@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 import { useAuth } from "./useAuth.js";
 import { api } from "../services/api.js";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://near-bitez.onrender.com";
 
 const normalizeLeaderboard = (rows = []) =>
   Array.isArray(rows)

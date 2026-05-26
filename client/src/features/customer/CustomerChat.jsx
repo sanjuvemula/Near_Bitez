@@ -85,7 +85,7 @@ const CustomerChat = ({ restaurantId, restaurantName, onClose }) => {
     // FIX: guard against missing user
     if (!user?._id) return;
 
-    socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:5000", {
+    socket = io(import.meta.env.VITE_SOCKET_URL || "https://near-bitez.onrender.com", {
       withCredentials: true,
       transports: ["websocket", "polling"], // FIX: fallback transport added
     });

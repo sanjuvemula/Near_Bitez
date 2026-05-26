@@ -18,7 +18,7 @@ import { api } from "../../services/api.js";
 import TiffinCard from "./TiffinCard.jsx";
 
 // ─── Socket URL — adjust to match your server ────────────────────────────────
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://near-bitez.onrender.com";
 
 // ─── Filter pill ──────────────────────────────────────────────────────────────
 const FilterPill = ({ label, active, onClick }) => (

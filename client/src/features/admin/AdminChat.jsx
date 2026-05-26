@@ -49,7 +49,7 @@ const AdminChat = () => {
     loadChats();
     const interval = setInterval(loadChats, 10000);
 
-    adminSocket = io("http://localhost:5000", { withCredentials: true });
+    adminSocket = io("https://near-bitez.onrender.com", { withCredentials: true });
     adminSocket.emit("join", { userId: String(user._id), role: "admin" });
 
     adminSocket.on("new_message", ({ chatId, message }) => {

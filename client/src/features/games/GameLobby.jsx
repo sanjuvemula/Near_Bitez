@@ -13,7 +13,7 @@ import FoodQuiz from "./games/FoodQuiz.jsx";
 import useGameScore from "../../hooks/useGameScore.js";
 import { useAuth } from "../../hooks/useAuth.js";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://near-bitez.onrender.com";
 
 const gameDefs = [
   { key: "food-dice", title: "FoodDice", difficulty: "Easy", component: FoodDice, icon: "dice" },

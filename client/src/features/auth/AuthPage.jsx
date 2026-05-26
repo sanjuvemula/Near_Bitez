@@ -60,7 +60,7 @@ const toggleClassName = (active, tone = "orange") =>
 
 const GoogleButton = () => (
   <a
-    href="http://localhost:5000/api/v1/auth/google"
+    href="https://near-bitez.onrender.com/api/v1/auth/google"
     className="flex w-full items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
   >
     <svg className="h-5 w-5" viewBox="0 0 24 24">

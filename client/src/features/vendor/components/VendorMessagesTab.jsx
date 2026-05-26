@@ -68,7 +68,7 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
     const vendorId = restaurant.vendor || restaurant._id;
     if (!vendorId) return;
 
-    vendorSocket = io("http://localhost:5000", { withCredentials: true });
+    vendorSocket = io("https://near-bitez.onrender.com", { withCredentials: true });
     vendorSocket.emit("join", { userId: String(vendorId), role: "vendor" });
 
     const handleIncoming = ({ chatId, message }) => {

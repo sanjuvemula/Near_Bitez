@@ -11,7 +11,7 @@ import { io } from "socket.io-client";
 import { motion, AnimatePresence } from "framer-motion";
 
 const NotificationContext = createContext(null);
-const SOCKET_URL = import.meta.env.VITE_API_URL?.replace("/api/v1", "") || "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_API_URL?.replace("/api/v1", "") || "https://near-bitez.onrender.com";
 const TOAST_DURATION = 5000;
 
 // ─── Notification Types Config ────────────────────────────────────────────────

@@ -3,7 +3,7 @@ import { motion as Motion, AnimatePresence } from "framer-motion";
 import { io } from "socket.io-client";
 import { useAuth } from "../../hooks/useAuth.js";
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "http://localhost:5000";
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://near-bitez.onrender.com";
 
 const formatCountdown = (ms) => {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
