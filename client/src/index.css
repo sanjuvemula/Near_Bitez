@@ -1,3 +1,57 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface font-sans text-gray-900 antialiased selection:bg-brand-100 selection:text-brand-900;
+    background-image:
+      radial-gradient(circle at top left, rgba(251, 146, 60, 0.1), transparent 22%),
+      radial-gradient(circle at top right, rgba(244, 63, 94, 0.06), transparent 18%),
+      linear-gradient(180deg, #fffaf5 0%, #f8f5f2 100%);
+    min-height: 100vh;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: 0.25s;
+    animation-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(234, 88, 12, 0.35) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(251, 146, 60, 0.65), rgba(239, 68, 68, 0.55));
+    background-clip: padding-box;
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
