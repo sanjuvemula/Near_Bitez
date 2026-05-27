@@ -2,8 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "./useAuth.js";
 import { api } from "../services/api.js";
-
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://near-bitez.onrender.com";
+import { SOCKET_URL } from "../config/runtime.js";
 
 const normalizeLeaderboard = (rows = []) =>
   Array.isArray(rows)
@@ -112,7 +111,6 @@ export const useGameScore = () => {
 
 export default useGameScore;
  
-
 
 
 

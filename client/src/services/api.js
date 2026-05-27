@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "/api/v1";
+import { getApiUrl } from "../config/runtime.js";
 
 class ApiError extends Error {
   constructor(message, status, payload = {}) {
@@ -9,9 +9,6 @@ class ApiError extends Error {
     this.code = payload.code;
   }
 }
-
-const makeUrl = (path) =>
-  `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 
 const serializeBody = (body) => {
   if (body === undefined || body === null) {
@@ -33,7 +30,7 @@ const request = async (path, options = {}) => {
     headers.set("Content-Type", "application/json");
   }
 
-  const response = await fetch(makeUrl(path), {
+  const response = await fetch(getApiUrl(path), {
     credentials: "include",
     ...options,
     headers,
@@ -78,7 +75,6 @@ export const api = {
 };
 
 export { ApiError };
-
 
 
 

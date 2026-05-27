@@ -5,6 +5,7 @@ import Input from "../../components/Input.jsx";
 import { appRoutes } from "../../app/routes.jsx";
 import { useAuth } from "../../hooks/useAuth.js";
 import { api } from "../../services/api.js";
+import { getApiUrl } from "../../config/runtime.js";
 import { formatCurrency } from "../../utils/formatters.js";
 
 const roleCopy = {
@@ -60,7 +61,7 @@ const toggleClassName = (active, tone = "orange") =>
 
 const GoogleButton = () => (
   <a
-    href="https://near-bitez.onrender.com/api/v1/auth/google"
+    href={getApiUrl("/auth/google")}
     className="flex w-full items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
   >
     <svg className="h-5 w-5" viewBox="0 0 24 24">

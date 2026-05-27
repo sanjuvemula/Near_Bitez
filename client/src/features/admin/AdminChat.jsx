@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import { io } from "socket.io-client";
 import { api } from "../../services/api.js";
 import { useAuth } from "../../hooks/useAuth.js";
+import { SOCKET_URL } from "../../config/runtime.js";
 
 let adminSocket = null;
 
@@ -49,7 +50,7 @@ const AdminChat = () => {
     loadChats();
     const interval = setInterval(loadChats, 10000);
 
-    adminSocket = io("https://near-bitez.onrender.com", { withCredentials: true });
+    adminSocket = io(SOCKET_URL, { withCredentials: true });
     adminSocket.emit("join", { userId: String(user._id), role: "admin" });
 
     adminSocket.on("new_message", ({ chatId, message }) => {

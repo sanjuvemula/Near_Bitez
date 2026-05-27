@@ -15,10 +15,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import { api } from "../../services/api.js";
+import { SOCKET_URL } from "../../config/runtime.js";
 import TiffinCard from "./TiffinCard.jsx";
 
 // ─── Socket URL — adjust to match your server ────────────────────────────────
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://near-bitez.onrender.com";
 
 // ─── Filter pill ──────────────────────────────────────────────────────────────
 const FilterPill = ({ label, active, onClick }) => (

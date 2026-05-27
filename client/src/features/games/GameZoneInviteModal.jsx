@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { io } from "socket.io-client";
 import { useAuth } from "../../hooks/useAuth.js";
-
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || "https://near-bitez.onrender.com";
+import { SOCKET_URL } from "../../config/runtime.js";
 
 const formatCountdown = (ms) => {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
@@ -46,11 +45,12 @@ const CookingIllustration = () => (
 
 const GameZoneInviteModal = ({ open, order, onEnter, onTrack, onOutForDelivery }) => {
   const { user } = useAuth();
+  const [mountedAt] = useState(() => Date.now());
   const etaMs = useMemo(() => {
-    const created = order?.createdAt ? new Date(order.createdAt).getTime() : Date.now();
+    const created = order?.createdAt ? new Date(order.createdAt).getTime() : mountedAt;
     const minutes = Number(order?.restaurant?.deliveryTime || order?.estimatedDeliveryMinutes || 30);
     return created + minutes * 60 * 1000;
-  }, [order]);
+  }, [mountedAt, order]);
   const [remaining, setRemaining] = useState(() => etaMs - Date.now());
 
   useEffect(() => {

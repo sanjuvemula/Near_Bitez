@@ -9,9 +9,9 @@ import {
 import { useAuth } from "./AuthContext.jsx";
 import { io } from "socket.io-client";
 import { motion, AnimatePresence } from "framer-motion";
+import { SOCKET_URL } from "../config/runtime.js";
 
 const NotificationContext = createContext(null);
-const SOCKET_URL = import.meta.env.VITE_API_URL?.replace("/api/v1", "") || "https://near-bitez.onrender.com";
 const TOAST_DURATION = 5000;
 
 // ─── Notification Types Config ────────────────────────────────────────────────

@@ -1,4 +1,5 @@
 import { Server } from "socket.io";
+import { getClientOrigins } from "./cors.js";
 
 // ─── In-memory Social State ───────────────────────────────────────────────────
 const socialState = {
@@ -43,7 +44,7 @@ const genRoomId = () => `room_${Date.now()}_${Math.random().toString(36).slice(2
 export const initSocket = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: process.env.CLIENT_URL || "http://localhost:5173",
+      origin: getClientOrigins(),
       credentials: true,
     },
     pingTimeout: 60000,

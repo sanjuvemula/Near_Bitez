@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { io } from "socket.io-client";
 import { api } from "../../services/api.js";
 import { useAuth } from "../../hooks/useAuth.js";
+import { SOCKET_URL } from "../../config/runtime.js";
 
 let socket = null;
 
@@ -85,7 +86,7 @@ const CustomerChat = ({ restaurantId, restaurantName, onClose }) => {
     // FIX: guard against missing user
     if (!user?._id) return;
 
-    socket = io(import.meta.env.VITE_SOCKET_URL || "https://near-bitez.onrender.com", {
+    socket = io(SOCKET_URL, {
       withCredentials: true,
       transports: ["websocket", "polling"], // FIX: fallback transport added
     });

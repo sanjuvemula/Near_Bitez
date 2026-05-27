@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { animated, useSpring } from "@react-spring/web";
+import { animated as Animated, useSpring } from "@react-spring/web";
 import ScorePop from "../../../components/ScorePop.jsx";
 import { useAuth } from "../../../hooks/useAuth.js";
 
@@ -142,7 +142,7 @@ const FoodDice = ({ order, onScore }) => {
 
       <section className="flex min-h-[520px] items-center justify-center rounded-[24px] bg-white p-6 shadow-[6px_6px_14px_rgba(0,0,0,0.08),-4px_-4px_10px_rgba(255,255,255,0.8)]">
         <div className="food-dice-scene">
-          <animated.div className="food-dice-cube" style={spring}>
+          <Animated.div className="food-dice-cube" style={spring}>
             {faces.map((face, index) => (
               <div
                 key={face.key}
@@ -155,7 +155,7 @@ const FoodDice = ({ order, onScore }) => {
                 </span>
               </div>
             ))}
-          </animated.div>
+          </Animated.div>
         </div>
       </section>
 

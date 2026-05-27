@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion as Motion } from "framer-motion";
 import ScorePop from "../../../components/ScorePop.jsx";
 
@@ -55,23 +55,23 @@ const MemoryMatch = ({ onScore }) => {
   const [seconds, setSeconds] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [pop, setPop] = useState(null);
-  const startedAtRef = useRef(Date.now());
+  const [startedAt] = useState(() => Date.now());
 
   useEffect(() => {
     if (completed) return undefined;
     const id = window.setInterval(() => {
-      setSeconds(Math.floor((Date.now() - startedAtRef.current) / 1000));
+      setSeconds(Math.floor((Date.now() - startedAt) / 1000));
     }, 500);
     return () => window.clearInterval(id);
-  }, [completed]);
+  }, [completed, startedAt]);
 
   const finishIfDone = async (nextMatched, nextWrongs, x, y) => {
     if (nextMatched.length < categories.length || completed) return;
     setCompleted(true);
-    const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);
+    const elapsed = seconds;
     const timeBonus = elapsed < 30 ? 100 : elapsed < 60 ? 50 : 0;
     const points = Math.max(0, nextMatched.length * 20 - nextWrongs * 5 + timeBonus);
-    setPop({ id: Date.now(), points, x, y });
+    setPop({ id: `${nextMatched.length}-${nextWrongs}`, points, x, y });
     await onScore?.("MemoryMatch", points);
   };
 

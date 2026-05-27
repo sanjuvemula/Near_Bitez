@@ -17,6 +17,7 @@ import {
   getFavoriteRestaurants,
   removeFavoriteRestaurant,
 } from "../controllers/favoriteController.js";
+import { getPrimaryClientUrl } from "../config/cors.js";
 import { authorize, protect } from "../middleware/auth.js";
 import { ensureAdminRole, getEffectiveRole } from "../utils/adminAccess.js";
 
@@ -50,26 +51,36 @@ router.delete("/favorites/:restaurantId", protect, authorize("customer", "admin"
 // Google OAuth
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"], session: false }));
 
-router.get(
-  "/google/callback",
-  passport.authenticate("google", { session: false, failureRedirect: "http://localhost:5173/customer/login" }),
-  async (req, res) => {
-    await ensureAdminRole(req.user);
-    const effectiveRole = getEffectiveRole(req.user);
-    const token = jwt.sign({ id: req.user._id }, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRE || "30d",
-    });
+const clientRedirect = (path) => `${getPrimaryClientUrl()}${path}`;
 
-    res.cookie("token", token, cookieOptions);
+router.get("/google/callback", (req, res, next) => {
+  passport.authenticate("google", { session: false }, async (error, user) => {
+    if (error || !user) {
+      res.redirect(clientRedirect("/customer/login"));
+      return;
+    }
 
-    const redirectMap = {
-      admin: "http://localhost:5173/admin",
-      vendor: "http://localhost:5173/vendor/dashboard",
-      customer: "http://localhost:5173/app",
-    };
+    try {
+      await ensureAdminRole(user);
+      const effectiveRole = getEffectiveRole(user);
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRE || "30d",
+      });
 
-    res.redirect(redirectMap[effectiveRole] || "http://localhost:5173/app");
+      res.cookie("token", token, cookieOptions);
+
+      const redirectMap = {
+        admin: "/admin",
+        vendor: "/vendor/dashboard",
+        customer: "/app",
+      };
+
+      res.redirect(clientRedirect(redirectMap[effectiveRole] || "/app"));
+    } catch (callbackError) {
+      next(callbackError);
+    }
   }
-);
+  )(req, res, next);
+});
 
 export default router;

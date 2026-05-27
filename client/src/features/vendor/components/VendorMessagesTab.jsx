@@ -4,6 +4,7 @@ import { io } from "socket.io-client";
 import { Panel, EmptyState, VendorButton } from "./VendorUi.jsx";
 import { formatRelativeTime } from "../vendorShared.js";
 import { api } from "../../../services/api.js";
+import { SOCKET_URL } from "../../../config/runtime.js";
 
 let vendorSocket = null;
 
@@ -68,7 +69,7 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
     const vendorId = restaurant.vendor || restaurant._id;
     if (!vendorId) return;
 
-    vendorSocket = io("https://near-bitez.onrender.com", { withCredentials: true });
+    vendorSocket = io(SOCKET_URL, { withCredentials: true });
     vendorSocket.emit("join", { userId: String(vendorId), role: "vendor" });
 
     const handleIncoming = ({ chatId, message }) => {

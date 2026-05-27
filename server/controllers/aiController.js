@@ -290,7 +290,7 @@ export const aiChat = async (req, res) => {
     } else {
       console.warn("⚠️  GEMINI_API_KEY not found in environment variables.");
       console.warn("    Get your free key from: https://aistudio.google.com/app/apikey");
-      console.warn("    Add to .env: GEMINI_API_KEY=AIzaSy...");
+      console.warn("    Add to .env: GEMINI_API_KEY=your-gemini-api-key");
     }
 
     // ── Smart intent-based fallback ─────────────────────────────────────────
