@@ -31,6 +31,10 @@ const Cart = () => {
   const [clearingCart, setClearingCart] = useState(false);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
+  useEffect(() => {
     refreshCart();
   }, [refreshCart]);
 
@@ -116,7 +120,7 @@ const Cart = () => {
       <CustomerHero
         eyebrow="Review your order"
         title={`Checkout from ${cart.restaurant?.name}`}
-        description="Review items, pricing, and availability before checkout."
+        description="Confirm your items and total."
         stats={heroStats}
         action={
           <div className="flex flex-wrap gap-3">
@@ -148,8 +152,8 @@ const Cart = () => {
                 <p className="text-xs font-black uppercase tracking-[0.22em] text-orange-600">
                   Cart items
                 </p>
-                <h2 className="mt-3 text-3xl font-black tracking-tight text-gray-950">
-                  Ready to review before checkout
+                <h2 className="mt-3 text-2xl font-black tracking-tight text-gray-950 sm:text-3xl">
+                  Your order
                 </h2>
               </div>
               <p className="text-sm font-semibold text-gray-500">
@@ -167,7 +171,9 @@ const Cart = () => {
                       : `${formatCurrency(deliveryFeeProgress.remaining)} away from free delivery`}
                   </p>
                   <p className="mt-1 text-sm font-semibold text-gray-500">
-                    Unlocks at {formatCurrency(deliveryFeeProgress.threshold)}.
+                    {deliveryFeeProgress.unlocked
+                      ? "Applied automatically."
+                      : `Unlocks at ${formatCurrency(deliveryFeeProgress.threshold)}.`}
                   </p>
                 </div>
                 <p className="text-lg font-black text-orange-600">
@@ -331,7 +337,7 @@ const Cart = () => {
           </CustomerPanel>
 
           {/* Bill summary */}
-          <CustomerPanel className="bg-slate-950 p-6 text-white">
+          <CustomerPanel className="border-slate-900 !bg-slate-950 p-6 text-white">
             <h2 className="text-2xl font-black tracking-tight">Bill summary</h2>
             <div className="mt-5 space-y-3 text-sm font-semibold text-slate-200">
               <div className="flex items-center justify-between">

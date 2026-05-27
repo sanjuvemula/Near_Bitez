@@ -437,6 +437,13 @@ const CheckoutPage = () => {
         referralCode: referralCode.trim() || undefined,
       });
 
+      const earnedCoins = Math.max(25, Math.round(grandTotal / 10));
+      window.localStorage.setItem("nearBites:lastCoinGain", String(earnedCoins));
+      pushNotification?.({
+        type: "XP_GAIN",
+        title: "NearCoins earned",
+        message: `+${earnedCoins} NearCoins unlocked with this order`,
+      });
       await refreshCart();
       navigate(getCustomerOrderRoute(response.data._id));
     } catch (apiError) {
@@ -769,7 +776,7 @@ const CheckoutPage = () => {
             </div>
           </Card>
 
-          <Card className="bg-stone-950 p-5 text-white">
+          <Card className="border-stone-900 !bg-stone-950 p-5 text-white">
             <p className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-300">
               Bill summary
             </p>

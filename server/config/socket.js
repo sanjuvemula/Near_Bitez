@@ -19,6 +19,20 @@ const areaGameBoards = new Map();
 const globalGameRecords = new Map();
 // reward tracking: userId → { topRankStart, rewardGranted }
 const rewardTracking = new Map();
+const battleState = {
+  queues: new Map(),
+  rooms: new Map(),
+};
+
+const BATTLE_CONFIGS = {
+  "food-quiz-battle": { duration: 45, botMin: 8, botMax: 18 },
+  "tap-battle": { duration: 20, botMin: 24, botMax: 54 },
+  "spin-clash": { duration: 18, botMin: 45, botMax: 110 },
+  "delivery-race": { duration: 40, botMin: 32, botMax: 82 },
+  "memory-duel": { duration: 50, botMin: 18, botMax: 58 },
+};
+
+const BOT_NAMES = ["Turbo Taster", "Neon Nibbler", "Combo King", "Rush Rider", "Pixel Foodie"];
 
 const getAreaKey = (lat, lng, radiusKm = 2) => {
   const grid = radiusKm / 111;
@@ -40,6 +54,94 @@ const ADJ = ["Happy","Hungry","Spicy","Salty","Sweet","Crispy","Fluffy","Zesty",
 const NOUNS = ["Foodie","Muncher","Snacker","Chomper","Nibbler","Biter","Taster","Eater","Chef","Diner"];
 const anonName = () => `${ADJ[Math.floor(Math.random() * ADJ.length)]} ${NOUNS[Math.floor(Math.random() * NOUNS.length)]}`;
 const genRoomId = () => `room_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+const genBattleId = () => `battle_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+const getBattleConfig = (gameKey) => BATTLE_CONFIGS[gameKey] || BATTLE_CONFIGS["tap-battle"];
+const makeBotPlayer = () => ({
+  id: `bot_${Math.random().toString(36).slice(2, 8)}`,
+  name: BOT_NAMES[Math.floor(Math.random() * BOT_NAMES.length)],
+  avatar: "AI",
+  isBot: true,
+  score: 0,
+  combo: 0,
+  streak: 0,
+});
+const publicBattleRoom = (room) => ({
+  roomId: room.id,
+  gameKey: room.gameKey,
+  status: room.status,
+  duration: room.duration,
+  startedAt: room.startedAt,
+  endsAt: room.endsAt,
+  players: room.players.map((player) => ({
+    id: player.id,
+    name: player.name,
+    avatar: player.avatar,
+    isBot: Boolean(player.isBot),
+    score: player.score || 0,
+    combo: player.combo || 0,
+    streak: player.streak || 0,
+  })),
+});
+const clearBattleTimers = (room) => {
+  if (!room) return;
+  (room.timers || []).forEach((timerId) => clearTimeout(timerId));
+  room.timers = [];
+};
+const emitBattleState = (io, room) => {
+  io.to(`battle_${room.id}`).emit("battle:state", publicBattleRoom(room));
+};
+const finishBattle = (io, roomId, reason = "finished") => {
+  const room = battleState.rooms.get(roomId);
+  if (!room || room.status === "finished") return;
+  room.status = "finished";
+  clearBattleTimers(room);
+  const ranked = [...room.players].sort((a, b) => (b.score || 0) - (a.score || 0));
+  const winner = ranked[0] || null;
+  io.to(`battle_${room.id}`).emit("battle:finished", {
+    ...publicBattleRoom(room),
+    reason,
+    winner: winner
+      ? { id: winner.id, name: winner.name, isBot: Boolean(winner.isBot), score: winner.score || 0 }
+      : null,
+    rewards: {
+      coins: winner?.isBot ? 20 : 80,
+      xp: winner?.isBot ? 12 : 45,
+      badge: winner?.score >= 100 ? "Combo Crusher" : null,
+    },
+  });
+  battleState.rooms.delete(roomId);
+};
+const startBattle = (io, room) => {
+  const config = getBattleConfig(room.gameKey);
+  room.status = "countdown";
+  room.duration = config.duration;
+  room.startedAt = Date.now() + 3200;
+  room.endsAt = room.startedAt + config.duration * 1000;
+  emitBattleState(io, room);
+  io.to(`battle_${room.id}`).emit("battle:countdown", { seconds: 3, room: publicBattleRoom(room) });
+
+  room.timers.push(setTimeout(() => {
+    room.status = "playing";
+    io.to(`battle_${room.id}`).emit("battle:start", publicBattleRoom(room));
+    emitBattleState(io, room);
+  }, 3200));
+
+  const bot = room.players.find((player) => player.isBot);
+  if (bot) {
+    const tickBot = () => {
+      if (room.status !== "playing") return;
+      const botDelta = Math.max(1, Math.round(config.botMin / 7 + Math.random() * (config.botMax / 7)));
+      bot.score += botDelta;
+      bot.combo = Math.min(99, (bot.combo || 0) + 1);
+      bot.streak = Math.max(bot.streak || 0, bot.combo);
+      emitBattleState(io, room);
+      room.timers.push(setTimeout(tickBot, 650 + Math.random() * 950));
+    };
+    room.timers.push(setTimeout(tickBot, 4100));
+  }
+
+  room.timers.push(setTimeout(() => finishBattle(io, room.id), config.duration * 1000 + 3600));
+};
 
 export const initSocket = (server) => {
   const io = new Server(server, {
@@ -75,6 +177,118 @@ export const initSocket = (server) => {
 
     socket.on("game:leave", () => {
       socket.leave("games:today");
+    });
+
+    socket.on("battle:join", ({ gameKey, userId, name } = {}) => {
+      const battleGameKey = String(gameKey || "tap-battle");
+      const player = {
+        id: String(userId || socket.data.userId || socket.id),
+        socketId: socket.id,
+        name: String(name || socket.data.gameName || "Foodie").slice(0, 28),
+        avatar: String(name || "NB").slice(0, 2).toUpperCase(),
+        score: 0,
+        combo: 0,
+        streak: 0,
+      };
+      socket.data.battleGameKey = battleGameKey;
+
+      const queue = battleState.queues.get(battleGameKey) || [];
+      const waiting = queue.find((entry) => entry.socketId !== socket.id);
+
+      if (waiting && io.sockets.sockets.get(waiting.socketId)) {
+        battleState.queues.set(
+          battleGameKey,
+          queue.filter((entry) => entry.socketId !== waiting.socketId && entry.socketId !== socket.id)
+        );
+        const room = {
+          id: genBattleId(),
+          gameKey: battleGameKey,
+          status: "matched",
+          duration: getBattleConfig(battleGameKey).duration,
+          players: [{ ...waiting, score: 0, combo: 0, streak: 0 }, player],
+          timers: [],
+          createdAt: Date.now(),
+        };
+        battleState.rooms.set(room.id, room);
+        room.players.forEach((entry) => {
+          const participant = io.sockets.sockets.get(entry.socketId);
+          participant?.join(`battle_${room.id}`);
+          if (participant) participant.data.battleRoomId = room.id;
+        });
+        io.to(`battle_${room.id}`).emit("battle:matched", publicBattleRoom(room));
+        startBattle(io, room);
+        return;
+      }
+
+      const nextQueue = [
+        ...queue.filter((entry) => entry.socketId !== socket.id),
+        player,
+      ];
+      battleState.queues.set(battleGameKey, nextQueue);
+      socket.emit("battle:searching", { gameKey: battleGameKey, online: socialState.onlineUsers.size });
+
+      const botTimer = setTimeout(() => {
+        const currentQueue = battleState.queues.get(battleGameKey) || [];
+        const stillWaiting = currentQueue.find((entry) => entry.socketId === socket.id);
+        if (!stillWaiting || !io.sockets.sockets.get(socket.id)) return;
+        battleState.queues.set(
+          battleGameKey,
+          currentQueue.filter((entry) => entry.socketId !== socket.id)
+        );
+        const room = {
+          id: genBattleId(),
+          gameKey: battleGameKey,
+          status: "matched",
+          duration: getBattleConfig(battleGameKey).duration,
+          players: [{ ...stillWaiting, score: 0, combo: 0, streak: 0 }, makeBotPlayer()],
+          timers: [],
+          createdAt: Date.now(),
+        };
+        battleState.rooms.set(room.id, room);
+        socket.join(`battle_${room.id}`);
+        socket.data.battleRoomId = room.id;
+        socket.emit("battle:bot_matched", publicBattleRoom(room));
+        startBattle(io, room);
+      }, 4500);
+      socket.data.battleQueueTimer = botTimer;
+    });
+
+    socket.on("battle:action", ({ roomId, delta = 1, combo = 0, event = "score" } = {}) => {
+      const room = battleState.rooms.get(roomId || socket.data.battleRoomId);
+      if (!room || room.status !== "playing") return;
+      const playerId = String(socket.data.userId || socket.data.gameUserId || socket.id);
+      const player =
+        room.players.find((entry) => entry.socketId === socket.id) ||
+        room.players.find((entry) => entry.id === playerId);
+      if (!player || player.isBot) return;
+      const scoreDelta = Math.max(0, Math.min(100, Math.round(Number(delta) || 0)));
+      player.score += scoreDelta;
+      player.combo = Math.max(player.combo || 0, Number(combo) || 0);
+      player.streak = Math.max(player.streak || 0, player.combo || 0);
+      io.to(`battle_${room.id}`).emit("battle:action", {
+        roomId: room.id,
+        playerId: player.id,
+        delta: scoreDelta,
+        event,
+      });
+      emitBattleState(io, room);
+    });
+
+    socket.on("battle:finish", ({ roomId } = {}) => {
+      finishBattle(io, roomId || socket.data.battleRoomId, "player_finished");
+    });
+
+    socket.on("battle:leave", () => {
+      if (socket.data.battleQueueTimer) clearTimeout(socket.data.battleQueueTimer);
+      for (const [gameKey, queue] of battleState.queues) {
+        battleState.queues.set(gameKey, queue.filter((entry) => entry.socketId !== socket.id));
+      }
+      const roomId = socket.data.battleRoomId;
+      if (roomId) {
+        socket.leave(`battle_${roomId}`);
+        finishBattle(io, roomId, "player_left");
+      }
+      socket.data.battleRoomId = null;
     });
 
     socket.on("join_chat", ({ chatId }) => { if (chatId) socket.join(`chat_${chatId}`); });
@@ -423,6 +637,13 @@ export const initSocket = (server) => {
 
     // ──────────────────── DISCONNECT ──────────────────────────────────────────
     socket.on("disconnect", () => {
+      if (socket.data.battleQueueTimer) clearTimeout(socket.data.battleQueueTimer);
+      for (const [gameKey, queue] of battleState.queues) {
+        battleState.queues.set(gameKey, queue.filter((entry) => entry.socketId !== socket.id));
+      }
+      if (socket.data.battleRoomId) {
+        finishBattle(io, socket.data.battleRoomId, "disconnect");
+      }
       const roomId = socket.data.fcRoomId;
       if (roomId) {
         socket.to(`fc_${roomId}`).emit("fc_peer_left");

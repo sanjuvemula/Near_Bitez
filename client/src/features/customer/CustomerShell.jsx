@@ -75,16 +75,6 @@ const SearchIcon = (props) => (
   </svg>
 );
 
-const GameIcon = (props) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
-    <path d="M7 12h10" />
-    <path d="M9 10v4" />
-    <path d="M15.5 11.5h.01" />
-    <path d="M17.5 13.5h.01" />
-    <path d="M6.6 7.5h10.8a4 4 0 0 1 3.9 3.2l.9 4.8a3 3 0 0 1-5 2.7l-1.7-1.7h-7l-1.7 1.7a3 3 0 0 1-5-2.7l.9-4.8a4 4 0 0 1 3.9-3.2Z" />
-  </svg>
-);
-
 const BellIcon = (props) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -181,14 +171,6 @@ const MoreMenu = ({ cartCount = 0, onNavigate }) => {
             >
               <SearchIcon className={iconClass} />
               Search
-            </Link>
-            <Link
-              to={appRoutes.customerGames}
-              onClick={handleClick}
-              className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-black text-stone-600 transition hover:bg-orange-50 hover:text-orange-700"
-            >
-              <GameIcon className={iconClass} />
-              Games
             </Link>
             <Link
               to={appRoutes.customerCart}
@@ -404,8 +386,7 @@ const BottomNav = ({ cartCount }) => {
   const location = useLocation();
   const moreActive =
     location.pathname.startsWith(appRoutes.customerCart) ||
-    location.pathname.startsWith(appRoutes.customerSearch) ||
-    location.pathname.startsWith(appRoutes.customerGames);
+    location.pathname.startsWith(appRoutes.customerSearch);
 
   const visibleItems = NAV_ITEMS;
 
@@ -465,14 +446,6 @@ const BottomNav = ({ cartCount }) => {
             >
               <SearchIcon className={iconClass} />
               Search
-            </Link>
-            <Link
-              to={appRoutes.customerGames}
-              onClick={() => setMoreOpen(false)}
-              className="flex items-center gap-3 rounded-[18px] px-4 py-3 text-sm font-black text-stone-700 no-underline hover:bg-orange-50"
-            >
-              <GameIcon className={iconClass} />
-              Games
             </Link>
             <Link
               to={appRoutes.customerCart}
@@ -545,7 +518,7 @@ const CustomerShell = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] font-sans text-stone-950">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_8%_0%,rgba(255,237,213,0.72),transparent_30%),radial-gradient(circle_at_95%_8%,rgba(254,202,202,0.42),transparent_26%),linear-gradient(180deg,#fff7ed_0%,#fffaf4_38%,#f8fafc_100%)] font-sans text-stone-950">
       <Sidebar user={user} cartCount={cartCount} onLogout={handleLogout} />
       <Drawer
         open={drawerOpen}
@@ -556,7 +529,7 @@ const CustomerShell = () => {
       />
 
       <div className="min-h-screen lg:pl-[260px]">
-        <header className="sticky top-0 z-30 border-b border-[#eee7dc] bg-white/92 backdrop-blur-xl">
+        <header className="sticky top-0 z-30 border-b border-orange-100/80 bg-white/78 backdrop-blur-xl">
           <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
             <button
               type="button"

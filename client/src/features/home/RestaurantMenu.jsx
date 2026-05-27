@@ -75,9 +75,9 @@ const MenuItemCard = ({ item, quantity, onAdd, onChange, pending }) => (
     layout
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
-    className="flex gap-4 rounded-2xl bg-white p-4 transition-all"
+    className="flex gap-4 rounded-2xl border border-orange-100/70 bg-white/90 p-4 transition-all backdrop-blur"
     style={{
-      boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+      boxShadow: "0 18px 44px -36px rgba(194,65,12,0.42)",
       opacity: item.isAvailable ? 1 : 0.55,
     }}
   >
@@ -271,7 +271,13 @@ const RestaurantMenu = () => {
   const totalCartValue = cart?.totals?.grandTotal || 0;
 
   return (
-    <div className="min-h-screen" style={{ background: "#fafaf8" }}>
+    <div
+      className="min-h-screen rounded-[28px] px-0 pb-8 sm:px-1"
+      style={{
+        background:
+          "radial-gradient(circle at 10% 0%, rgba(255,237,213,0.8), transparent 28%), radial-gradient(circle at 94% 12%, rgba(254,215,170,0.46), transparent 24%), linear-gradient(180deg,#fff7ed 0%,#fffdf8 42%,#f8fafc 100%)",
+      }}
+    >
       {/* Back */}
       <Link
         to={backRoute}
@@ -345,7 +351,12 @@ const RestaurantMenu = () => {
       <div
         ref={headerRef}
         className="sticky top-0 z-30 rounded-2xl mb-5 py-3 px-4"
-        style={{ background: "rgba(250,250,248,0.95)", backdropFilter: "blur(12px)", boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}
+        style={{
+          background: "linear-gradient(135deg, rgba(255,247,237,0.94), rgba(255,255,255,0.86))",
+          backdropFilter: "blur(14px)",
+          boxShadow: "0 18px 48px -36px rgba(194,65,12,0.45)",
+          border: "1px solid rgba(254,215,170,0.85)",
+        }}
       >
         {/* Search + toggles */}
         <div className="flex gap-3 items-center mb-3">
@@ -358,7 +369,7 @@ const RestaurantMenu = () => {
               placeholder="Search dishes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-xl text-sm font-medium text-gray-800 outline-none border border-gray-200 focus:border-orange-400 bg-white"
+            className="w-full rounded-xl border border-orange-100 bg-white/90 py-2 pl-9 pr-3 text-sm font-medium text-gray-800 outline-none transition focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
             />
           </div>
           <button
@@ -406,8 +417,8 @@ const RestaurantMenu = () => {
         {/* Menu sections */}
         <div className="space-y-8">
           {groupedItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center rounded-2xl bg-white"
-              style={{ boxShadow: "0 2px 10px rgba(0,0,0,0.06)" }}>
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-orange-100 bg-white/85 py-20 text-center"
+              style={{ boxShadow: "0 18px 44px -36px rgba(194,65,12,0.42)" }}>
               <div className="text-4xl mb-3">🍽️</div>
               <p className="text-lg font-black text-gray-900">No items found</p>
               <p className="text-sm text-gray-400 mt-1">Try removing filters</p>
@@ -443,7 +454,7 @@ const RestaurantMenu = () => {
         {/* ── Sticky sidebar ──────────────────────────────────────────── */}
         <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
           {/* Cart summary */}
-          <div className="rounded-2xl bg-white p-5" style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.08)" }}>
+          <div className="rounded-2xl border border-orange-100 bg-gradient-to-br from-white via-orange-50/70 to-amber-50 p-5" style={{ boxShadow: "0 22px 54px -38px rgba(194,65,12,0.42)" }}>
             <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">Your cart</p>
             {restaurantCartActive && totalCartItems > 0 ? (
               <>
@@ -478,7 +489,7 @@ const RestaurantMenu = () => {
           </div>
 
           {/* Restaurant info */}
-          <div className="rounded-2xl bg-white p-5 space-y-3" style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.08)" }}>
+          <div className="space-y-3 rounded-2xl border border-orange-100 bg-white/82 p-5 backdrop-blur" style={{ boxShadow: "0 22px 54px -38px rgba(194,65,12,0.34)" }}>
             <p className="text-xs font-black uppercase tracking-widest text-gray-400">Info</p>
             {[
               { label: "Delivery time", val: `${restaurant.deliveryTime} min` },
@@ -499,7 +510,7 @@ const RestaurantMenu = () => {
               whileTap={{ scale: 0.97 }}
               onClick={() => setChatOpen(true)}
               className="w-full flex items-center justify-center gap-2.5 rounded-2xl py-3.5 text-sm font-black border-2 border-orange-200 text-orange-600 hover:bg-orange-50 transition-colors"
-              style={{ background: "#fff" }}
+              style={{ background: "linear-gradient(135deg,#fff7ed,#ffffff)" }}
             >
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />

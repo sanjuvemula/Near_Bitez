@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion as Motion } from "framer-motion";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Button from "../../components/Button.jsx";
 import Card from "../../components/Card.jsx";
 import Loader from "../../components/Loader.jsx";
@@ -26,7 +26,6 @@ import {
   formatStatusLabel,
 } from "../../utils/formatters.js";
 import { DEFAULT_GAME_KEY, getGameSlug, getGameTheme } from "../games/gameCatalog.js";
-import GameLobby from "../games/GameLobby.jsx";
 import GameZoneInviteModal from "../games/GameZoneInviteModal.jsx";
 import ReviewForm from "./ReviewForm.jsx";
 
@@ -336,12 +335,12 @@ const WaitAndPlayPanel = ({ orderId }) => {
 
 const OrderTracking = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteDismissed, setInviteDismissed] = useState(false);
-  const [showGameLobby, setShowGameLobby] = useState(false);
 
   const loadOrder = useCallback(async () => {
     try {
@@ -362,7 +361,6 @@ const OrderTracking = () => {
   useEffect(() => {
     setInviteOpen(false);
     setInviteDismissed(false);
-    setShowGameLobby(false);
   }, [id]);
 
   useEffect(() => {
@@ -392,10 +390,10 @@ const OrderTracking = () => {
   );
 
   useEffect(() => {
-    if (!showGamePanel || inviteDismissed || showGameLobby) return undefined;
+    if (!showGamePanel || inviteDismissed) return undefined;
     const timerId = window.setTimeout(() => setInviteOpen(true), 3000);
     return () => window.clearTimeout(timerId);
-  }, [inviteDismissed, showGameLobby, showGamePanel]);
+  }, [inviteDismissed, showGamePanel]);
 
   const handleTrackInstead = () => {
     setInviteOpen(false);
@@ -405,12 +403,11 @@ const OrderTracking = () => {
   const handleEnterGameZone = () => {
     setInviteOpen(false);
     setInviteDismissed(true);
-    setShowGameLobby(true);
+    navigate(`${appRoutes.customerGames}?orderId=${encodeURIComponent(order._id)}`);
   };
 
   const handleOutForDelivery = () => {
     setInviteOpen(false);
-    setShowGameLobby(false);
     setInviteDismissed(true);
     loadOrder();
   };
@@ -493,14 +490,6 @@ const OrderTracking = () => {
         onTrack={handleTrackInstead}
         onOutForDelivery={handleOutForDelivery}
       />
-
-      {showGamePanel && showGameLobby ? (
-        <GameLobby
-          order={order}
-          onClose={() => setShowGameLobby(false)}
-          onOutForDelivery={handleOutForDelivery}
-        />
-      ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr),360px]">
         <Card className="p-5 sm:p-6">

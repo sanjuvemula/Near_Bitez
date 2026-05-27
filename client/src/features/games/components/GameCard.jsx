@@ -30,15 +30,20 @@ const GameThumbnail = ({ game }) => (
   </div>
 );
 
-const GameCard = ({ game, index = 0 }) => {
+const GameCard = ({ game, index = 0, orderId = "", onBattle }) => {
   const item = withGameTheme(game);
+  const isMultiplayer = item.mode === "multiplayer" || item.crowd === "2P";
+  const playTo = `${getCustomerGameRoute(item.slug)}${
+    orderId ? `?orderId=${encodeURIComponent(orderId)}` : ""
+  }`;
 
   return (
     <Motion.article
       initial={{ opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, delay: index * 0.035, ease: "easeOut" }}
-      className="group overflow-hidden rounded-[18px] border border-[#e5dccf] bg-[#f4f1ec] p-3 shadow-[inset_7px_7px_14px_rgba(139,120,96,0.14),inset_-7px_-7px_14px_rgba(255,255,255,0.92),0_18px_42px_-34px_rgba(65,54,43,0.36)] transition duration-300 hover:-translate-y-0.5 hover:border-orange-200"
+      whileHover={{ y: -6, scale: 1.01 }}
+      className="group overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.08] p-3 shadow-[0_24px_80px_-48px_rgba(0,0,0,0.9)] backdrop-blur-xl transition duration-300 hover:border-cyan-300/40 hover:bg-white/[0.12]"
     >
       <GameThumbnail game={item} />
       <div className="p-3">
@@ -47,7 +52,7 @@ const GameCard = ({ game, index = 0 }) => {
             <p className="text-[11px] font-extrabold uppercase text-stone-400">
               {item.group}
             </p>
-            <h3 className="mt-1 truncate text-2xl font-black leading-none text-stone-950">
+            <h3 className="mt-1 truncate text-2xl font-black leading-none text-white">
               {item.title}
             </h3>
           </div>
@@ -56,12 +61,22 @@ const GameCard = ({ game, index = 0 }) => {
           </span>
         </div>
 
-        <Link
-          to={getCustomerGameRoute(item.slug)}
-          className="mt-5 inline-flex w-full items-center justify-center rounded-[14px] bg-stone-950 px-4 py-3 text-sm font-black text-white no-underline transition duration-200 hover:-translate-y-0.5 hover:bg-orange-600"
-        >
-          Play Now
-        </Link>
+        {isMultiplayer ? (
+          <button
+            type="button"
+            onClick={() => onBattle?.(item)}
+            className="mt-5 inline-flex w-full items-center justify-center rounded-[16px] bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-black text-white shadow-[0_18px_45px_-28px_rgba(34,211,238,0.85)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110"
+          >
+            Find Match
+          </button>
+        ) : (
+          <Link
+            to={playTo}
+            className="mt-5 inline-flex w-full items-center justify-center rounded-[16px] bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-black text-white no-underline shadow-[0_18px_45px_-28px_rgba(34,211,238,0.85)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110"
+          >
+            Play Now
+          </Link>
+        )}
       </div>
     </Motion.article>
   );

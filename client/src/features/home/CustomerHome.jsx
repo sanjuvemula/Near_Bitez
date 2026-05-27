@@ -7,7 +7,6 @@ import SectionWrapper from "../../components/SectionWrapper.jsx";
 import Skeleton from "../../components/Skeleton.jsx";
 import {
   appRoutes,
-  getCustomerGameRoute,
   getCustomerRestaurantRoute,
 } from "../../app/routes.jsx";
 import { useAuth } from "../../hooks/useAuth.js";
@@ -16,12 +15,6 @@ import { useUserLocation } from "../../hooks/useUserLocation.js";
 import { api } from "../../services/api.js";
 import { formatCurrency } from "../../utils/formatters.js";
 import { useRestaurantDiscovery } from "./useRestaurantDiscovery.js";
-import {
-  DEFAULT_GAME_KEY,
-  GAME_LIBRARY,
-  getGameSlug,
-  getGameTheme,
-} from "../games/gameCatalog.js";
 
 const CATEGORY_ICONS = {
   all: "🍽",
@@ -46,13 +39,6 @@ const COMMON_CATEGORIES = [
   "South Indian",
   "Desserts",
   "Thali",
-];
-
-const HOME_FEATURED_GAME_KEYS = [
-  "hand-cricket",
-  "tray-shuffle",
-  "lucky-tray",
-  "snack-snap",
 ];
 
 const fadeUp = {
@@ -129,6 +115,22 @@ const StarIcon = ({ className = "h-3.5 w-3.5" }) => (
     aria-hidden="true"
   >
     <path d="m12 2.6 2.9 5.88 6.49.95-4.7 4.58 1.11 6.47L12 17.38l-5.8 3.05 1.1-6.47-4.69-4.58 6.49-.95L12 2.6Z" />
+  </svg>
+);
+
+const CoinIcon = ({ className = "h-5 w-5" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <ellipse cx="12" cy="6" rx="7" ry="3" />
+    <path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6" />
+    <path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" />
   </svg>
 );
 
@@ -404,38 +406,139 @@ const QuickActionCard = ({
   </Motion.button>
 );
 
-const getRewardTone = (reward, index = 0) => {
-  if (reward?.gameRewardTier === "TOP") {
-    return {
-      cardClassName:
-        "border-rose-200 bg-[linear-gradient(135deg,#fff1f2,#ffe4e6_55%,#fff7ed)]",
-      badgeClassName: "bg-rose-600 text-white",
-      metaClassName: "text-rose-600",
-    };
-  }
+const RewardStrip = ({ loyalty }) => {
+  const points = Number(loyalty?.points || 0);
+  const tier = loyalty?.tier ? String(loyalty.tier).toLowerCase() : "bronze";
+  const progress = Math.max(0, Math.min(100, Number(loyalty?.progress || 0)));
+  const lastGain = Number(
+    loyalty?.lastGain ||
+      (typeof window !== "undefined"
+        ? window.localStorage.getItem("nearBites:lastCoinGain")
+        : 0) ||
+      0
+  );
 
-  return index % 2 === 0
-    ? {
-        cardClassName:
-          "border-orange-200 bg-[linear-gradient(135deg,#fff7ed,#ffedd5_55%,#fff1f2)]",
-        badgeClassName: "bg-orange-600 text-white",
-        metaClassName: "text-orange-600",
-      }
-    : {
-        cardClassName:
-          "border-amber-200 bg-[linear-gradient(135deg,#fffbeb,#fef3c7_55%,#fff7ed)]",
-        badgeClassName: "bg-amber-500 text-stone-950",
-        metaClassName: "text-amber-700",
-      };
+  return (
+    <Motion.section
+      {...fadeUp}
+      className="relative overflow-hidden rounded-[26px] border border-white/70 bg-white/75 p-4 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:p-5"
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(251,146,60,0.18),transparent_26%),radial-gradient(circle_at_92%_8%,rgba(244,63,94,0.12),transparent_24%)]" />
+      <div className="relative grid gap-4 md:grid-cols-[1fr,1.4fr] md:items-center">
+        <div className="flex items-center gap-3">
+          <Motion.div
+            animate={{ rotate: [0, -8, 8, 0], scale: [1, 1.05, 1] }}
+            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 to-orange-600 text-white shadow-[0_18px_36px_-24px_rgba(234,88,12,0.9)]"
+          >
+            <CoinIcon />
+          </Motion.div>
+          <div className="min-w-0">
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-600">
+              NearCoins wallet
+            </p>
+            <div className="mt-1 flex flex-wrap items-end gap-2">
+              <Motion.p
+                key={points}
+                initial={{ y: 8, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="text-3xl font-black leading-none text-stone-950"
+              >
+                {points.toLocaleString()}
+              </Motion.p>
+              {lastGain > 0 ? (
+                <Motion.span
+                  initial={{ y: 10, opacity: 0, scale: 0.9 }}
+                  animate={{ y: 0, opacity: 1, scale: 1 }}
+                  className="mb-0.5 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-black text-emerald-700"
+                >
+                  +{lastGain} after order
+                </Motion.span>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        <div>
+          <div className="flex items-center justify-between gap-4 text-xs font-black uppercase tracking-[0.12em] text-stone-500">
+            <span>{tier} tier</span>
+            <span>{loyalty?.pointsToNext || 0} XP to next</span>
+          </div>
+          <div className="mt-3 h-3 overflow-hidden rounded-full bg-stone-100">
+            <Motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="h-full rounded-full bg-gradient-to-r from-orange-500 via-rose-500 to-amber-400 shadow-[0_0_18px_rgba(249,115,22,0.45)]"
+            />
+          </div>
+        </div>
+      </div>
+    </Motion.section>
+  );
 };
 
-const HomeFoodGameCard = ({
+const OfferCard = ({ promo, index = 0 }) => {
+  const restaurant = promo?.restaurant || {};
+  const value =
+    promo?.discountType === "PERCENTAGE"
+      ? `${promo?.value || promo?.discount || 20}% off`
+      : `${formatCurrency(promo?.value || promo?.discount || 100)} off`;
+
+  return (
+    <Motion.article
+      {...fadeUp}
+      transition={{ ...fadeUp.transition, delay: index * 0.04 }}
+      whileHover={{ y: -5 }}
+      className="relative min-w-[280px] overflow-hidden rounded-[24px] border border-white/50 bg-stone-950 text-white shadow-[0_24px_70px_-44px_rgba(15,23,42,0.65)] sm:min-w-[330px]"
+    >
+      <div className="absolute inset-0">
+        {restaurant?.imageUrl ? (
+          <img src={restaurant.imageUrl} alt={restaurant.name || "Restaurant offer"} className="h-full w-full object-cover opacity-70" loading="lazy" />
+        ) : (
+          <div className="h-full w-full bg-gradient-to-br from-orange-700 via-rose-600 to-stone-950" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/28 to-black/10" />
+      </div>
+      <div className="relative flex min-h-[210px] flex-col justify-between p-4">
+        <div className="flex items-start justify-between gap-3">
+          <span className="rounded-full bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-orange-700">
+            Restaurant offer
+          </span>
+          <span className="rounded-full border border-white/20 bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] backdrop-blur">
+            Live
+          </span>
+        </div>
+        <div>
+          <p className="text-3xl font-black leading-none">{value}</p>
+          <h3 className="mt-2 truncate text-lg font-black">
+            {restaurant?.name || promo?.title || "Featured restaurant"}
+          </h3>
+          <p className="mt-1 line-clamp-2 text-sm font-semibold text-white/78">
+            {promo?.description || promo?.code || "Tap to explore today's deal."}
+          </p>
+          <Link
+            to={
+              restaurant?._id
+                ? getCustomerRestaurantRoute(restaurant._id)
+                : appRoutes.customerSearch
+            }
+            className="mt-4 inline-flex rounded-2xl bg-white px-4 py-2.5 text-sm font-black text-stone-950 no-underline transition hover:bg-orange-50"
+          >
+            Order deal
+          </Link>
+        </div>
+      </div>
+    </Motion.article>
+  );
+};
+
+const DecisionWheelCard = ({
   restaurants = [],
   popularDishes = [],
-  onOpenGames,
 }) => {
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState(null);
+  const [rotation, setRotation] = useState(0);
 
   const choices = useMemo(() => {
     const dishChoices = popularDishes
@@ -459,122 +562,73 @@ const HomeFoodGameCard = ({
     return shuffle([...dishChoices, ...restaurantChoices]).slice(0, 16);
   }, [popularDishes, restaurants]);
 
+  const wheelSegments = choices.length > 0 ? choices.slice(0, 10) : [];
+
   const spinChoice = () => {
     if (spinning || choices.length === 0) return;
 
     setSpinning(true);
-    let tick = 0;
-    const totalTicks = 16 + Math.floor(Math.random() * 8);
-
-    const intervalId = window.setInterval(() => {
-      const nextChoice = choices[tick % choices.length];
-      setResult(nextChoice);
-      tick += 1;
-
-      if (tick >= totalTicks) {
-        window.clearInterval(intervalId);
-        const finalChoice = choices[Math.floor(Math.random() * choices.length)];
-        setResult(finalChoice);
-        setSpinning(false);
-      }
-    }, 90);
+    const finalChoice = choices[Math.floor(Math.random() * choices.length)];
+    setRotation((value) => value + 1080 + Math.floor(Math.random() * 360));
+    window.setTimeout(() => {
+      setResult(finalChoice);
+      setSpinning(false);
+    }, 1450);
   };
 
   return (
-    <Card className="relative overflow-hidden border-0 bg-[linear-gradient(135deg,#271208_0%,#7c2d12_34%,#f97316_68%,#fb7185_100%)] p-5 text-white shadow-[0_32px_90px_-44px_rgba(249,115,22,0.85)]">
+    <Card className="relative overflow-hidden border-0 bg-[linear-gradient(135deg,#180b05_0%,#7c2d12_42%,#f97316_72%,#f43f5e_100%)] p-5 text-white shadow-[0_32px_90px_-44px_rgba(249,115,22,0.85)]">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.22),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(255,237,213,0.18),transparent_28%)]" />
-      <div className="flex items-start justify-between gap-3">
+      <div className="relative grid gap-6 lg:grid-cols-[0.95fr,1.05fr] lg:items-center">
         <div>
           <p className="text-[11px] font-black uppercase tracking-[0.14em] text-white/70">
-            Games
+            Craving wheel
           </p>
-          <h3 className="mt-2 text-2xl font-black">
+          <h3 className="mt-2 text-3xl font-black leading-tight">
             {result?.label || "Pick your next bite"}
           </h3>
           <p className="mt-2 text-sm font-semibold text-white/82">
             {result?.restaurant?.name
               ? result.restaurant.name
-              : "Live dishes and restaurants"}
+              : "Spin through live restaurants and dishes."}
           </p>
-        </div>
-        <span className="rounded-full border border-white/15 bg-white/12 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white backdrop-blur">
-          {result?.gameName || "Craving Spinner"}
-        </span>
-      </div>
-
-      <div className="mt-5 grid gap-3 sm:grid-cols-[1fr,auto] sm:items-end">
-        <div className="grid gap-3 sm:grid-cols-2">
-          {choices.slice(0, 4).map((choice, index) => (
-            <div
-              key={choice.id}
-              className={`rounded-[18px] border px-4 py-3 ${
-                result?.id === choice.id
-                  ? "border-white/45 bg-white/18 shadow-[0_18px_34px_-28px_rgba(255,255,255,0.8)]"
-                  : index % 2 === 0
-                  ? "border-white/14 bg-white/10"
-                  : "border-orange-100/25 bg-black/10"
-              }`}
-            >
-              <p className="text-[10px] font-black uppercase tracking-[0.12em] text-white/65">
-                {choice.type}
-              </p>
-              <p className="mt-1 truncate text-sm font-black text-white">
-                {choice.label}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex flex-col gap-2">
           <button
             type="button"
             onClick={spinChoice}
             disabled={spinning || choices.length === 0}
-            className="rounded-[20px] bg-white px-5 py-3 text-sm font-black text-orange-700 transition hover:scale-[1.02] hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="mt-5 rounded-[20px] bg-white px-5 py-3 text-sm font-black text-orange-700 shadow-[0_18px_34px_-22px_rgba(255,255,255,0.75)] transition hover:scale-[1.02] hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {spinning ? "Picking..." : "Spin"}
           </button>
-          <button
-            type="button"
-            onClick={onOpenGames}
-            className="rounded-[20px] border border-white/20 bg-black/10 px-5 py-3 text-sm font-black text-white transition hover:bg-white/15"
+        </div>
+
+        <div className="relative mx-auto aspect-square w-full max-w-[320px]">
+          <div className="absolute inset-[-10px] rounded-full bg-white/10 blur-xl" />
+          <div className="absolute left-1/2 top-0 z-10 h-0 w-0 -translate-x-1/2 border-l-[12px] border-r-[12px] border-t-[24px] border-l-transparent border-r-transparent border-t-white drop-shadow" />
+          <Motion.div
+            animate={{ rotate: rotation }}
+            transition={{ duration: 1.45, ease: [0.12, 0.76, 0.16, 1] }}
+            className="relative h-full w-full rounded-full border-[10px] border-white/20 bg-[conic-gradient(from_0deg,#fb923c,#f43f5e,#fde047,#22c55e,#38bdf8,#a78bfa,#fb923c)] p-5 shadow-[inset_0_0_40px_rgba(0,0,0,0.22),0_28px_70px_-36px_rgba(0,0,0,0.9)]"
           >
-            All games
-          </button>
+            <div className="absolute inset-[18%] rounded-full border border-white/30 bg-stone-950/72 backdrop-blur" />
+            {wheelSegments.map((choice, index) => {
+              const angle = (360 / wheelSegments.length) * index;
+              return (
+                <div
+                  key={choice.id}
+                  className="absolute left-1/2 top-1/2 origin-left text-[10px] font-black uppercase tracking-[0.08em] text-white drop-shadow"
+                  style={{ transform: `rotate(${angle}deg) translateX(70px) rotate(90deg)` }}
+                >
+                  <span className="block max-w-[76px] truncate">{choice.label}</span>
+                </div>
+              );
+            })}
+            <div className="absolute left-1/2 top-1/2 grid h-20 w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-white text-center text-xs font-black uppercase tracking-[0.12em] text-orange-700 shadow-xl">
+              Spin
+            </div>
+          </Motion.div>
         </div>
       </div>
-    </Card>
-  );
-};
-
-const HomeGameShortcutCard = ({ game, onOpen }) => {
-  const theme = getGameTheme(game.key);
-
-  return (
-    <Card
-      interactive
-      as="button"
-      type="button"
-      onClick={() => onOpen(game.key)}
-      className={`relative h-full overflow-hidden p-4 text-left ${theme.softCard}`}
-    >
-      <div className="absolute right-3 top-3 text-[44px] font-black leading-none text-stone-900/10">
-        {theme.glyph || theme.mark}
-      </div>
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] ${theme.chip}`}>
-            {theme.mark}
-          </span>
-          <h3 className="mt-3 text-lg font-black text-stone-950">{game.title}</h3>
-        </div>
-        <span className="rounded-full bg-white/85 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-stone-600">
-          {theme.crowd || "solo"}
-        </span>
-      </div>
-      <p className="mt-3 text-sm font-semibold text-stone-600">
-        {theme.homeHint || game.description}
-      </p>
     </Card>
   );
 };
@@ -597,7 +651,7 @@ const CustomerHome = () => {
   const [restaurantMode, setRestaurantMode] = useState("recommended");
   const [tiffins, setTiffins] = useState([]);
   const [promos, setPromos] = useState([]);
-  const [gamesFeed, setGamesFeed] = useState({ games: [], rewards: [] });
+  const [loyaltyInfo, setLoyaltyInfo] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -605,8 +659,8 @@ const CustomerHome = () => {
     Promise.allSettled([
       api.get("/tiffins"),
       api.get("/promos/active"),
-      api.get("/games/feed"),
-    ]).then(([tiffinResult, promoResult, gameResult]) => {
+      api.get("/orders/loyalty"),
+    ]).then(([tiffinResult, promoResult, loyaltyResult]) => {
       if (!mounted) return;
 
       if (tiffinResult.status === "fulfilled") {
@@ -623,8 +677,8 @@ const CustomerHome = () => {
         setPromos(Array.isArray(promoResult.value.data) ? promoResult.value.data : []);
       }
 
-      if (gameResult.status === "fulfilled") {
-        setGamesFeed(gameResult.value.data || { games: [], rewards: [] });
+      if (loyaltyResult.status === "fulfilled") {
+        setLoyaltyInfo(loyaltyResult.value.data || null);
       }
     });
 
@@ -686,24 +740,6 @@ const CustomerHome = () => {
       .filter((price) => price > 0);
     return prices.length ? Math.min(...prices) : 0;
   }, [tiffins]);
-
-  const homeGames = useMemo(() => {
-    const available = Array.isArray(gamesFeed.games) && gamesFeed.games.length
-      ? gamesFeed.games
-      : GAME_LIBRARY;
-    const featured = HOME_FEATURED_GAME_KEYS.map((key) =>
-      available.find((game) => game.key === key)
-    ).filter(Boolean);
-    const extras = available.filter(
-      (game) => !featured.some((item) => item.key === game.key)
-    );
-    return [...featured, ...extras].slice(0, 4);
-  }, [gamesFeed.games]);
-
-  const gameRewards = useMemo(
-    () => (Array.isArray(gamesFeed.rewards) ? gamesFeed.rewards : []),
-    [gamesFeed.rewards]
-  );
 
   const handleCategory = (label) => {
     setActiveCategory(label);
@@ -810,6 +846,34 @@ const CustomerHome = () => {
           </button>
         </div>
       </Motion.form>
+
+      <RewardStrip loyalty={loyaltyInfo} />
+
+      {promos.length > 0 ? (
+        <SectionWrapper
+          eyebrow="Today"
+          title="Restaurant offers"
+          subtitle="Fresh deals from restaurants near you."
+          action={
+            <Button size="sm" variant="secondary" onClick={openOffers}>
+              View deals
+            </Button>
+          }
+        >
+          <div className="scrollbar-hide -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
+            {promos.slice(0, 8).map((promo, index) => (
+              <div key={promo._id || `${promo.code}-${index}`} className="snap-start">
+                <OfferCard promo={promo} index={index} />
+              </div>
+            ))}
+          </div>
+        </SectionWrapper>
+      ) : null}
+
+      <DecisionWheelCard
+        restaurants={topRatedRestaurants.length > 0 ? topRatedRestaurants : filteredRestaurants}
+        popularDishes={popularDishes}
+      />
 
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <QuickActionCard
@@ -1002,85 +1066,6 @@ const CustomerHome = () => {
             description="Popular dishes will appear here as real orders come in."
           />
         )}
-      </SectionWrapper>
-
-      <SectionWrapper
-        eyebrow="Play"
-        title="Games & rewards"
-        subtitle="Tap in."
-        action={
-          <Button size="sm" onClick={() => navigate(appRoutes.customerGames)}>
-            Games
-          </Button>
-        }
-      >
-        <div className="grid gap-4 lg:grid-cols-[1.1fr,0.9fr]">
-          <HomeFoodGameCard
-            restaurants={topRatedRestaurants.length > 0 ? topRatedRestaurants : filteredRestaurants}
-            popularDishes={popularDishes}
-            onOpenGames={() => navigate(getCustomerGameRoute(getGameSlug(DEFAULT_GAME_KEY)))}
-          />
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            {homeGames.map((game) => (
-              <HomeGameShortcutCard
-                key={game.key}
-                game={game}
-                onOpen={(gameKey) =>
-                  navigate(getCustomerGameRoute(getGameSlug(gameKey)))
-                }
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-4 grid gap-3 md:grid-cols-[1.1fr,1fr,1fr]">
-          <Card
-            interactive
-            as="button"
-            type="button"
-            onClick={() => navigate(appRoutes.customerGames)}
-            className="overflow-hidden border-stone-900 bg-[linear-gradient(135deg,#0f172a,#1f2937_55%,#334155)] p-4 text-left text-white shadow-[0_24px_60px_-44px_rgba(15,23,42,0.9)]"
-          >
-            <p className="text-[11px] font-black uppercase tracking-[0.12em] text-white/70">
-              Games hub
-            </p>
-            <h3 className="mt-2 text-xl font-black">Open all games</h3>
-          </Card>
-
-          {gameRewards.slice(0, 2).map((reward, index) => {
-            const tone = getRewardTone(reward, index);
-
-            return (
-              <Card key={reward._id} className={`p-4 ${tone.cardClassName}`}>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className={`text-[11px] font-black uppercase tracking-[0.12em] ${tone.metaClassName}`}>
-                      {reward.gameRewardTier === "TOP" ? "Top reward" : "Score reward"}
-                    </p>
-                    <p className="mt-2 text-xl font-black text-stone-950">
-                      {reward.discountType === "PERCENTAGE"
-                        ? `${reward.value}% off`
-                        : `${formatCurrency(reward.value)} off`}
-                    </p>
-                    <p className="mt-1 text-xs font-bold text-stone-600">
-                      {reward.restaurant?.name || "Vendor offer"}
-                    </p>
-                  </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-black ${tone.badgeClassName}`}>
-                    {reward.gameRewardTier === "TOP" ? "Top" : `${reward.gameMinScore || 0}+`}
-                  </span>
-                </div>
-              </Card>
-            );
-          })}
-
-          {gameRewards.length === 0 ? (
-            <Card className="border-orange-200 bg-[linear-gradient(135deg,#fff7ed,#ffedd5)] p-4">
-              <p className="text-sm font-black text-stone-950">Rewards loading</p>
-            </Card>
-          ) : null}
-        </div>
       </SectionWrapper>
     </div>
   );

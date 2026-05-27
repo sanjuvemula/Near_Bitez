@@ -6,6 +6,16 @@ import User, { getTierFromPoints } from "../models/User.js";
 import WalletTransaction from "../models/WalletTransaction.js";
 
 export const GAME_CONFIGS = [
+  { key: "food-quiz-battle", title: "Food Quiz Battle", difficulty: "PvP", rewardType: "xp", mode: "multiplayer" },
+  { key: "tap-battle", title: "Tap Battle", difficulty: "PvP", rewardType: "coins", mode: "multiplayer" },
+  { key: "spin-clash", title: "Spin Clash", difficulty: "PvP", rewardType: "coupon", mode: "multiplayer" },
+  { key: "delivery-race", title: "Delivery Race", difficulty: "PvP", rewardType: "coins", mode: "multiplayer" },
+  { key: "memory-duel", title: "Memory Match Duel", difficulty: "PvP", rewardType: "xp", mode: "multiplayer" },
+  { key: "food-memory", title: "Food Memory Match", difficulty: "Medium", rewardType: "xp", mode: "solo" },
+  { key: "burger-stack", title: "Burger Stack", difficulty: "Medium", rewardType: "coins", mode: "solo" },
+  { key: "pizza-catcher", title: "Pizza Catcher", difficulty: "Medium", rewardType: "coins", mode: "solo" },
+  { key: "fruit-slice", title: "Fruit Slice", difficulty: "Hard", rewardType: "xp", mode: "solo" },
+  { key: "guess-the-dish", title: "Guess The Dish", difficulty: "Medium", rewardType: "xp", mode: "solo" },
   { key: "craving-spinner", title: "Craving Spinner", difficulty: "Easy", rewardType: "coupon" },
   { key: "delivery-race", title: "Delivery Race", difficulty: "Medium", rewardType: "coins" },
   { key: "cook-combo", title: "Cook Combo", difficulty: "Medium", rewardType: "xp" },
