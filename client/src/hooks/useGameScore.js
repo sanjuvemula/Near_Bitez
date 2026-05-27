@@ -49,7 +49,7 @@ export const useGameScore = () => {
     setError("");
     try {
       const response = await api.get("/games/my-score");
-      applyPayload(response.data || {});
+      applyPayload(response.data || response || {});
     } catch (apiError) {
       setError(apiError.message || "Could not load game score");
     } finally {
@@ -87,7 +87,7 @@ export const useGameScore = () => {
   const addScore = useCallback(
     async (gameName, points) => {
       const response = await api.patch("/games/score", { gameName, points });
-      const data = response.data || {};
+      const data = response.data || response || {};
       applyPayload(data);
       return data;
     },
@@ -111,7 +111,6 @@ export const useGameScore = () => {
 
 export default useGameScore;
  
-
 
 
 

@@ -80,6 +80,30 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0, // lifetime total (never decremented)
     },
+    nearCoins: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    currentStreak: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    longestStreak: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    lastActivityDate: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    xpBoostUntil: {
+      type: Date,
+      default: null,
+    },
     referralCode: { type: String, default: null, uppercase: true },
     referralUsed: { type: Boolean, default: false },
     pointsHistory: {
@@ -178,13 +202,17 @@ userSchema.methods.toSafeObject = function toSafeObject() {
     loyaltyTier:           this.loyaltyTier,
     totalPointsEarned:     this.totalPointsEarned,
     badges:                this.badges || [],
+    nearCoins:             this.nearCoins || 0,
+    currentStreak:         this.currentStreak || 0,
+    longestStreak:         this.longestStreak || 0,
+    lastActivityDate:      this.lastActivityDate || "",
+    xpBoostUntil:          this.xpBoostUntil,
     createdAt:             this.createdAt,
     updatedAt:             this.updatedAt,
   };
 };
 
 export default mongoose.model("User", userSchema);
-
 
 
 

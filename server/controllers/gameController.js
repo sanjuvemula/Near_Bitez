@@ -3,20 +3,52 @@ import Order from "../models/Order.js";
 import Promo from "../models/Promo.js";
 import Restaurant from "../models/Restaurant.js";
 import User, { getTierFromPoints } from "../models/User.js";
+import WalletTransaction from "../models/WalletTransaction.js";
 
 export const GAME_CONFIGS = [
-  { key: "food-dice", title: "Food Dice", difficulty: "Easy" },
-  { key: "spin-wheel", title: "Spin Wheel", difficulty: "Easy" },
-  { key: "scratch-card", title: "Scratch Card", difficulty: "Easy" },
-  { key: "memory-match", title: "Memory Match", difficulty: "Medium" },
-  { key: "tap-the-food", title: "Tap The Food", difficulty: "Hard" },
-  { key: "food-quiz", title: "Food Quiz", difficulty: "Medium" },
+  { key: "craving-spinner", title: "Craving Spinner", difficulty: "Easy", rewardType: "coupon" },
+  { key: "delivery-race", title: "Delivery Race", difficulty: "Medium", rewardType: "coins" },
+  { key: "cook-combo", title: "Cook Combo", difficulty: "Medium", rewardType: "xp" },
+  { key: "hungry-monster", title: "Hungry Monster", difficulty: "Easy", rewardType: "streak" },
+  { key: "coupon-hunt", title: "Coupon Hunt", difficulty: "Easy", rewardType: "coupon" },
+  { key: "spin-battle", title: "Spin Battle", difficulty: "Medium", rewardType: "coins" },
+  { key: "mystery-food-box", title: "Mystery Food Box", difficulty: "Easy", rewardType: "badge" },
+  { key: "chef-boss-fight", title: "Chef Boss Fight", difficulty: "Hard", rewardType: "badge" },
+  { key: "food-snake", title: "Food Snake", difficulty: "Medium", rewardType: "coins" },
+  { key: "restaurant-empire", title: "Restaurant Empire", difficulty: "Idle", rewardType: "passive" },
+  { key: "blind-taste", title: "Blind Taste Challenge", difficulty: "Medium", rewardType: "xp" },
+  { key: "bite-catcher", title: "Pizza Catcher", difficulty: "Medium", rewardType: "coins" },
+  { key: "food-memory", title: "Food Memory", difficulty: "Medium", rewardType: "xp" },
+  { key: "tap-the-food", title: "Tap The Burger", difficulty: "Hard", rewardType: "coins" },
+  { key: "lucky-tray", title: "Lucky Card Flip", difficulty: "Easy", rewardType: "coupon" },
+  { key: "speed-quiz", title: "Food Quiz", difficulty: "Medium", rewardType: "xp" },
+  { key: "snakes-sprint", title: "Delivery Rider Runner", difficulty: "Medium", rewardType: "coins" },
+  { key: "cuisine-match", title: "Guess The Dish", difficulty: "Medium", rewardType: "xp" },
+  { key: "tray-shuffle", title: "Daily Treasure Hunt", difficulty: "Easy", rewardType: "coupon" },
 ];
 
 const BADGE_THRESHOLDS = [
-  { type: "GAME_ROOKIE", name: "Game Rookie", minScore: 100, points: 10 },
-  { type: "GAME_HOT_STREAK", name: "Hot Streak", minScore: 250, points: 25 },
-  { type: "GAME_CHAMPION", name: "Daily Champion", minScore: 500, points: 50 },
+  { type: "GAME_ROOKIE", name: "Snack Hunter", minScore: 100, points: 10, coins: 20 },
+  { type: "GAME_HOT_STREAK", name: "Street Food Master", minScore: 250, points: 25, coins: 50 },
+  { type: "GAME_CHAMPION", name: "Elite Food Warrior", minScore: 500, points: 50, coins: 100 },
+  { type: "NB_LEGEND", name: "NearBites Legend", minScore: 1000, points: 120, coins: 250 },
+];
+
+const DAILY_MISSIONS = [
+  { key: "order-today", title: "Order once today", targetMetric: "ORDER", target: 1, reward: { coins: 40, xp: 25, label: "40 coins + 25 XP" } },
+  { key: "new-restaurant", title: "Try a new restaurant", targetMetric: "DISCOVERY", target: 1, reward: { coins: 30, xp: 20, label: "30 coins + 20 XP" } },
+  { key: "spend-300", title: "Spend above Rs 300", targetMetric: "SPEND", target: 300, reward: { coins: 60, xp: 35, label: "60 coins + 35 XP" } },
+  { key: "rate-order", title: "Rate an order", targetMetric: "REVIEW", target: 1, reward: { coins: 25, xp: 25, label: "25 coins + 25 XP" } },
+  { key: "invite-friend", title: "Invite a friend", targetMetric: "REFERRAL", target: 1, reward: { coins: 100, xp: 50, label: "100 coins + 50 XP" } },
+];
+
+const LEVELS = [
+  { name: "Beginner Foodie", minXp: 0 },
+  { name: "Snack Hunter", minXp: 150 },
+  { name: "Street Food Master", minXp: 500 },
+  { name: "Pro Explorer", minXp: 1200 },
+  { name: "Elite Food Warrior", minXp: 2500 },
+  { name: "NearBites Legend", minXp: 5000 },
 ];
 
 const leaderboardCache = new Map();
@@ -29,6 +61,65 @@ const getIstDate = (date = new Date()) =>
     month: "2-digit",
     day: "2-digit",
   }).format(date);
+
+const getPreviousIstDate = () => {
+  const date = new Date();
+  date.setDate(date.getDate() - 1);
+  return getIstDate(date);
+};
+
+const getLevelSnapshot = (xp = 0) => {
+  const currentIndex = LEVELS.reduce(
+    (match, level, index) => (xp >= level.minXp ? index : match),
+    0
+  );
+  const current = LEVELS[currentIndex];
+  const next = LEVELS[currentIndex + 1] || null;
+  const span = next ? next.minXp - current.minXp : 1;
+  const progress = next
+    ? Math.min(100, Math.round(((xp - current.minXp) / span) * 100))
+    : 100;
+
+  return {
+    name: current.name,
+    xp,
+    nextLevel: next?.name || null,
+    xpToNext: next ? Math.max(0, next.minXp - xp) : 0,
+    progress,
+  };
+};
+
+const isLuckyHour = () => {
+  const hour = Number(
+    new Intl.DateTimeFormat("en-IN", {
+      timeZone: "Asia/Kolkata",
+      hour: "2-digit",
+      hour12: false,
+    }).format(new Date())
+  );
+  return hour >= 19 && hour < 21;
+};
+
+const touchDailyStreak = (user, date = getIstDate()) => {
+  if (user.lastActivityDate === date) return false;
+  user.currentStreak = user.lastActivityDate === getPreviousIstDate()
+    ? Number(user.currentStreak || 0) + 1
+    : 1;
+  user.longestStreak = Math.max(Number(user.longestStreak || 0), user.currentStreak);
+  user.lastActivityDate = date;
+  return true;
+};
+
+const recordWallet = ({ userId, coins, xp, description, source = "GAME", meta = {} }) =>
+  WalletTransaction.create({
+    user: userId,
+    type: coins >= 0 ? "EARNED" : "SPENT",
+    source,
+    coins,
+    xp,
+    description,
+    meta,
+  });
 
 const asSafeScore = (value) => {
   const score = Math.round(Number(value));
@@ -146,10 +237,18 @@ const maybeAwardBadges = async ({ req, userId, previousTotal, nextTotal, date })
     });
     user.loyaltyPoints += badge.points;
     user.totalPointsEarned += badge.points;
+    user.nearCoins += badge.coins || 0;
     user.pointsHistory.push({
       type: "EARNED",
       points: badge.points,
       description: `${badge.name} gaming badge`,
+    });
+    await recordWallet({
+      userId,
+      coins: badge.coins || 0,
+      xp: badge.points,
+      description: `${badge.name} badge unlocked`,
+      meta: { badge: badge.type },
     });
   }
   user.loyaltyTier = getTierFromPoints(user.loyaltyPoints);
@@ -180,6 +279,9 @@ export const addOrUpdateScore = async (req, res) => {
     const date = getIstDate();
     const previous = await GameScore.findOne({ userId: req.user._id, date });
     const previousTotal = previous?.totalScore || 0;
+    const luckyMultiplier = isLuckyHour() ? 2 : 1;
+    const xpAward = Math.max(1, Math.floor(points * 0.2 * luckyMultiplier));
+    const coinAward = Math.max(1, Math.floor(points * 0.35 * luckyMultiplier));
 
     const score = await GameScore.findOneAndUpdate(
       { userId: req.user._id, date },
@@ -210,6 +312,29 @@ export const addOrUpdateScore = async (req, res) => {
       nextTotal: freshScore.totalScore,
       date,
     });
+
+    const user = await User.findById(req.user._id).select("+pointsHistory");
+    if (user) {
+      touchDailyStreak(user, date);
+      user.loyaltyPoints += xpAward;
+      user.totalPointsEarned += xpAward;
+      user.nearCoins += coinAward;
+      user.pointsHistory.push({
+        type: "EARNED",
+        points: xpAward,
+        description: `${game} game reward`,
+      });
+      user.loyaltyTier = getTierFromPoints(user.loyaltyPoints);
+      await user.save();
+      await recordWallet({
+        userId: req.user._id,
+        coins: coinAward,
+        xp: xpAward,
+        description: `${game} score reward`,
+        meta: { game, points, luckyHour: isLuckyHour() },
+      });
+    }
+
     const leaderboardPayload = await emitLeaderboard(req, date, req.user._id);
 
     res.status(200).json({
@@ -219,6 +344,13 @@ export const addOrUpdateScore = async (req, res) => {
         myRank: freshScore.rank,
         score: serializeScoreRow(freshScore, req.user._id),
         badges,
+        reward: {
+          coins: coinAward,
+          xp: xpAward,
+          luckyHour: isLuckyHour(),
+          streak: user?.currentStreak || 0,
+          level: getLevelSnapshot(user?.loyaltyPoints || 0),
+        },
         leaderboard: leaderboardPayload?.leaderboard || [],
         currentUser: leaderboardPayload?.currentUser || serializeScoreRow(freshScore, req.user._id),
       },
@@ -503,15 +635,94 @@ export const getWheelSegments = async (_req, res) => {
 export const getGamesFeed = async (req, res) => {
   try {
     const date = getIstDate();
-    const myScore = req.user
-      ? await GameScore.findOne({ userId: req.user._id, date, archived: false }).lean()
-      : null;
+    const [myScore, rewards, transactions, user] = await Promise.all([
+      req.user
+        ? GameScore.findOne({ userId: req.user._id, date, archived: false }).lean()
+        : null,
+      Promo.find({
+        isActive: true,
+        isGameReward: true,
+        validUntil: { $gte: new Date() },
+      })
+        .sort({ gameRewardTier: -1, value: -1, createdAt: -1 })
+        .limit(8)
+        .populate("restaurant", "name imageUrl")
+        .lean(),
+      req.user
+        ? WalletTransaction.find({ user: req.user._id })
+            .sort({ createdAt: -1 })
+            .limit(8)
+            .lean()
+        : [],
+      req.user ? User.findById(req.user._id).lean() : null,
+    ]);
+
+    const xp = user?.loyaltyPoints || 0;
+    const defaultRewards = [
+      {
+        _id: "daily-free-delivery",
+        gameKey: "any",
+        gameRewardTier: "PLAY",
+        gameMinScore: 80,
+        discountType: "FLAT",
+        value: 49,
+        minOrderValue: 199,
+        title: "Free delivery unlock",
+      },
+      {
+        _id: "legend-bonus",
+        gameKey: "any",
+        gameRewardTier: "TOP",
+        gameMinScore: 350,
+        discountType: "PERCENTAGE",
+        value: 20,
+        minOrderValue: 299,
+        title: "Daily champion coupon",
+      },
+    ];
 
     res.status(200).json({
       success: true,
       data: {
         games: GAME_CONFIGS,
-        rewards: [],
+        rewards: rewards.length ? rewards : defaultRewards,
+        wallet: {
+          coins: user?.nearCoins || 0,
+          xp,
+          level: getLevelSnapshot(xp),
+          streak: {
+            current: user?.currentStreak || 0,
+            longest: user?.longestStreak || 0,
+            lastActivityDate: user?.lastActivityDate || "",
+          },
+          luckyHour: isLuckyHour(),
+          history: transactions.map((item) => ({
+            _id: item._id,
+            type: item.type,
+            source: item.source,
+            coins: item.coins,
+            xp: item.xp,
+            description: item.description,
+            createdAt: item.createdAt,
+          })),
+        },
+        missions: DAILY_MISSIONS.map((mission, index) => ({
+          ...mission,
+          progress:
+            mission.key === "order-today"
+              ? 0
+              : mission.key === "rate-order"
+              ? 0
+              : index === 0 && myScore
+              ? 1
+              : 0,
+          completed: false,
+        })),
+        seasonalEvent: {
+          title: "Lucky Hour Rush",
+          description: "7 PM to 9 PM gives double XP and double NearCoins from games.",
+          active: isLuckyHour(),
+        },
         myScores: myScore
           ? [
               {
@@ -530,9 +741,86 @@ export const getGamesFeed = async (req, res) => {
   }
 };
 
-export const claimGameReward = (_req, res) => {
-  res.status(410).json({
-    success: false,
-    message: "Game reward claiming has moved to the daily score and scratch reward system",
-  });
+export const claimGameReward = async (req, res) => {
+  try {
+    const date = getIstDate();
+    const rewardTier = String(req.body.rewardTier || "PLAY").toUpperCase();
+    const gameKey = String(req.body.gameKey || "any").toLowerCase();
+    const todayScore = await GameScore.findOne({
+      userId: req.user._id,
+      date,
+      archived: false,
+    }).lean();
+
+    const minScore = rewardTier === "TOP" ? 350 : 80;
+    if (!todayScore || Number(todayScore.totalScore || 0) < minScore) {
+      return res.status(403).json({
+        success: false,
+        message: `Score ${minScore}+ today to unlock this reward`,
+      });
+    }
+
+    if (rewardTier === "TOP" && Number(todayScore.rank || 9999) !== 1) {
+      return res.status(403).json({
+        success: false,
+        message: "Only the current #1 player can claim the top reward",
+      });
+    }
+
+    const promo = await Promo.findOne({
+      isActive: true,
+      isGameReward: true,
+      gameRewardTier: rewardTier,
+      $or: [{ gameKey }, { gameKey: "any" }],
+      validUntil: { $gte: new Date() },
+    })
+      .sort({ value: -1, createdAt: -1 })
+      .populate("restaurant", "name imageUrl")
+      .lean();
+
+    const coins = rewardTier === "TOP" ? 150 : 45;
+    const xp = rewardTier === "TOP" ? 75 : 25;
+    const user = await User.findById(req.user._id).select("+pointsHistory");
+    if (user) {
+      touchDailyStreak(user, date);
+      user.nearCoins += coins;
+      user.loyaltyPoints += xp;
+      user.totalPointsEarned += xp;
+      user.pointsHistory.push({
+        type: "EARNED",
+        points: xp,
+        description: `${rewardTier} game reward claim`,
+      });
+      user.loyaltyTier = getTierFromPoints(user.loyaltyPoints);
+      await user.save();
+      await recordWallet({
+        userId: req.user._id,
+        coins,
+        xp,
+        description: `${rewardTier} reward claimed`,
+        meta: { gameKey, promo: promo?._id || null },
+      });
+    }
+
+    const fallbackCode = rewardTier === "TOP" ? "NBLEGEND20" : "NBPLAY49";
+    res.status(200).json({
+      success: true,
+      data: {
+        coins,
+        xp,
+        streak: user?.currentStreak || 0,
+        level: getLevelSnapshot(user?.loyaltyPoints || 0),
+        promo: promo || {
+          code: fallbackCode,
+          discountType: rewardTier === "TOP" ? "PERCENTAGE" : "FLAT",
+          value: rewardTier === "TOP" ? 20 : 49,
+          minOrderValue: rewardTier === "TOP" ? 299 : 199,
+          restaurant: { name: "NearBites" },
+        },
+      },
+    });
+  } catch (error) {
+    console.error("claimGameReward error:", error);
+    res.status(500).json({ success: false, message: "Could not claim game reward" });
+  }
 };

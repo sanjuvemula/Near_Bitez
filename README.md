@@ -11,7 +11,9 @@ NearBites is a full-stack food ordering platform for customer ordering and vendo
 - Real-time updates with Socket.IO
 - Cloudinary-backed media uploads
 - Email OTP and optional Google OAuth login
-- Game score and leaderboard APIs
+- Game score, NearCoins, XP, missions, streaks, and leaderboard APIs
+- Installable PWA shell with offline app fallback
+- Customer Fun Zone with food games connected to coupons and rewards
 
 ## Tech Stack
 
@@ -44,6 +46,15 @@ server/
   utils/
 ```
 
+## Product Modules
+
+- Customer app: restaurant discovery, sticky search, categories, cart, checkout, orders, favorites, tiffin plans, profile, reviews, and live tracking.
+- Shop owner app: dashboard, restaurant profile, menu, inventory, orders, reviews, promos, analytics, logistics, and wallet surfaces.
+- Admin app: analytics, user/restaurant/rider management foundations, reports, account controls, and monitoring views.
+- Gamification: levels from Beginner Foodie to NearBites Legend, NearCoins, XP, daily streaks, Lucky Hour, daily missions, reward claims, badges, and real-time leaderboards.
+- Fun Zone: Delivery Race, Cook Combo, Hungry Monster, Coupon Hunt, Spin Battle, Mystery Food Box, Chef Boss Fight, Food Snake, Restaurant Empire, Blind Taste Challenge, Food Memory, Tap The Burger, Pizza Catcher, Lucky Card Flip, Food Quiz, Delivery Rider Runner, Guess The Dish, and Daily Treasure Hunt.
+- PWA: manifest, install prompt, full-screen mobile mode metadata, service worker shell caching, splash/theme color, and offline fallback.
+
 ## Local Setup
 
 Install dependencies:
@@ -68,6 +79,11 @@ JWT_EXPIRE=30d
 CLOUDINARY_CLOUD_NAME=your-cloud-name
 CLOUDINARY_API_KEY=your-cloudinary-api-key
 CLOUDINARY_API_SECRET=your-cloudinary-api-secret
+STRIPE_SECRET_KEY=your-stripe-secret-key
+RAZORPAY_KEY_ID=your-razorpay-key-id
+RAZORPAY_KEY_SECRET=your-razorpay-secret
+VAPID_PUBLIC_KEY=your-web-push-public-key
+VAPID_PRIVATE_KEY=your-web-push-private-key
 ```
 
 Optional: create `client/.env` from `client/.env.example`.
@@ -161,6 +177,12 @@ Customer:
 - `GET /api/v1/orders`
 - `POST /api/v1/orders`
 - `GET /api/v1/orders/:id`
+- `GET /api/v1/games/feed`
+- `PATCH /api/v1/games/score`
+- `POST /api/v1/games/claim`
+- `GET /api/v1/games/leaderboard`
+- `GET /api/v1/games/wheel-segments`
+- `GET /api/v1/games/scratch-rewards`
 
 Vendor:
 
@@ -181,3 +203,12 @@ Vendor:
 - Do not commit `.env` files, logs, `node_modules`, or build output.
 - Rotate any credential that was ever committed to git history.
 - Keep the GitHub repository private unless you are ready to publish the code.
+- Use HTTPS in production so secure auth cookies, push notifications, payment callbacks, Socket.IO, and PWA install prompts work reliably.
+
+## Deployment Checklist
+
+1. Create MongoDB Atlas, Cloudinary, Google OAuth, Resend, payment, and push-notification credentials.
+2. Deploy the API to Render/Railway/Fly with `npm start`, `NODE_ENV=production`, and the production env above.
+3. Deploy `client` to Vercel/Netlify with `npm run build`, `VITE_API_URL`, and `VITE_SOCKET_URL`.
+4. Add the frontend domain to `CLIENT_URLS` and OAuth callback allowlists.
+5. Verify `/api/v1/health`, login, restaurant discovery, cart checkout, Socket.IO order updates, `/app/games`, PWA install, and offline reload.

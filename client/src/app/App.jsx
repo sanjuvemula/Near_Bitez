@@ -13,6 +13,7 @@ import { useAuth } from "../hooks/useAuth.js";
 import Navbar from "../features/navbar/Navbar.jsx";
 import ProtectedRoute from "../features/auth/ProtectedRoute.jsx";
 import { NotificationProvider } from "../context/NotificationContext.jsx";
+import PwaInstallButton from "../components/PwaInstallButton.jsx";
 
 const Home            = lazy(() => import("../features/home/Home.jsx"));
 const CustomerHome    = lazy(() => import("../features/home/CustomerHome.jsx"));
@@ -32,7 +33,7 @@ const CustomerShell   = lazy(() => import("../features/customer/CustomerShell.js
 const FavoritesPage   = lazy(() => import("../features/customer/FavoritesPage.jsx"));
 const AdminDashboard  = lazy(() => import("../features/admin/AdminDashboard.jsx"));
 const TiffinPage = lazy(() => import("../features/tiffin/TiffinPage.jsx"));
-const CustomerGamesPage = lazy(() => import("../features/games/GameLobby.jsx"));
+const CustomerGamesPage = lazy(() => import("../features/games/CustomerGamesPage.jsx"));
 const GamePlayPage = lazy(() => import("../features/games/GamePlayPage.jsx"));
 
 const PublicLayout = () => (
@@ -149,6 +150,7 @@ function App() {
             <Route path="*" element={<Navigate to={appRoutes.publicHome} replace />} />
           </Routes>
         </Suspense>
+        <PwaInstallButton />
       </NotificationProvider>
     </BrowserRouter>
   );

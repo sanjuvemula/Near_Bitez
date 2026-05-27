@@ -23,6 +23,82 @@ const FeaturePill = ({ label, value }) => (
   </div>
 );
 
+const WalletPanel = ({ wallet, missions = [], event }) => {
+  const level = wallet?.level || { name: "Beginner Foodie", progress: 0, xp: 0, xpToNext: 150 };
+  const streak = wallet?.streak || { current: 0, longest: 0 };
+
+  return (
+    <div className="grid gap-4 lg:grid-cols-[1.1fr,0.9fr]">
+      <div className="overflow-hidden rounded-[24px] border border-orange-200 bg-[linear-gradient(135deg,#211008,#7c2d12_52%,#f97316)] p-5 text-white shadow-[0_28px_70px_-44px_rgba(234,88,12,0.85)]">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-orange-100">
+              NearCoins wallet
+            </p>
+            <h2 className="mt-2 text-3xl font-black">
+              {(wallet?.coins || 0).toLocaleString()} coins
+            </h2>
+            <p className="mt-1 text-sm font-bold text-orange-50">
+              {level.name} - {level.xp.toLocaleString()} XP
+            </p>
+          </div>
+          <div className="rounded-[18px] border border-white/15 bg-white/12 px-4 py-3 text-right backdrop-blur">
+            <p className="text-[10px] font-black uppercase text-white/70">Streak</p>
+            <p className="mt-1 text-2xl font-black">{streak.current || 0} days</p>
+            <p className="text-xs font-bold text-white/70">Best {streak.longest || 0}</p>
+          </div>
+        </div>
+        <div className="mt-5">
+          <div className="mb-2 flex justify-between text-xs font-black text-orange-50">
+            <span>{level.name}</span>
+            <span>{level.xpToNext ? `${level.xpToNext} XP to next` : "Max level"}</span>
+          </div>
+          <div className="h-3 overflow-hidden rounded-full bg-black/20">
+            <Motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${level.progress || 0}%` }}
+              transition={{ duration: 0.7, ease: "easeOut" }}
+              className="h-full rounded-full bg-white"
+            />
+          </div>
+        </div>
+        {event ? (
+          <div className="mt-4 rounded-[18px] border border-white/15 bg-black/15 p-3">
+            <p className="text-sm font-black">{event.title}</p>
+            <p className="mt-1 text-xs font-bold leading-5 text-white/72">
+              {event.description}
+            </p>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="rounded-[24px] border border-[#e7ded2] bg-white p-5 shadow-[0_18px_48px_-40px_rgba(65,54,43,0.28)]">
+        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-orange-600">
+          Daily missions
+        </p>
+        <div className="mt-4 space-y-3">
+          {missions.slice(0, 5).map((mission) => (
+            <div key={mission.key} className="rounded-[18px] border border-[#eee7dc] bg-[#fafaf8] p-3">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-black text-stone-950">{mission.title}</p>
+                <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[10px] font-black text-orange-700">
+                  {mission.reward?.label}
+                </span>
+              </div>
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-stone-200">
+                <div
+                  className="h-full rounded-full bg-orange-600"
+                  style={{ width: `${Math.min(100, ((mission.progress || 0) / mission.target) * 100)}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const GroupButton = ({ group, active, onClick }) => (
   <button
     type="button"
@@ -135,6 +211,12 @@ const CustomerGamesPage = () => {
           </div>
         </div>
       </Motion.section>
+
+      <WalletPanel
+        wallet={gameFeed.wallet}
+        missions={gameFeed.missions}
+        event={gameFeed.seasonalEvent}
+      />
 
       <section className="space-y-5">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
