@@ -230,7 +230,7 @@ const WaitAndPlayPanel = ({ orderId }) => {
                       </div>
                       <Link
                         to={`${getCustomerGameRoute(getGameSlug(game.key))}?orderId=${orderId}`}
-                        className="rounded-full bg-stone-950 px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white no-underline"
+                        className="rounded-full bg-orange-600 px-3 py-2 text-[11px] font-black uppercase tracking-[0.12em] text-white no-underline transition hover:bg-orange-700"
                       >
                         Play
                       </Link>
@@ -242,7 +242,7 @@ const WaitAndPlayPanel = ({ orderId }) => {
 
             <Link
               to={`${getCustomerGameRoute(getGameSlug(activeGameKey || games[0]?.key || DEFAULT_GAME_KEY))}?orderId=${orderId}`}
-              className="inline-flex rounded-[18px] bg-stone-950 px-4 py-3 text-sm font-black text-white no-underline transition hover:bg-stone-800"
+              className="inline-flex rounded-[18px] bg-gradient-to-r from-orange-500 to-rose-500 px-4 py-3 text-sm font-black text-white no-underline shadow-[0_18px_34px_-24px_rgba(244,63,94,0.75)] transition hover:brightness-105"
             >
               Open full games hub
             </Link>
@@ -282,7 +282,7 @@ const WaitAndPlayPanel = ({ orderId }) => {
                       entry.isCurrentUser ? "border-white bg-white" : "border-white/80 bg-white/80"
                     }`}
                   >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-stone-950 text-sm font-black text-white">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-[14px] bg-gradient-to-br from-orange-500 to-rose-500 text-sm font-black text-white">
                       {entry.rank}
                     </div>
                     <div className="min-w-0 flex-1">

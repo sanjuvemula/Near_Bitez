@@ -6,6 +6,7 @@ import {
 } from "./shared.js";
 
 const ALLOWED_TRANSITIONS = {
+  SCHEDULED: ["PLACED", "ACCEPTED", "REJECTED"],
   PLACED: ["ACCEPTED", "REJECTED"],
   ACCEPTED: ["PREPARING", "REJECTED"],
   PREPARING: ["READY"],

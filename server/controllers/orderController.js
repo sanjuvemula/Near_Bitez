@@ -5,18 +5,8 @@ import Promo from "../models/Promo.js";
 import GameRewardClaim from "../models/GameRewardClaim.js";
 import Restaurant from "../models/Restaurant.js";
 import User from "../models/User.js";
-
-const calculateTotals = (items) => {
-  const itemTotal = items.reduce(
-    (total, item) => total + item.price * item.quantity,
-    0
-  );
-  const deliveryFee = itemTotal >= 500 ? 0 : 40;
-  const platformFee = itemTotal > 0 ? 5 : 0;
-  const gst = Math.round(itemTotal * 0.05);
-  const grandTotal = itemTotal + deliveryFee + platformFee + gst;
-  return { itemTotal, deliveryFee, platformFee, gst, grandTotal };
-};
+import { getBusinessSettings } from "../models/BusinessSettings.js";
+import { calculateOrderTotals } from "../services/pricingService.js";
 
 const serializeOrder = (order) => ({
   _id: order._id,
@@ -146,7 +136,8 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: "Some cart items are no longer available" });
     }
 
-    const totals = calculateTotals(orderItems);
+    const settings = await getBusinessSettings();
+    const totals = await calculateOrderTotals(orderItems, restaurant);
     const finalAddress = deliveryAddress?.trim() || req.user.address || "";
     if (!finalAddress) {
       return res.status(400).json({ success: false, message: "Delivery address is required" });
@@ -155,6 +146,10 @@ export const createOrder = async (req, res) => {
     // ── Scheduled order validation ─────────────────────────────────────────────
     let scheduledDate = null;
     if (scheduledFor) {
+      if (!settings.allowScheduledOrders) {
+        return res.status(400).json({ success: false, message: "Scheduled orders are currently disabled" });
+      }
+
       scheduledDate = new Date(scheduledFor);
       if (isNaN(scheduledDate.getTime())) {
         return res.status(400).json({ success: false, message: "Invalid scheduled time" });
@@ -162,10 +157,9 @@ export const createOrder = async (req, res) => {
       if (scheduledDate <= new Date()) {
         return res.status(400).json({ success: false, message: "Scheduled time must be in the future" });
       }
-      // Max 7 days ahead
-      const maxAhead = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      const maxAhead = new Date(Date.now() + settings.maxScheduleDays * 24 * 60 * 60 * 1000);
       if (scheduledDate > maxAhead) {
-        return res.status(400).json({ success: false, message: "Cannot schedule more than 7 days ahead" });
+        return res.status(400).json({ success: false, message: `Cannot schedule more than ${settings.maxScheduleDays} days ahead` });
       }
     }
 
@@ -214,12 +208,12 @@ export const createOrder = async (req, res) => {
           // Check if customer hasn't used referral before
           const customer = await User.findById(req.user._id);
           if (!customer.referralUsed) {
-            // Award both users 50 points
-            referrer.loyaltyPoints = (referrer.loyaltyPoints || 0) + 50;
-            referrer.totalPointsEarned = (referrer.totalPointsEarned || 0) + 50;
+            const referralBonus = Number(settings.referralBonusPoints || 0);
+            referrer.loyaltyPoints = (referrer.loyaltyPoints || 0) + referralBonus;
+            referrer.totalPointsEarned = (referrer.totalPointsEarned || 0) + referralBonus;
             await referrer.save();
-            customer.loyaltyPoints = (customer.loyaltyPoints || 0) + 50;
-            customer.totalPointsEarned = (customer.totalPointsEarned || 0) + 50;
+            customer.loyaltyPoints = (customer.loyaltyPoints || 0) + referralBonus;
+            customer.totalPointsEarned = (customer.totalPointsEarned || 0) + referralBonus;
             customer.referralUsed = true;
             await customer.save();
             referralBonusApplied = true;
@@ -285,7 +279,7 @@ export const createOrder = async (req, res) => {
     if (!scheduledDate) {
       try {
         if (customer && customer.role === "customer") {
-          await customer.awardOrderPoints(finalGrandTotal, order._id);
+          await customer.awardOrderPoints(finalGrandTotal, order._id, settings.loyaltyPointsPerRupee);
         }
       } catch (_) {}
     }
@@ -542,5 +536,3 @@ export const getActivePromos = async (req, res) => {
     res.status(500).json({ success: false, message: "Could not fetch promos" });
   }
 };
-
-

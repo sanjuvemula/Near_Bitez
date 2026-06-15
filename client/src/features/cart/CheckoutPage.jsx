@@ -776,8 +776,8 @@ const CheckoutPage = () => {
             </div>
           </Card>
 
-          <Card className="border-stone-900 !bg-stone-950 p-5 text-white">
-            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-300">
+          <Card className="border-orange-100 bg-[linear-gradient(135deg,#fff7ed,#ffffff_48%,#ecfeff)] p-5 text-stone-950">
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-600">
               Bill summary
             </p>
             <div className="mt-5 space-y-3">
@@ -803,7 +803,7 @@ const CheckoutPage = () => {
                   highlight
                 />
               ) : null}
-              <div className="border-t border-white/10 pt-3">
+              <div className="border-t border-orange-100 pt-3">
                 <SummaryRow
                   label="To pay"
                   value={formatCurrency(grandTotal)}
@@ -813,13 +813,13 @@ const CheckoutPage = () => {
             </div>
 
             {totalSavings > 0 ? (
-              <div className="mt-4 rounded-[18px] border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-300">
+              <div className="mt-4 rounded-[18px] border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-700">
                 You are saving {formatCurrency(totalSavings)} on this order.
               </div>
             ) : null}
 
             {scheduleEnabled && scheduledFor ? (
-              <div className="mt-4 rounded-[18px] border border-orange-400/30 bg-orange-500/10 px-4 py-3 text-sm font-bold text-orange-200">
+              <div className="mt-4 rounded-[18px] border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-bold text-orange-700">
                 Scheduled for{" "}
                 {new Date(scheduledFor).toLocaleString("en-IN", {
                   dateStyle: "medium",
@@ -828,7 +828,7 @@ const CheckoutPage = () => {
               </div>
             ) : null}
 
-            <div className="mt-4 rounded-[18px] border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-slate-300">
+            <div className="mt-4 rounded-[18px] border border-orange-100 bg-white/80 px-4 py-3 text-sm font-semibold text-stone-600">
               Payment mode: Cash on Delivery
             </div>
 
@@ -843,13 +843,13 @@ const CheckoutPage = () => {
             </Button>
 
             {error ? (
-              <div className="mt-4 rounded-[18px] border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm font-bold text-red-200">
+              <div className="mt-4 rounded-[18px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-600">
                 {error}
               </div>
             ) : null}
 
             {!address.trim() ? (
-              <p className="mt-3 text-center text-xs font-bold text-orange-200">
+              <p className="mt-3 text-center text-xs font-bold text-orange-600">
                 Add address to continue.
               </p>
             ) : null}

@@ -123,21 +123,22 @@ const MultiplayerBattleArena = ({ game, orderId, open, onClose }) => {
   const rival = players.find((player) => player.id !== me?.id) || null;
   const won = result?.winner?.id === meId || (!result?.winner?.isBot && result?.winner?.id === me?.id);
   const canPlay = room?.status === "playing" && !result;
+  const roomId = room?.roomId;
 
   const sendAction = useCallback(
     (delta, event = "score") => {
-      if (!socketRef.current || !room?.roomId || !canPlay) return;
+      if (!socketRef.current || !roomId || !canPlay) return;
       const nextCombo = combo + 1;
       setCombo(nextCombo);
       setLastDelta(delta);
       socketRef.current.emit("battle:action", {
-        roomId: room.roomId,
+        roomId,
         delta,
         combo: nextCombo,
         event,
       });
     },
-    [canPlay, combo, room?.roomId]
+    [canPlay, combo, roomId]
   );
 
   useEffect(() => {

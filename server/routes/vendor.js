@@ -8,6 +8,14 @@ import { withOptionalImageUpload } from "../middleware/upload.js";
 import { getVendorChats, vendorSendMessage } from "../controllers/chatController.js";
 import { getVendorReviews } from "../controllers/reviewController.js";
 import { getVendorPromos, createPromo, togglePromoStatus, deletePromo } from "../controllers/vendor/promoController.js";
+import {
+  getVendorLogistics,
+  getVendorSubscriptions,
+  getVendorWallet,
+  requestVendorPayout,
+  updateVendorLogistics,
+  updateVendorSubscriptionStatus,
+} from "../controllers/vendor/financeController.js";
 
 const router = express.Router();
 
@@ -35,6 +43,18 @@ router.patch("/orders/:id/status", updateVendorOrderStatus);
 
 // Reviews
 router.get("/reviews", getVendorReviews);
+
+// Logistics
+router.get("/logistics", getVendorLogistics);
+router.put("/logistics", updateVendorLogistics);
+
+// Wallet and payouts
+router.get("/wallet", getVendorWallet);
+router.post("/wallet/payout", requestVendorPayout);
+
+// Tiffin subscriptions
+router.get("/subscriptions", getVendorSubscriptions);
+router.patch("/subscriptions/:id/status", updateVendorSubscriptionStatus);
 
 // Chats
 router.get("/chats", getVendorChats);

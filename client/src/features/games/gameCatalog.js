@@ -102,7 +102,6 @@ export const GAME_LIBRARY = [
     group: "quick",
     crowd: "1P",
     mode: "solo",
-    mode: "solo",
     homeHint: "Falling food combo",
     actionHint: "Catch run",
     accent: "text-rose-700 bg-rose-50 border-rose-200",
@@ -588,11 +587,12 @@ export const getGameKeyFromSlug = (slug) => {
 };
 
 export const withGameTheme = (game = {}) => {
-  const theme = getGameTheme(game.key);
+  const source = game || {};
+  const theme = getGameTheme(source.key);
   return {
     ...theme,
-    ...game,
-    slug: getGameSlug(game.key),
-    description: game.description || theme.description || theme.homeHint,
+    ...source,
+    slug: getGameSlug(source.key),
+    description: source.description || theme.description || theme.homeHint,
   };
 };

@@ -27,6 +27,7 @@ import favoriteRoutes from "./routes/favoriteRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
 import tiffinRoutes from "./routes/tiffinRoutes.js";
 import gameRoutes from "./routes/gameRoutes.js";
+import settingsRoutes from "./routes/settingsRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -78,6 +79,7 @@ app.use("/api/v1/auth/favorites", favoriteRoutes);
 app.use("/api/v1/ai", aiRoutes);
 app.use("/api/v1/tiffins", tiffinRoutes);
 app.use("/api/v1/games", gameRoutes);
+app.use("/api/v1/settings", settingsRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
@@ -129,7 +131,6 @@ const startServer = async () => {
 };
 
 startServer();
-
 
 
 

@@ -383,13 +383,15 @@ const RestaurantDiscoveryView = ({ variant = "public" }) => {
       {/* ── Public Hero (only on public/landing page) ── */}
       {!isCustomer && (
         <div style={{
-          background: "linear-gradient(135deg, #1a0800 0%, #3a1500 55%, #e8380d 100%)",
+          background: "linear-gradient(135deg, #fff7ed 0%, #ecfeff 52%, #fdf2f8 100%)",
+          border: "1px solid rgba(255,255,255,0.85)",
           borderRadius: 18, padding: "36px 32px", marginBottom: 24,
           position: "relative", overflow: "hidden",
+          boxShadow: "0 28px 80px -58px rgba(14,116,144,0.44)",
         }}>
           <div style={{
             position: "absolute", inset: 0,
-            backgroundImage: "radial-gradient(circle at 15% 50%, rgba(255,107,61,0.25) 0%, transparent 55%)",
+            backgroundImage: "radial-gradient(circle at 15% 50%, rgba(251,146,60,0.24) 0%, transparent 55%), radial-gradient(circle at 85% 15%, rgba(14,165,233,0.18), transparent 35%)",
             pointerEvents: "none",
           }} />
           <div style={{
@@ -398,14 +400,14 @@ const RestaurantDiscoveryView = ({ variant = "public" }) => {
             flexWrap: "wrap", gap: 20,
           }}>
             <div>
-              <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#ff8a60", marginBottom: 10 }}>
+              <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#e8380d", marginBottom: 10 }}>
                 NearBites
               </p>
-              <h1 style={{ fontSize: 34, fontWeight: 900, color: "#fff", lineHeight: 1.2, letterSpacing: "-0.02em", margin: 0 }}>
+              <h1 style={{ fontSize: 34, fontWeight: 900, color: "#1c1c1c", lineHeight: 1.2, letterSpacing: "-0.02em", margin: 0 }}>
                 Real restaurants,<br />
-                <span style={{ color: "#ff8a60" }}>live menus.</span>
+                <span style={{ color: "#e8380d" }}>live menus.</span>
               </h1>
-              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", marginTop: 10, fontWeight: 400 }}>
+              <p style={{ fontSize: 13, color: "#7c6f64", marginTop: 10, fontWeight: 600 }}>
                 {feed.highlights.activeRestaurantCount} restaurants · {feed.highlights.availableDishCount} dishes right now
               </p>
             </div>
@@ -413,9 +415,9 @@ const RestaurantDiscoveryView = ({ variant = "public" }) => {
               <Link to={appRoutes.customerLogin}>
                 <button style={{
                   padding: "9px 20px",
-                  background: "rgba(255,255,255,0.1)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  borderRadius: 100, color: "#fff",
+                  background: "rgba(255,255,255,0.85)",
+                  border: "1px solid #fed7aa",
+                  borderRadius: 100, color: "#9a3412",
                   fontSize: 13, fontWeight: 600, cursor: "pointer",
                   fontFamily: "inherit", backdropFilter: "blur(8px)",
                 }}>
@@ -425,7 +427,7 @@ const RestaurantDiscoveryView = ({ variant = "public" }) => {
               <Link to={appRoutes.vendorLogin}>
                 <button style={{
                   padding: "9px 20px",
-                  background: "#e8380d", border: "none",
+                  background: "linear-gradient(135deg,#f97316,#f43f5e)", border: "none",
                   borderRadius: 100, color: "#fff",
                   fontSize: 13, fontWeight: 700, cursor: "pointer",
                   fontFamily: "inherit",

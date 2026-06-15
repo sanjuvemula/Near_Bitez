@@ -115,10 +115,10 @@ const NOTIF_ICONS = {
 
 const navClass = ({ isActive }) =>
   [
-    "group flex items-center gap-3 rounded-[18px] px-4 py-3 text-sm font-black transition",
+    "group flex items-center gap-3 rounded-[16px] px-4 py-3 text-sm font-black transition duration-200",
     isActive
-      ? "bg-orange-600 text-white shadow-[0_18px_42px_-28px_rgba(234,88,12,0.9)]"
-      : "text-stone-500 hover:bg-orange-50 hover:text-orange-700",
+      ? "bg-stone-950 text-white"
+      : "text-stone-500 hover:bg-stone-100 hover:text-stone-950",
   ].join(" ");
 
 const iconClass = "h-5 w-5 shrink-0 stroke-[2.25]";
@@ -171,6 +171,16 @@ const MoreMenu = ({ cartCount = 0, onNavigate }) => {
             >
               <SearchIcon className={iconClass} />
               Search
+            </Link>
+            <Link
+              to={appRoutes.customerGames}
+              onClick={handleClick}
+              className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-black text-stone-600 transition hover:bg-orange-50 hover:text-orange-700"
+            >
+              <span className="grid h-5 w-5 place-items-center rounded-md bg-orange-100 text-[10px] font-black text-orange-700">
+                XP
+              </span>
+              Games
             </Link>
             <Link
               to={appRoutes.customerCart}
@@ -247,9 +257,9 @@ const Sidebar = ({ user, cartCount, onLogout }) => {
   const avatarLetter = (user?.name || user?.email || "U").charAt(0).toUpperCase();
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[260px] flex-col border-r border-[#eee7dc] bg-white px-4 py-5 lg:flex">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-[260px] flex-col border-r border-[#ece7e3] bg-white px-4 py-5 lg:flex">
       <Link to={appRoutes.customerHome} className="flex items-center gap-3 px-2 no-underline">
-        <span className="flex h-11 w-11 items-center justify-center rounded-[18px] bg-orange-600 text-lg font-black text-white shadow-[0_16px_32px_-24px_rgba(234,88,12,0.9)]">
+        <span className="flex h-11 w-11 items-center justify-center rounded-[16px] bg-orange-600 text-lg font-black text-white">
           N
         </span>
         <span>
@@ -262,9 +272,9 @@ const Sidebar = ({ user, cartCount, onLogout }) => {
         </span>
       </Link>
 
-      <div className="mt-6 rounded-[20px] border border-[#eee7dc] bg-[#fafaf8] p-3">
+      <div className="mt-6 rounded-[18px] border border-[#ece7e3] bg-[#faf9f7] p-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-stone-950 text-sm font-black text-white">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-rose-500 text-sm font-black text-white">
             {avatarLetter}
           </span>
           <span className="min-w-0">
@@ -317,7 +327,7 @@ const Drawer = ({ open, user, cartCount, onClose, onLogout }) => (
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 bg-black/35 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-50 bg-orange-950/25 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
         <Motion.aside
@@ -448,6 +458,16 @@ const BottomNav = ({ cartCount }) => {
               Search
             </Link>
             <Link
+              to={appRoutes.customerGames}
+              onClick={() => setMoreOpen(false)}
+              className="flex items-center gap-3 rounded-[18px] px-4 py-3 text-sm font-black text-stone-700 no-underline hover:bg-orange-50"
+            >
+              <span className="grid h-5 w-5 place-items-center rounded-md bg-orange-100 text-[10px] font-black text-orange-700">
+                XP
+              </span>
+              Games
+            </Link>
+            <Link
               to={appRoutes.customerCart}
               onClick={() => setMoreOpen(false)}
               className="flex items-center gap-3 rounded-[18px] px-4 py-3 text-sm font-black text-stone-700 no-underline hover:bg-orange-50"
@@ -518,7 +538,7 @@ const CustomerShell = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_8%_0%,rgba(255,237,213,0.72),transparent_30%),radial-gradient(circle_at_95%_8%,rgba(254,202,202,0.42),transparent_26%),linear-gradient(180deg,#fff7ed_0%,#fffaf4_38%,#f8fafc_100%)] font-sans text-stone-950">
+    <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_85%_0%,rgba(255,214,184,0.34),transparent_24%),radial-gradient(circle_at_8%_35%,rgba(255,235,211,0.55),transparent_25%),linear-gradient(180deg,#fffaf6_0%,#faf7f3_52%,#fff8f2_100%)] font-sans text-stone-950">
       <Sidebar user={user} cartCount={cartCount} onLogout={handleLogout} />
       <Drawer
         open={drawerOpen}
@@ -528,13 +548,13 @@ const CustomerShell = () => {
         onLogout={handleLogout}
       />
 
-      <div className="min-h-screen lg:pl-[260px]">
-        <header className="sticky top-0 z-30 border-b border-orange-100/80 bg-white/78 backdrop-blur-xl">
-          <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen min-w-0 overflow-x-hidden lg:pl-[260px]">
+        <header className="sticky top-0 z-30 border-b border-[#ece7e3] bg-white/92 backdrop-blur-xl">
+          <div className="mx-auto flex h-[72px] w-full max-w-[1480px] items-center gap-3 px-4 sm:px-6 lg:h-16 lg:px-7">
             <button
               type="button"
               onClick={() => setDrawerOpen(true)}
-              className="flex h-11 w-11 items-center justify-center rounded-[18px] border border-[#eee7dc] bg-white text-stone-700 lg:hidden"
+              className="flex h-12 w-12 items-center justify-center rounded-[18px] border border-[#eedfd2] bg-white text-stone-700 shadow-[0_14px_30px_-24px_rgba(68,35,15,0.8)] lg:hidden"
               aria-label="Open menu"
             >
               <MenuIcon className="h-5 w-5 stroke-[2.4]" />
@@ -553,7 +573,7 @@ const CustomerShell = () => {
                 <button
                   type="button"
                   onClick={handleBell}
-                  className="relative flex h-11 w-11 items-center justify-center rounded-[18px] border border-[#eee7dc] bg-white text-stone-600 transition hover:border-orange-200 hover:text-orange-700"
+                  className="relative flex h-12 w-12 items-center justify-center rounded-[18px] border border-[#eedfd2] bg-white text-stone-600 shadow-[0_14px_30px_-24px_rgba(68,35,15,0.8)] transition hover:border-orange-200 hover:text-orange-700 lg:h-11 lg:w-11"
                   aria-label="Notifications"
                 >
                   <BellIcon className="h-5 w-5 stroke-[2.3]" />
@@ -576,7 +596,7 @@ const CustomerShell = () => {
               <button
                 type="button"
                 onClick={() => navigate(appRoutes.customerCart)}
-                className="hidden items-center gap-2 rounded-[18px] bg-orange-600 px-4 py-3 text-sm font-black text-white shadow-[0_18px_42px_-28px_rgba(234,88,12,0.9)] transition hover:bg-orange-700 sm:inline-flex"
+              className="hidden items-center gap-2 rounded-[16px] bg-orange-600 px-4 py-3 text-sm font-black text-white transition hover:bg-orange-700 sm:inline-flex"
               >
                 <CartIcon className="h-4 w-4 stroke-[2.4]" />
                 Cart
@@ -590,7 +610,7 @@ const CustomerShell = () => {
           </div>
         </header>
 
-        <main className="mx-auto max-w-7xl px-4 py-5 pb-28 sm:px-6 lg:px-8 lg:pb-10">
+        <main className="mx-auto w-full min-w-0 max-w-[1480px] overflow-x-hidden px-4 pb-28 pt-3 sm:px-6 sm:pt-5 lg:px-7 lg:pb-12">
           <Outlet />
         </main>
       </div>

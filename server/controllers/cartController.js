@@ -1,6 +1,7 @@
 import Cart from "../models/Cart.js";
 import MenuItem from "../models/MenuItem.js";
 import Restaurant from "../models/Restaurant.js";
+import { calculateOrderTotals } from "../services/pricingService.js";
 
 const ensureCart = async (customerId) => {
   let cart = await Cart.findOne({ customer: customerId });
@@ -45,7 +46,6 @@ const buildCartResponse = async (cart) => {
 
   const nextItems = [];
   const items = [];
-  let itemTotal = 0;
   let totalItems = 0;
 
   for (const cartItem of cart.items) {
@@ -60,7 +60,6 @@ const buildCartResponse = async (cart) => {
     nextItems.push({ menuItem: menuItem._id, quantity: cartItem.quantity });
 
     const lineTotal = menuItem.price * cartItem.quantity;
-    itemTotal += lineTotal;
     totalItems += cartItem.quantity;
 
     if (!menuItem.isAvailable) {
@@ -89,10 +88,7 @@ const buildCartResponse = async (cart) => {
     await cart.save();
   }
 
-  const deliveryFee = itemTotal >= 500 || itemTotal === 0 ? 0 : 40;
-  const platformFee = itemTotal > 0 ? 5 : 0;
-  const gst = Math.round(itemTotal * 0.05);
-  const grandTotal = itemTotal + deliveryFee + platformFee + gst;
+  const totals = await calculateOrderTotals(items, cart.restaurant);
 
   return {
     _id: cart._id,
@@ -111,12 +107,15 @@ const buildCartResponse = async (cart) => {
     items,
     warnings,
     totals: {
-      itemTotal,
-      deliveryFee,
-      platformFee,
-      gst,
-      grandTotal,
+      itemTotal: totals.itemTotal,
+      deliveryFee: totals.deliveryFee,
+      platformFee: totals.platformFee,
+      gst: totals.gst,
+      grandTotal: totals.grandTotal,
       totalItems,
+      freeDeliveryAbove: totals.freeDeliveryAbove,
+      deliveryBaseFee: totals.deliveryBaseFee,
+      gstPercent: totals.gstPercent,
     },
     updatedAt: cart.updatedAt,
   };

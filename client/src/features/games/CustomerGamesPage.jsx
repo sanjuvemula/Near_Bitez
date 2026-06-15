@@ -16,8 +16,8 @@ import {
 } from "./gameCatalog.js";
 
 const FeaturePill = ({ label, value }) => (
-  <div className="rounded-[20px] border border-white/10 bg-white/[0.08] px-4 py-3 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_22px_60px_-46px_rgba(0,0,0,0.9)] backdrop-blur">
-    <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-cyan-200/70">
+  <div className="rounded-[20px] border border-white/80 bg-white/85 px-4 py-3 text-stone-950 shadow-[0_18px_50px_-40px_rgba(14,116,144,0.35)] backdrop-blur">
+    <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-teal-600">
       {label}
     </p>
     <p className="mt-2 truncate text-[24px] font-black leading-none">{value}</p>
@@ -26,46 +26,46 @@ const FeaturePill = ({ label, value }) => (
 
 const ArcadeDecor = () => (
   <div className="pointer-events-none absolute inset-0 overflow-hidden">
-    <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(34,211,238,0.26),transparent_28%),radial-gradient(circle_at_88%_8%,rgba(217,70,239,0.22),transparent_26%),radial-gradient(circle_at_50%_100%,rgba(249,115,22,0.18),transparent_34%)]" />
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(45,212,191,0.24),transparent_28%),radial-gradient(circle_at_88%_8%,rgba(244,114,182,0.18),transparent_26%),radial-gradient(circle_at_50%_100%,rgba(251,191,36,0.2),transparent_34%)]" />
     <Motion.div
       animate={{ opacity: [0.28, 0.62, 0.28], y: [0, -12, 0] }}
       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-      className="absolute -right-20 top-16 h-64 w-64 rounded-full border border-cyan-300/20 bg-cyan-300/10 blur-2xl"
+      className="absolute -right-20 top-16 h-64 w-64 rounded-full border border-cyan-200/50 bg-cyan-200/30 blur-2xl"
     />
     <Motion.div
       animate={{ opacity: [0.2, 0.5, 0.2], x: [0, 16, 0] }}
       transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-      className="absolute -left-16 bottom-20 h-56 w-56 rounded-full border border-fuchsia-300/20 bg-fuchsia-400/10 blur-2xl"
+      className="absolute -left-16 bottom-20 h-56 w-56 rounded-full border border-fuchsia-200/50 bg-fuchsia-200/30 blur-2xl"
     />
   </div>
 );
 
 const LockedGames = () => (
-  <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[32px] border border-white/10 bg-[#080b18] p-6 text-center text-white shadow-[0_36px_120px_-70px_rgba(0,0,0,0.95)] sm:p-10">
+  <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[32px] border border-white/80 bg-[linear-gradient(135deg,#ecfeff,#fff7ed_52%,#fdf2f8)] p-6 text-center text-stone-950 shadow-[0_30px_80px_-58px_rgba(14,116,144,0.45)] sm:p-10">
     <ArcadeDecor />
     <div className="relative">
-      <div className="mx-auto grid h-20 w-20 place-items-center rounded-[28px] border border-cyan-300/30 bg-cyan-300/10 text-3xl font-black text-cyan-100 shadow-[0_0_42px_rgba(34,211,238,0.28)]">
+      <div className="mx-auto grid h-20 w-20 place-items-center rounded-[28px] border border-cyan-200 bg-cyan-50 text-3xl font-black text-cyan-700 shadow-[0_20px_44px_-32px_rgba(14,116,144,0.55)]">
         XP
       </div>
-      <p className="mt-6 text-[11px] font-black uppercase tracking-[0.18em] text-cyan-200/80">
+      <p className="mt-6 text-[11px] font-black uppercase tracking-[0.18em] text-teal-600">
         Reward zone locked
       </p>
       <h1 className="mt-3 text-3xl font-black leading-tight sm:text-5xl">
         Place an order to unlock the arcade.
       </h1>
-      <p className="mx-auto mt-4 max-w-xl text-sm font-semibold leading-6 text-white/62">
+      <p className="mx-auto mt-4 max-w-xl text-sm font-semibold leading-6 text-stone-600">
         Gaming Zone opens as a bonus after checkout so rewards feel earned, timed, and tied to your food journey.
       </p>
       <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
         <Link
           to={appRoutes.customerHome}
-          className="rounded-[18px] bg-white px-5 py-3 text-sm font-black text-stone-950 no-underline transition hover:bg-cyan-50"
+          className="rounded-[18px] bg-orange-600 px-5 py-3 text-sm font-black text-white no-underline transition hover:bg-orange-700"
         >
           Order food
         </Link>
         <Link
           to={appRoutes.customerOrders}
-          className="rounded-[18px] border border-white/15 bg-white/10 px-5 py-3 text-sm font-black text-white no-underline backdrop-blur transition hover:bg-white/15"
+          className="rounded-[18px] border border-orange-100 bg-white px-5 py-3 text-sm font-black text-orange-700 no-underline backdrop-blur transition hover:bg-orange-50"
         >
           View orders
         </Link>
@@ -80,32 +80,32 @@ const WalletPanel = ({ wallet, missions = [], event }) => {
 
   return (
     <div className="grid gap-4 lg:grid-cols-[1.1fr,0.9fr]">
-      <div className="relative overflow-hidden rounded-[28px] border border-cyan-300/20 bg-[linear-gradient(135deg,#07111f,#172554_42%,#7e22ce_72%,#f97316)] p-5 text-white shadow-[0_0_60px_-28px_rgba(34,211,238,0.7)]">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_88%_12%,rgba(255,255,255,0.2),transparent_24%)]" />
+      <div className="relative overflow-hidden rounded-[28px] border border-white/80 bg-[linear-gradient(135deg,#ecfeff,#fdf4ff_48%,#fff7ed)] p-5 text-stone-950 shadow-[0_28px_70px_-52px_rgba(14,116,144,0.45)]">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_88%_12%,rgba(251,146,60,0.18),transparent_24%)]" />
         <div className="relative flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-orange-100">
+            <p className="text-[11px] font-black uppercase tracking-[0.14em] text-orange-600">
               NearCoins wallet
             </p>
             <h2 className="mt-2 text-3xl font-black">
               {(wallet?.coins || 0).toLocaleString()} coins
             </h2>
-            <p className="mt-1 text-sm font-bold text-orange-50">
+            <p className="mt-1 text-sm font-bold text-stone-600">
               {level.name} - {level.xp.toLocaleString()} XP
             </p>
           </div>
-          <div className="rounded-[18px] border border-white/15 bg-white/12 px-4 py-3 text-right backdrop-blur">
-            <p className="text-[10px] font-black uppercase text-white/70">Streak</p>
+          <div className="rounded-[18px] border border-white/80 bg-white/75 px-4 py-3 text-right backdrop-blur">
+            <p className="text-[10px] font-black uppercase text-stone-500">Streak</p>
             <p className="mt-1 text-2xl font-black">{streak.current || 0} days</p>
-            <p className="text-xs font-bold text-white/70">Best {streak.longest || 0}</p>
+            <p className="text-xs font-bold text-stone-500">Best {streak.longest || 0}</p>
           </div>
         </div>
         <div className="relative mt-5">
-          <div className="mb-2 flex justify-between text-xs font-black text-orange-50">
+          <div className="mb-2 flex justify-between text-xs font-black text-stone-600">
             <span>{level.name}</span>
             <span>{level.xpToNext ? `${level.xpToNext} XP to next` : "Max level"}</span>
           </div>
-          <div className="h-3 overflow-hidden rounded-full bg-black/25">
+          <div className="h-3 overflow-hidden rounded-full bg-white/75">
             <Motion.div
               initial={{ width: 0 }}
               animate={{ width: `${level.progress || 0}%` }}
@@ -115,29 +115,29 @@ const WalletPanel = ({ wallet, missions = [], event }) => {
           </div>
         </div>
         {event ? (
-          <div className="relative mt-4 rounded-[18px] border border-white/15 bg-black/20 p-3 backdrop-blur">
+          <div className="relative mt-4 rounded-[18px] border border-white/80 bg-white/70 p-3 backdrop-blur">
             <p className="text-sm font-black">{event.title}</p>
-            <p className="mt-1 text-xs font-bold leading-5 text-white/72">
+            <p className="mt-1 text-xs font-bold leading-5 text-stone-600">
               {event.description}
             </p>
           </div>
         ) : null}
       </div>
 
-      <div className="rounded-[28px] border border-white/10 bg-white/[0.08] p-5 text-white shadow-[0_24px_80px_-52px_rgba(0,0,0,0.9)] backdrop-blur">
-        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-cyan-200/80">
+      <div className="rounded-[28px] border border-white/80 bg-white/85 p-5 text-stone-950 shadow-[0_24px_70px_-52px_rgba(14,116,144,0.32)] backdrop-blur">
+        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-teal-600">
           Daily missions
         </p>
         <div className="mt-4 space-y-3">
           {missions.slice(0, 5).map((mission) => (
-            <div key={mission.key} className="rounded-[18px] border border-white/10 bg-white/[0.08] p-3">
+            <div key={mission.key} className="rounded-[18px] border border-orange-100 bg-white p-3">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-sm font-black text-white">{mission.title}</p>
-                <span className="rounded-full bg-cyan-300/15 px-2.5 py-1 text-[10px] font-black text-cyan-100">
+                <p className="text-sm font-black text-stone-950">{mission.title}</p>
+                <span className="rounded-full bg-teal-100 px-2.5 py-1 text-[10px] font-black text-teal-700">
                   {mission.reward?.label}
                 </span>
               </div>
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-stone-100">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-cyan-300 to-fuchsia-400"
                   style={{ width: `${Math.min(100, ((mission.progress || 0) / mission.target) * 100)}%` }}
@@ -158,8 +158,8 @@ const GroupButton = ({ group, active, onClick }) => (
     className={[
       "rounded-full px-4 py-2 text-sm font-black transition",
       active
-        ? "bg-white text-stone-950 shadow-[0_0_34px_-18px_rgba(34,211,238,0.9)]"
-        : "border border-white/10 bg-white/[0.08] text-white/68 hover:border-cyan-300/35 hover:text-white",
+        ? "bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-[0_18px_34px_-24px_rgba(244,63,94,0.8)]"
+        : "border border-orange-100 bg-white text-stone-600 hover:border-orange-200 hover:text-orange-700",
     ].join(" ")}
   >
     {group.label}
@@ -199,6 +199,7 @@ const CustomerGamesPage = () => {
   const [battleGame, setBattleGame] = useState(null);
 
   const areaLabel = location?.city || "Nearby";
+  const postOrderMode = Boolean(orderId);
 
   const loadGames = useCallback(async () => {
     setLoading(true);
@@ -235,14 +236,6 @@ const CustomerGamesPage = () => {
   );
 
   const redirectGameKey = requestedGame || "";
-  if (!orderId) {
-    return (
-      <div className="-mx-4 -my-5 min-h-[calc(100vh-4rem)] bg-[#050816] px-4 py-8 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-        <LockedGames />
-      </div>
-    );
-  }
-
   if (redirectGameKey) {
     const targetSlug = getGameSlug(redirectGameKey || DEFAULT_GAME_KEY);
     const target = `${getCustomerGameRoute(targetSlug)}${orderId ? `?orderId=${encodeURIComponent(orderId)}` : ""}`;
@@ -250,26 +243,28 @@ const CustomerGamesPage = () => {
   }
 
   return (
-    <div className="-mx-4 -my-5 min-h-[calc(100vh-4rem)] overflow-hidden bg-[#050816] px-4 py-6 text-white sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+    <div className="-mx-4 -my-5 min-h-[calc(100vh-4rem)] overflow-hidden bg-[linear-gradient(180deg,#fff7ed_0%,#f0fdfa_48%,#eef2ff_100%)] px-4 py-6 text-stone-950 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
       <div className="relative mx-auto max-w-7xl space-y-8 pb-10">
         <ArcadeDecor />
       <Motion.section
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, ease: "easeOut" }}
-        className="relative overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.08] p-4 shadow-[0_36px_110px_-70px_rgba(0,0,0,0.95)] backdrop-blur-xl sm:p-6"
+        className="relative overflow-hidden rounded-[32px] border border-white/80 bg-white/82 p-4 shadow-[0_32px_90px_-64px_rgba(14,116,144,0.5)] backdrop-blur-xl sm:p-6"
       >
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(34,211,238,0.16),transparent_38%),radial-gradient(circle_at_92%_20%,rgba(244,114,182,0.18),transparent_26%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(45,212,191,0.18),transparent_38%),radial-gradient(circle_at_92%_20%,rgba(244,114,182,0.18),transparent_26%)]" />
         <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr),430px] lg:items-end">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-cyan-200/80">
-              Order reward unlocked
+            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-teal-600">
+              {postOrderMode ? "Order reward unlocked" : "Gaming zone open"}
             </p>
-            <h1 className="mt-2 text-4xl font-black leading-tight text-white sm:text-6xl">
+            <h1 className="mt-2 text-4xl font-black leading-tight text-stone-950 sm:text-6xl">
               Gaming Zone
             </h1>
-            <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-white/62">
-              Arcade rounds, live missions, XP bursts, coins, and restaurant rewards while your food is on the way.
+            <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-stone-600">
+              {postOrderMode
+                ? "Arcade rounds, live missions, XP bursts, coins, and restaurant rewards while your food is on the way."
+                : "Play anytime in free-play mode. Order rewards still unlock when you enter from an active order."}
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <button
@@ -278,7 +273,7 @@ const CustomerGamesPage = () => {
                   playArcadeTone(soundEnabled, 520);
                   loadGames();
                 }}
-                className="rounded-[16px] bg-white px-4 py-3 text-sm font-black text-stone-950 transition hover:-translate-y-0.5 hover:bg-cyan-50"
+                className="rounded-[16px] bg-gradient-to-r from-orange-500 to-rose-500 px-4 py-3 text-sm font-black text-white shadow-[0_18px_38px_-26px_rgba(244,63,94,0.75)] transition hover:-translate-y-0.5 hover:brightness-105"
               >
                 Refresh Games
               </button>
@@ -291,8 +286,8 @@ const CustomerGamesPage = () => {
                 }}
                 className={`rounded-[16px] border px-4 py-3 text-sm font-black transition hover:-translate-y-0.5 ${
                   soundEnabled
-                    ? "border-cyan-300/40 bg-cyan-300/15 text-cyan-50"
-                    : "border-white/15 bg-white/10 text-white"
+                    ? "border-teal-200 bg-teal-50 text-teal-700"
+                    : "border-orange-100 bg-white text-stone-600"
                 }`}
               >
                 Sound {soundEnabled ? "On" : "Off"}
@@ -301,7 +296,7 @@ const CustomerGamesPage = () => {
                 <button
                   type="button"
                   onClick={requestLocation}
-                  className="rounded-[16px] border border-white/15 bg-white/10 px-4 py-3 text-sm font-black text-white backdrop-blur transition hover:-translate-y-0.5 hover:bg-white/15"
+                  className="rounded-[16px] border border-orange-100 bg-white px-4 py-3 text-sm font-black text-stone-600 backdrop-blur transition hover:-translate-y-0.5 hover:border-orange-200 hover:text-orange-700"
                 >
                   Use Location
                 </button>
@@ -326,12 +321,12 @@ const CustomerGamesPage = () => {
         ].map(([label, value]) => (
           <div
             key={label}
-            className="rounded-[22px] border border-white/10 bg-white/[0.07] p-4 shadow-[0_24px_80px_-58px_rgba(0,0,0,0.9)] backdrop-blur"
+            className="rounded-[22px] border border-white/80 bg-white/82 p-4 shadow-[0_22px_64px_-52px_rgba(14,116,144,0.34)] backdrop-blur"
           >
-            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-white/42">
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-stone-400">
               {label} leaderboard
             </p>
-            <p className="mt-2 text-lg font-black text-white">{value}</p>
+            <p className="mt-2 text-lg font-black text-stone-950">{value}</p>
           </div>
         ))}
       </section>
@@ -348,7 +343,7 @@ const CustomerGamesPage = () => {
             <p className="text-[11px] font-black uppercase text-orange-600">
               Game Library
             </p>
-            <h2 className="mt-1 text-2xl font-black text-white">
+            <h2 className="mt-1 text-2xl font-black text-stone-950">
               Choose your next round
             </h2>
           </div>
@@ -368,7 +363,7 @@ const CustomerGamesPage = () => {
         </div>
 
         {error ? (
-          <div className="rounded-[20px] border border-amber-300/20 bg-amber-300/10 p-4 text-sm font-bold text-amber-100">
+          <div className="rounded-[20px] border border-amber-200 bg-amber-50 p-4 text-sm font-bold text-amber-700">
             {error} Showing the built-in game library.
           </div>
         ) : null}

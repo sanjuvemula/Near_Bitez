@@ -77,7 +77,7 @@ const GameZoneInviteModal = ({ open, order, onEnter, onTrack, onOutForDelivery }
     <AnimatePresence>
       {open ? (
         <Motion.div
-          className="fixed inset-0 z-50 grid place-items-end bg-black/35 p-0 backdrop-blur-sm sm:place-items-center sm:p-4"
+          className="fixed inset-0 z-50 grid place-items-end bg-orange-950/25 p-0 backdrop-blur-sm sm:place-items-center sm:p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

@@ -154,8 +154,8 @@ userSchema.methods.matchPassword = async function matchPassword(enteredPassword)
 };
 
 // ─── Award points for an order ────────────────────────────────────────────────
-userSchema.methods.awardOrderPoints = async function (grandTotal, orderId) {
-  const earned = Math.floor(grandTotal * POINTS_PER_RUPEE);
+userSchema.methods.awardOrderPoints = async function (grandTotal, orderId, pointsPerRupee = POINTS_PER_RUPEE) {
+  const earned = Math.floor(grandTotal * Math.max(0, Number(pointsPerRupee) || POINTS_PER_RUPEE));
   if (earned <= 0) return 0;
 
   this.loyaltyPoints     += earned;
@@ -213,7 +213,6 @@ userSchema.methods.toSafeObject = function toSafeObject() {
 };
 
 export default mongoose.model("User", userSchema);
-
 
 
 

@@ -25,10 +25,10 @@ const FilterPill = ({ label, active, onClick }) => (
   <motion.button
     whileTap={{ scale: 0.96 }}
     onClick={onClick}
-    className={`shrink-0 rounded-full border px-4 py-2 text-xs font-black transition-all
+    className={`shrink-0 rounded-full border px-5 py-3 text-sm font-black transition-all
       ${active
-        ? "border-orange-500 bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-md shadow-orange-200"
-        : "border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:text-orange-600"}`}
+        ? "border-orange-500 bg-orange-500 text-white shadow-[0_12px_24px_-16px_rgba(234,88,12,0.9)]"
+        : "border-orange-100 bg-white/90 text-stone-600 hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700"}`}
   >
     {label}
   </motion.button>
@@ -60,18 +60,25 @@ const StatsBar = ({ count }) => {
     { icon: "🔓", val: "None", label: "Lock-in"    },
   ];
   return (
-    <div className="grid grid-cols-3 gap-3 mb-5">
+    <div className="mb-7 grid grid-cols-3 gap-3">
       {items.map((s, i) => (
         <motion.div
           key={s.label}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.06 }}
-          className="rounded-2xl border border-slate-100 bg-white p-3 text-center shadow-sm"
+          className={[
+            "rounded-[22px] border p-4 text-center shadow-[0_18px_40px_-36px_rgba(75,35,15,0.75)]",
+            i === 0
+              ? "border-orange-100 bg-orange-50/80"
+              : i === 1
+                ? "border-emerald-100 bg-emerald-50/70"
+                : "border-amber-100 bg-amber-50/70",
+          ].join(" ")}
         >
           <div className="text-xl mb-0.5">{s.icon}</div>
-          <div className="text-base font-black text-slate-800">{s.val}</div>
-          <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">
+          <div className="text-lg font-black text-stone-900">{s.val}</div>
+          <div className="text-[10px] font-black uppercase tracking-widest text-stone-400">
             {s.label}
           </div>
         </motion.div>
@@ -198,13 +205,17 @@ const TiffinPage = () => {
 
   return (
     <div
-      className="mx-auto max-w-2xl"
+      className="mx-auto w-full min-w-0 max-w-6xl overflow-x-hidden"
       style={{ fontFamily: "'Plus Jakarta Sans', -apple-system, sans-serif" }}
     >
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
         .nb-no-scrollbar::-webkit-scrollbar { display: none; }
         .nb-no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .tiffin-soft-section {
+          border: 1px solid rgba(251, 146, 60, 0.2);
+          background: linear-gradient(135deg, rgba(255, 247, 237, 0.92), rgba(255, 255, 255, 0.78));
+        }
       `}</style>
 
       {/* ── Subscribe toast ── */}
@@ -230,37 +241,37 @@ const TiffinPage = () => {
       <motion.div
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl mb-5 p-6"
+        className="relative mb-7 overflow-hidden rounded-[30px] border border-orange-200/70 p-6 sm:p-8"
         style={{
-          background: "linear-gradient(135deg, #1c1917 0%, #431407 50%, #1c1917 100%)",
+          background: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 48%, #fef3c7 100%)",
         }}
       >
         {/* Decorative glows */}
-        <div className="absolute right-0 top-0 h-40 w-40 rounded-full bg-orange-500/10 blur-2xl pointer-events-none" />
-        <div className="absolute left-0 bottom-0 h-32 w-32 rounded-full bg-rose-500/10 blur-xl pointer-events-none" />
+        <div className="pointer-events-none absolute -right-10 -top-16 h-60 w-60 rounded-full bg-orange-300/35 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-20 left-1/3 h-52 w-52 rounded-full bg-amber-200/45 blur-2xl" />
 
         {/* Back button */}
         <button
           onClick={() => navigate(-1)}
-          className="mb-4 inline-flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-1.5 text-[11px] font-black text-white/80 backdrop-blur transition hover:bg-white/20"
+          className="relative mb-5 inline-flex items-center gap-1.5 rounded-xl border border-orange-200 bg-white/75 px-3 py-2 text-xs font-black text-stone-600 backdrop-blur transition hover:bg-white"
         >
           ← Back
         </button>
 
-        <div className="flex items-end gap-4">
+        <div className="relative flex items-end gap-4">
           <div className="flex-1">
             {/* Label pill */}
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-orange-500/30 bg-orange-500/15 px-3 py-1">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-orange-300 bg-orange-100/80 px-3 py-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-orange-300">
+              <span className="text-[10px] font-black uppercase tracking-widest text-orange-700">
                 Daily Tiffin
               </span>
             </div>
 
-            <h1 className="text-2xl font-black leading-tight tracking-tight text-white mb-2">
+            <h1 className="mb-3 text-3xl font-black leading-tight tracking-tight text-stone-950 sm:text-4xl">
               Fresh Home Meals,<br />Delivered Daily
             </h1>
-            <p className="text-xs font-semibold text-white/50">
+            <p className="text-sm font-semibold text-stone-600">
               Subscribe to a plan · Cancel anytime · Real-time availability
             </p>
           </div>
@@ -273,7 +284,7 @@ const TiffinPage = () => {
 
       {/* ── Filters ── */}
       <div
-        className="nb-no-scrollbar flex gap-2 overflow-x-auto pb-1 mb-5"
+        className="tiffin-soft-section nb-no-scrollbar mb-7 flex max-w-full gap-2 overflow-x-auto rounded-[22px] p-3"
       >
         {FILTERS.map(f => (
           <FilterPill

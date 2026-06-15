@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 export const ORDER_STATUSES = [
+  "SCHEDULED",
   "PLACED",
   "ACCEPTED",
   "PREPARING",
@@ -120,6 +121,5 @@ const orderSchema = new mongoose.Schema(
 );
 
 export default mongoose.model("Order", orderSchema);
-
 
 

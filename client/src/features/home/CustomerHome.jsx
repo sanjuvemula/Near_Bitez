@@ -1,14 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion as Motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/Button.jsx";
-import Card from "../../components/Card.jsx";
-import SectionWrapper from "../../components/SectionWrapper.jsx";
 import Skeleton from "../../components/Skeleton.jsx";
-import {
-  appRoutes,
-  getCustomerRestaurantRoute,
-} from "../../app/routes.jsx";
+import { appRoutes, getCustomerRestaurantRoute } from "../../app/routes.jsx";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useFavorites } from "../../hooks/useFavorites.js";
 import { useUserLocation } from "../../hooks/useUserLocation.js";
@@ -17,37 +12,25 @@ import { formatCurrency } from "../../utils/formatters.js";
 import { useRestaurantDiscovery } from "./useRestaurantDiscovery.js";
 
 const CATEGORY_ICONS = {
-  all: "🍽",
-  pizza: "🍕",
-  burger: "🍔",
-  biryani: "🍛",
-  healthy: "🥗",
-  chinese: "🥢",
-  "south indian": "🥘",
-  desserts: "🍰",
-  thali: "🍱",
-  snacks: "🥟",
-  drinks: "🥤",
+  All: "&#127869;",
+  Pizza: "&#127829;",
+  Burger: "&#127828;",
+  Biryani: "&#127835;",
+  Healthy: "&#129367;",
+  Chinese: "&#129379;",
+  "South Indian": "&#129374;",
+  Desserts: "&#127856;",
 };
 
-const COMMON_CATEGORIES = [
-  "Pizza",
-  "Burger",
-  "Biryani",
-  "Healthy",
-  "Chinese",
-  "South Indian",
-  "Desserts",
-  "Thali",
-];
+const DEFAULT_CATEGORIES = Object.keys(CATEGORY_ICONS);
 
 const fadeUp = {
-  initial: { opacity: 0, y: 18 },
+  initial: { opacity: 0, y: 12 },
   animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.35, ease: "easeOut" },
+  transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
 };
 
-const SearchIcon = ({ className = "h-5 w-5" }) => (
+const Icon = ({ children, className = "h-5 w-5" }) => (
   <svg
     className={className}
     viewBox="0 0 24 24"
@@ -56,92 +39,29 @@ const SearchIcon = ({ className = "h-5 w-5" }) => (
     strokeWidth="2.2"
     strokeLinecap="round"
     strokeLinejoin="round"
-  >
-    <circle cx="11" cy="11" r="8" />
-    <path d="m21 21-4.35-4.35" />
-  </svg>
-);
-
-const PinIcon = ({ className = "h-4 w-4" }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-);
-
-const ClockIcon = ({ className = "h-4 w-4" }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="9" />
-    <path d="M12 7v5l3 2" />
-  </svg>
-);
-
-const ArrowIcon = ({ className = "h-4 w-4" }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.4"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M5 12h14" />
-    <path d="m13 6 6 6-6 6" />
-  </svg>
-);
-
-const StarIcon = ({ className = "h-3.5 w-3.5" }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    fill="currentColor"
     aria-hidden="true"
   >
-    <path d="m12 2.6 2.9 5.88 6.49.95-4.7 4.58 1.11 6.47L12 17.38l-5.8 3.05 1.1-6.47-4.69-4.58 6.49-.95L12 2.6Z" />
+    {children}
   </svg>
 );
 
-const CoinIcon = ({ className = "h-5 w-5" }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2.2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <ellipse cx="12" cy="6" rx="7" ry="3" />
-    <path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6" />
-    <path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6" />
+const SearchIcon = (props) => <Icon {...props}><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></Icon>;
+const PinIcon = (props) => <Icon {...props}><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z" /><circle cx="12" cy="10" r="2.5" /></Icon>;
+const ArrowIcon = (props) => <Icon {...props}><path d="M5 12h14" /><path d="m14 7 5 5-5 5" /></Icon>;
+const ClockIcon = (props) => <Icon {...props}><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></Icon>;
+const CoinIcon = (props) => <Icon {...props}><ellipse cx="12" cy="6" rx="6" ry="3" /><path d="M6 6v6c0 1.7 2.7 3 6 3s6-1.3 6-3V6" /><path d="M6 12v6c0 1.7 2.7 3 6 3s6-1.3 6-3v-6" /></Icon>;
+const MealIcon = (props) => <Icon {...props}><path d="M5 7h14M6 7l1.2 14h9.6L18 7M9 7V4h6v3M9 12h6M10 16h4" /></Icon>;
+const GameIcon = (props) => <Icon {...props}><path d="M8.5 6h7a6.5 6.5 0 0 1 6.2 8.4l-1.1 3.3a2.4 2.4 0 0 1-4.1.8L14.8 17H9.2l-1.7 1.5a2.4 2.4 0 0 1-4.1-.8l-1.1-3.3A6.5 6.5 0 0 1 8.5 6Z" /><path d="M7 11v4M5 13h4M16 12h.01M19 14h.01" /></Icon>;
+const HeartIcon = ({ filled = false, className = "h-5 w-5" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8Z" />
   </svg>
 );
-
-const shuffle = (items) => {
-  const next = [...items];
-  for (let index = next.length - 1; index > 0; index -= 1) {
-    const swapIndex = Math.floor(Math.random() * (index + 1));
-    [next[index], next[swapIndex]] = [next[swapIndex], next[index]];
-  }
-  return next;
-};
+const StarIcon = ({ className = "h-4 w-4" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="m12 2.8 2.8 5.7 6.3.9-4.6 4.5 1.1 6.3-5.6-3-5.6 3 1.1-6.3-4.6-4.5 6.3-.9L12 2.8Z" />
+  </svg>
+);
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -150,923 +70,523 @@ const getGreeting = () => {
   return "Good evening";
 };
 
-const getCategoryIcon = (name) => {
-  const key = String(name || "").trim().toLowerCase();
-  return CATEGORY_ICONS[key] || "🍴";
-};
-
 const getCuisineLine = (restaurant) =>
-  (restaurant.cuisineType || []).slice(0, 3).join(", ") ||
-  restaurant.category ||
-  "Restaurant";
+  (restaurant.cuisineType || []).slice(0, 3).join(", ") || restaurant.category || "Restaurant";
 
 const getDistanceLabel = (restaurant) =>
   restaurant.distanceKm ? `${Number(restaurant.distanceKm).toFixed(1)} km` : "Nearby";
 
-const buildCategoryOptions = (feed) => {
-  const realCategories = (feed.categories || []).map((category) => category.name);
-  const merged = ["All", ...COMMON_CATEGORIES, ...realCategories]
-    .filter(Boolean)
-    .map((item) => String(item).trim())
-    .filter(Boolean);
-
-  const seen = new Set();
-  return merged
-    .filter((item) => {
-      const key = item.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .slice(0, 11)
-    .map((label) => {
-      const real = (feed.categories || []).find(
-        (category) => category.name?.toLowerCase() === label.toLowerCase()
-      );
-      return {
-        label,
-        count: real?.restaurantCount || 0,
-      };
-    });
+const buildCategories = (feed) => {
+  const values = [...DEFAULT_CATEGORIES, ...(feed.categories || []).map((item) => item.name)].filter(Boolean);
+  return [...new Set(values)].slice(0, 10);
 };
 
-const SectionSkeleton = ({ cards = 3 }) => (
-  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-    {Array.from({ length: cards }).map((_, index) => (
-      <Card key={index} className="overflow-hidden">
-        <Skeleton className="h-40 rounded-none" />
-        <div className="space-y-3 p-4">
-          <Skeleton className="h-4 w-2/3" />
-          <Skeleton className="h-3 w-full" />
-          <Skeleton className="h-3 w-1/2" />
-        </div>
-      </Card>
-    ))}
-  </div>
+const SearchBar = ({ value, onChange, onSubmit }) => (
+  <form className="clean-search" onSubmit={onSubmit}>
+    <SearchIcon className="h-5 w-5 shrink-0" />
+    <input
+      type="search"
+      value={value}
+      onChange={onChange}
+      placeholder="Search restaurants, dishes or cuisines"
+      aria-label="Search restaurants and dishes"
+    />
+    <button type="submit">Search</button>
+  </form>
 );
 
-const EmptyPanel = ({ title, description, action }) => (
-  <Card className="flex min-h-52 flex-col items-center justify-center px-6 py-12 text-center">
-    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[20px] bg-orange-50 text-orange-600">
-      <SearchIcon />
-    </div>
-    <h3 className="text-lg font-black text-stone-950">{title}</h3>
-    {description ? (
-      <p className="mt-2 max-w-sm text-sm font-semibold leading-6 text-stone-500">
-        {description}
-      </p>
-    ) : null}
-    {action ? <div className="mt-5">{action}</div> : null}
-  </Card>
-);
-
-const RatingBadge = ({ rating }) => {
-  const value = Number(rating || 0);
-  const tone =
-    value >= 4.4
-      ? "bg-emerald-600"
-      : value >= 4
-      ? "bg-orange-500"
-      : "bg-stone-500";
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-black text-white ${tone}`}
-    >
-      <StarIcon className="h-3 w-3" />
-      {value.toFixed(1)}
-    </span>
-  );
-};
-
-const RestaurantTile = ({ restaurant, index = 0 }) => (
-  <Motion.div
-    {...fadeUp}
-    transition={{ ...fadeUp.transition, delay: index * 0.04 }}
-  >
-    <Card
-      as={Link}
-      to={getCustomerRestaurantRoute(restaurant._id)}
-      interactive
-      className="group block overflow-hidden no-underline"
-    >
-      <div className="relative h-44 overflow-hidden bg-orange-50">
-        {restaurant.imageUrl ? (
-          <img
-            src={restaurant.imageUrl}
-            alt={restaurant.name}
-            loading="lazy"
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-5xl font-black text-orange-200">
-            {restaurant.name?.charAt(0) || "N"}
-          </div>
-        )}
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/55 to-transparent p-4">
-          <h3 className="truncate text-lg font-black text-white">
-            {restaurant.name}
-          </h3>
-        </div>
-        {restaurant.category ? (
-          <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-[11px] font-black uppercase text-stone-800 shadow-sm">
-            {restaurant.category}
-          </span>
-        ) : null}
-      </div>
-
-      <div className="space-y-3 p-4">
-        <p className="truncate text-sm font-semibold text-stone-500">
-          {getCuisineLine(restaurant)}
-        </p>
-        <div className="flex flex-wrap items-center gap-3 text-sm font-bold text-stone-600">
-          <RatingBadge rating={restaurant.rating} />
-          <span className="inline-flex items-center gap-1">
-            <ClockIcon />
-            {restaurant.deliveryTime || 30} min
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <PinIcon />
-            {getDistanceLabel(restaurant)}
-          </span>
-        </div>
-        <div className="flex items-center justify-between border-t border-stone-100 pt-3">
-          <span className="text-sm font-bold text-stone-500">
-            {restaurant.minimumItemPrice > 0
-              ? `Starts ${formatCurrency(restaurant.minimumItemPrice)}`
-              : restaurant.priceBand || "Open now"}
-          </span>
-          <span className="inline-flex items-center gap-1 text-sm font-black text-orange-600">
-            Order <ArrowIcon className="h-3.5 w-3.5" />
-          </span>
-        </div>
-      </div>
-    </Card>
-  </Motion.div>
-);
-
-const DishTile = ({ dish, index = 0 }) => {
-  const restaurant = dish.restaurant;
-  if (!restaurant?._id) return null;
-
-  return (
-    <Motion.div
-      {...fadeUp}
-      transition={{ ...fadeUp.transition, delay: index * 0.04 }}
-    >
-      <Card
-        as={Link}
-        to={getCustomerRestaurantRoute(restaurant._id)}
-        interactive
-        className="flex min-w-[260px] gap-3 overflow-hidden p-3 no-underline sm:min-w-0"
-      >
-        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-orange-50">
-          {dish.imageUrl ? (
-            <img
-              src={dish.imageUrl}
-              alt={dish.name}
-              loading="lazy"
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-xl font-black text-orange-300">
-              {dish.name?.charAt(0) || "D"}
-            </div>
-          )}
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-black text-stone-950">
-            {dish.name}
-          </p>
-          <p className="mt-1 truncate text-xs font-bold text-stone-500">
-            {restaurant.name}
-          </p>
-          <div className="mt-3 flex items-center justify-between gap-3">
-            <span className="text-sm font-black text-orange-600">
-              {formatCurrency(dish.price)}
-            </span>
-            <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[11px] font-black text-orange-700">
-              {dish.orderCount > 0 ? `${dish.orderCount} ordered` : "Popular"}
-            </span>
-          </div>
-        </div>
-      </Card>
-    </Motion.div>
-  );
-};
-
-const QuickActionCard = ({
-  title,
-  subtitle,
-  icon,
-  highlight = false,
-  badge,
-  onClick,
+const Hero = ({
+  firstName,
+  restaurant,
+  highlights,
+  search,
+  onSearchChange,
+  onSearchSubmit,
+  location,
+  locationStatus,
+  locationError,
+  requestLocation,
+  clearLocation,
 }) => (
-  <Motion.button
-    type="button"
-    whileHover={{ y: -4 }}
-    whileTap={{ scale: 0.98 }}
-    onClick={onClick}
-    className={[
-      "relative overflow-hidden rounded-[20px] border p-4 text-left transition duration-200",
-      highlight
-        ? "min-h-[168px] border-orange-200 bg-gradient-to-br from-[#2b1207] via-[#451806] to-[#ea580c] text-white shadow-[0_26px_70px_-38px_rgba(234,88,12,0.8)] sm:col-span-2 lg:col-span-1"
-        : "min-h-[132px] border-[#eee7dc] bg-white text-stone-950 shadow-[0_18px_50px_-40px_rgba(15,23,42,0.45)] hover:border-orange-200",
-    ].join(" ")}
-  >
-    <span
-      className={[
-        "mb-4 flex h-12 w-12 items-center justify-center rounded-2xl text-xl font-black",
-        highlight ? "bg-white/15 text-white" : "bg-orange-50 text-orange-600",
-      ].join(" ")}
-      aria-hidden="true"
-    >
-      {icon}
-    </span>
-    <span className="block text-lg font-black">{title}</span>
-    <span
-      className={[
-        "mt-1 block text-sm font-semibold leading-5",
-        highlight ? "text-orange-50" : "text-stone-500",
-      ].join(" ")}
-    >
-      {subtitle}
-    </span>
-    {badge ? (
-      <span
-        className={[
-          "absolute right-4 top-4 rounded-full px-3 py-1 text-xs font-black",
-          highlight ? "bg-white text-orange-700" : "bg-orange-600 text-white",
-        ].join(" ")}
+  <Motion.section {...fadeUp} className="clean-hero">
+    <div className="clean-hero-copy">
+      <p>{getGreeting()}, {firstName}</p>
+      <h1>What would you like to eat today?</h1>
+      <span>Discover real nearby restaurants with live menus and quick delivery.</span>
+      <SearchBar value={search} onChange={onSearchChange} onSubmit={onSearchSubmit} />
+      <button
+        type="button"
+        className="clean-location"
+        onClick={locationStatus === "granted" ? clearLocation : requestLocation}
       >
-        {badge}
-      </span>
-    ) : null}
+        <PinIcon className="h-4 w-4" />
+        <span>
+          {locationStatus === "requesting"
+            ? "Finding your location..."
+            : locationStatus === "granted"
+              ? location?.city || "Current location"
+              : "Use current location"}
+        </span>
+        <ArrowIcon className="ml-auto h-4 w-4" />
+      </button>
+      {locationError ? <small className="clean-location-error">{locationError}</small> : null}
+    </div>
+
+    <div className="clean-hero-visual">
+      {restaurant?.imageUrl ? (
+        <img src={restaurant.imageUrl} alt={restaurant.name} />
+      ) : (
+        <div className="clean-hero-placeholder">{restaurant?.name?.charAt(0) || "N"}</div>
+      )}
+      <div className="clean-hero-overlay" />
+      <div className="clean-featured">
+        <small>Featured nearby</small>
+        <strong>{restaurant?.name || "Local restaurants"}</strong>
+        <span>{restaurant ? getCuisineLine(restaurant) : "Fresh menus near you"}</span>
+        {restaurant?._id ? <Link to={getCustomerRestaurantRoute(restaurant._id)}>View menu <ArrowIcon className="h-4 w-4" /></Link> : null}
+      </div>
+      <div className="clean-live-stats">
+        <div><strong>{highlights.activeRestaurantCount || 0}</strong><span>Restaurants</span></div>
+        <div><strong>{highlights.availableDishCount || 0}</strong><span>Live dishes</span></div>
+        <div><strong>{highlights.averageDeliveryTime || 30}m</strong><span>Avg delivery</span></div>
+      </div>
+    </div>
+  </Motion.section>
+);
+
+const InfoCard = ({ icon, eyebrow, title, description, action, onClick, accent = false }) => (
+  <Motion.button {...fadeUp} whileHover={{ y: -3 }} type="button" className={`clean-info-card ${accent ? "accent" : ""}`} onClick={onClick}>
+    <span className="clean-info-icon">{icon}</span>
+    <span className="clean-info-copy">
+      <small>{eyebrow}</small>
+      <strong>{title}</strong>
+      <span>{description}</span>
+    </span>
+    <span className="clean-info-action">{action}<ArrowIcon className="h-4 w-4" /></span>
   </Motion.button>
 );
 
-const RewardStrip = ({ loyalty }) => {
-  const points = Number(loyalty?.points || 0);
-  const tier = loyalty?.tier ? String(loyalty.tier).toLowerCase() : "bronze";
-  const progress = Math.max(0, Math.min(100, Number(loyalty?.progress || 0)));
-  const lastGain = Number(
-    loyalty?.lastGain ||
-      (typeof window !== "undefined"
-        ? window.localStorage.getItem("nearBites:lastCoinGain")
-        : 0) ||
-      0
+const SectionHeading = ({ eyebrow, title, action }) => (
+  <div className="clean-section-heading">
+    <div><p>{eyebrow}</p><h2>{title}</h2></div>
+    {action}
+  </div>
+);
+
+const RestaurantCard = ({ restaurant, favorite, pending, onFavorite }) => (
+  <Motion.article {...fadeUp} whileHover={{ y: -4 }} className="clean-restaurant-card">
+    <div className="clean-restaurant-image">
+      <Link to={getCustomerRestaurantRoute(restaurant._id)}>
+        {restaurant.imageUrl ? (
+          <img src={restaurant.imageUrl} alt={restaurant.name} loading="lazy" />
+        ) : (
+          <span>{restaurant.name?.charAt(0) || "N"}</span>
+        )}
+      </Link>
+      <button
+        type="button"
+        className={`clean-favorite ${favorite ? "active" : ""}`}
+        disabled={pending}
+        onClick={() => onFavorite(restaurant)}
+        aria-label={favorite ? `Remove ${restaurant.name} from favorites` : `Add ${restaurant.name} to favorites`}
+      >
+        <HeartIcon filled={favorite} className="h-5 w-5" />
+      </button>
+      <span className="clean-rating"><StarIcon className="h-3.5 w-3.5" />{Number(restaurant.rating || 0).toFixed(1)}</span>
+    </div>
+    <Link to={getCustomerRestaurantRoute(restaurant._id)} className="clean-restaurant-copy">
+      <div><h3>{restaurant.name}</h3><ArrowIcon className="h-4 w-4" /></div>
+      <p>{getCuisineLine(restaurant)}</p>
+      <span className="clean-meta">
+        <span><ClockIcon className="h-4 w-4" />{restaurant.deliveryTime || 30} min</span>
+        <span><PinIcon className="h-4 w-4" />{getDistanceLabel(restaurant)}</span>
+      </span>
+      <span className="clean-price">
+        {restaurant.minimumItemPrice > 0 ? `Starts at ${formatCurrency(restaurant.minimumItemPrice)}` : "Live menu available"}
+      </span>
+    </Link>
+  </Motion.article>
+);
+
+const DishCard = ({ dish }) => {
+  const restaurant = dish.restaurant;
+  if (!restaurant?._id) return null;
+  return (
+    <Motion.article {...fadeUp} whileHover={{ y: -3 }} className="clean-dish">
+      <Link to={getCustomerRestaurantRoute(restaurant._id)}>
+        <div>
+          {dish.imageUrl ? <img src={dish.imageUrl} alt={dish.name} loading="lazy" /> : <span>{dish.name?.charAt(0) || "D"}</span>}
+        </div>
+        <strong>{dish.name}</strong>
+        <small>{restaurant.name}</small>
+        <p>{formatCurrency(dish.price)}</p>
+      </Link>
+    </Motion.article>
   );
+};
+
+const DecisionLab = ({ restaurants, dishes, onOpenRestaurant }) => {
+  const [rotation, setRotation] = useState(0);
+  const [spinning, setSpinning] = useState(false);
+  const [wheelResult, setWheelResult] = useState(null);
+  const [previewChoice, setPreviewChoice] = useState(null);
+  const [randomRestaurant, setRandomRestaurant] = useState(restaurants[0] || null);
+  const [randomizing, setRandomizing] = useState(false);
+  const intervalRef = useRef(null);
+  const timeoutRef = useRef(null);
+  const randomIntervalRef = useRef(null);
+  const randomTimeoutRef = useRef(null);
+
+  const choices = useMemo(() => {
+    const dishChoices = dishes.map((dish) => ({
+      id: `dish-${dish._id}`,
+      type: "Dish",
+      name: dish.name,
+      restaurant: dish.restaurant,
+      imageUrl: dish.imageUrl,
+      detail: dish.restaurant?.name,
+    }));
+    const restaurantChoices = restaurants.map((restaurant) => ({
+      id: `restaurant-${restaurant._id}`,
+      type: "Restaurant",
+      name: restaurant.name,
+      restaurant,
+      imageUrl: restaurant.imageUrl,
+      detail: getCuisineLine(restaurant),
+    }));
+    return [...dishChoices, ...restaurantChoices].slice(0, 12);
+  }, [dishes, restaurants]);
+
+  useEffect(() => {
+    const randomRestaurantStillVisible = restaurants.some((restaurant) => restaurant._id === randomRestaurant?._id);
+    if ((!randomRestaurant || !randomRestaurantStillVisible) && restaurants.length > 0) {
+      setRandomRestaurant(restaurants[0]);
+    }
+  }, [randomRestaurant, restaurants]);
+
+  useEffect(() => () => {
+    window.clearInterval(intervalRef.current);
+    window.clearTimeout(timeoutRef.current);
+    window.clearInterval(randomIntervalRef.current);
+    window.clearTimeout(randomTimeoutRef.current);
+  }, []);
+
+  const spinWheel = () => {
+    if (spinning || choices.length === 0) return;
+    const result = choices[Math.floor(Math.random() * choices.length)];
+    setSpinning(true);
+    setWheelResult(null);
+    setPreviewChoice(choices[Math.floor(Math.random() * choices.length)]);
+    setRotation((current) => current + 1800 + Math.floor(Math.random() * 360));
+
+    let previewIndex = Math.floor(Math.random() * choices.length);
+    intervalRef.current = window.setInterval(() => {
+      previewIndex = (previewIndex + 1) % choices.length;
+      setPreviewChoice(choices[previewIndex]);
+    }, 140);
+
+    timeoutRef.current = window.setTimeout(() => {
+      window.clearInterval(intervalRef.current);
+      setPreviewChoice(result);
+      setWheelResult(result);
+      setSpinning(false);
+    }, 2500);
+  };
+
+  const generateRestaurant = () => {
+    if (restaurants.length === 0 || randomizing) return;
+    const pool = randomRestaurant && restaurants.length > 1
+      ? restaurants.filter((restaurant) => restaurant._id !== randomRestaurant._id)
+      : restaurants;
+    const result = pool[Math.floor(Math.random() * pool.length)];
+    setRandomizing(true);
+
+    let index = Math.floor(Math.random() * restaurants.length);
+    randomIntervalRef.current = window.setInterval(() => {
+      index = (index + 1) % restaurants.length;
+      setRandomRestaurant(restaurants[index]);
+    }, 130);
+
+    randomTimeoutRef.current = window.setTimeout(() => {
+      window.clearInterval(randomIntervalRef.current);
+      setRandomRestaurant(result);
+      setRandomizing(false);
+    }, 1450);
+  };
 
   return (
-    <Motion.section
-      {...fadeUp}
-      className="relative overflow-hidden rounded-[26px] border border-white/70 bg-white/75 p-4 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:p-5"
-    >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_20%,rgba(251,146,60,0.18),transparent_26%),radial-gradient(circle_at_92%_8%,rgba(244,63,94,0.12),transparent_24%)]" />
-      <div className="relative grid gap-4 md:grid-cols-[1fr,1.4fr] md:items-center">
-        <div className="flex items-center gap-3">
+    <Motion.section {...fadeUp} className="clean-decision">
+      <div className="clean-wheel-panel">
+        <div className="clean-decision-copy">
+          <p>Food decision wheel</p>
+          <h2>Let the wheel choose your next bite.</h2>
+          <span>It picks from real dishes and restaurants available near you right now.</span>
+          <button type="button" onClick={spinWheel} disabled={spinning || choices.length === 0}>
+            {spinning ? "Choosing..." : "Spin the wheel"}
+          </button>
+        </div>
+        <div className="clean-wheel-wrap">
+          <span className="clean-wheel-pointer" />
           <Motion.div
-            animate={{ rotate: [0, -8, 8, 0], scale: [1, 1.05, 1] }}
-            transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 to-orange-600 text-white shadow-[0_18px_36px_-24px_rgba(234,88,12,0.9)]"
+            className="clean-wheel"
+            animate={{ rotate: rotation }}
+            transition={{ duration: 2.5, ease: [0.12, 0.76, 0.16, 1] }}
           >
-            <CoinIcon />
-          </Motion.div>
-          <div className="min-w-0">
-            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-600">
-              NearCoins wallet
-            </p>
-            <div className="mt-1 flex flex-wrap items-end gap-2">
-              <Motion.p
-                key={points}
-                initial={{ y: 8, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="text-3xl font-black leading-none text-stone-950"
-              >
-                {points.toLocaleString()}
-              </Motion.p>
-              {lastGain > 0 ? (
-                <Motion.span
-                  initial={{ y: 10, opacity: 0, scale: 0.9 }}
-                  animate={{ y: 0, opacity: 1, scale: 1 }}
-                  className="mb-0.5 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-black text-emerald-700"
+            <div className="clean-wheel-labels">
+              {choices.slice(0, 8).map((choice, index) => (
+                <span
+                  key={choice.id}
+                  className="clean-wheel-label"
+                  style={{ transform: `rotate(${index * 45}deg) translateY(-68px) rotate(${-index * 45}deg)` }}
                 >
-                  +{lastGain} after order
-                </Motion.span>
-              ) : null}
+                  {choice.name}
+                </span>
+              ))}
             </div>
+            <span>SPIN</span>
+          </Motion.div>
+          <div className={`clean-choice-reel ${spinning ? "spinning" : ""}`}>
+            <small>{previewChoice?.type || "Live choices"}</small>
+            <strong>{previewChoice?.name || `${choices.length} real options loaded`}</strong>
           </div>
         </div>
-        <div>
-          <div className="flex items-center justify-between gap-4 text-xs font-black uppercase tracking-[0.12em] text-stone-500">
-            <span>{tier} tier</span>
-            <span>{loyalty?.pointsToNext || 0} XP to next</span>
+        <div className={`clean-wheel-result ${wheelResult || spinning ? "visible" : ""}`}>
+          <div>
+            {(spinning ? previewChoice : wheelResult)?.imageUrl ? <img src={(spinning ? previewChoice : wheelResult).imageUrl} alt="" /> : <span>{(spinning ? previewChoice : wheelResult)?.name?.charAt(0) || "?"}</span>}
           </div>
-          <div className="mt-3 h-3 overflow-hidden rounded-full bg-stone-100">
-            <Motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="h-full rounded-full bg-gradient-to-r from-orange-500 via-rose-500 to-amber-400 shadow-[0_0_18px_rgba(249,115,22,0.45)]"
-            />
+          <small>{spinning ? "Checking live options..." : wheelResult?.type || "Your result"}</small>
+          <strong>{(spinning ? previewChoice : wheelResult)?.name || "Spin to choose"}</strong>
+          <p>{(spinning ? previewChoice : wheelResult)?.detail || "A nearby option will appear here."}</p>
+          {!spinning && wheelResult?.restaurant?._id ? (
+            <button type="button" onClick={() => onOpenRestaurant(wheelResult.restaurant)}>Open menu <ArrowIcon className="h-4 w-4" /></button>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="clean-random-panel">
+        <div className="clean-random-heading">
+          <p>Random restaurant generator</p>
+          <h2>Surprise me</h2>
+          <span>One tap gives you a restaurant worth trying.</span>
+        </div>
+        <div className="clean-random-result">
+          <div className="clean-random-image">
+            {randomRestaurant?.imageUrl ? (
+              <img src={randomRestaurant.imageUrl} alt={randomRestaurant.name} />
+            ) : (
+              <span>{randomRestaurant?.name?.charAt(0) || "N"}</span>
+            )}
           </div>
+          <div className="clean-random-copy">
+            <small>Today's random pick</small>
+            <strong>{randomRestaurant?.name || "Waiting for restaurants"}</strong>
+            <p>{randomRestaurant ? getCuisineLine(randomRestaurant) : "Try again when restaurants are available."}</p>
+            {randomRestaurant ? (
+              <div>
+                <span><StarIcon className="h-4 w-4" />{Number(randomRestaurant.rating || 0).toFixed(1)}</span>
+                <span><ClockIcon className="h-4 w-4" />{randomRestaurant.deliveryTime || 30} min</span>
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <div className="clean-random-actions">
+          <button type="button" onClick={generateRestaurant} disabled={randomizing}>{randomizing ? "Finding..." : "Pick another"}</button>
+          {randomRestaurant?._id && !randomizing ? <button type="button" onClick={() => onOpenRestaurant(randomRestaurant)}>Open menu <ArrowIcon className="h-4 w-4" /></button> : null}
         </div>
       </div>
     </Motion.section>
   );
 };
 
-const OfferCard = ({ promo, index = 0 }) => {
-  const restaurant = promo?.restaurant || {};
-  const value =
-    promo?.discountType === "PERCENTAGE"
-      ? `${promo?.value || promo?.discount || 20}% off`
-      : `${formatCurrency(promo?.value || promo?.discount || 100)} off`;
-
-  return (
-    <Motion.article
-      {...fadeUp}
-      transition={{ ...fadeUp.transition, delay: index * 0.04 }}
-      whileHover={{ y: -5 }}
-      className="relative min-w-[280px] overflow-hidden rounded-[24px] border border-white/50 bg-stone-950 text-white shadow-[0_24px_70px_-44px_rgba(15,23,42,0.65)] sm:min-w-[330px]"
-    >
-      <div className="absolute inset-0">
-        {restaurant?.imageUrl ? (
-          <img src={restaurant.imageUrl} alt={restaurant.name || "Restaurant offer"} className="h-full w-full object-cover opacity-70" loading="lazy" />
-        ) : (
-          <div className="h-full w-full bg-gradient-to-br from-orange-700 via-rose-600 to-stone-950" />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/28 to-black/10" />
+const RestaurantSkeleton = () => (
+  <div className="clean-restaurant-grid">
+    {Array.from({ length: 3 }).map((_, index) => (
+      <div key={index} className="clean-restaurant-card p-3">
+        <Skeleton className="h-52 rounded-[18px]" />
+        <Skeleton className="mt-4 h-5 w-2/3" />
+        <Skeleton className="mt-3 h-3 w-full" />
       </div>
-      <div className="relative flex min-h-[210px] flex-col justify-between p-4">
-        <div className="flex items-start justify-between gap-3">
-          <span className="rounded-full bg-white px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-orange-700">
-            Restaurant offer
-          </span>
-          <span className="rounded-full border border-white/20 bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] backdrop-blur">
-            Live
-          </span>
-        </div>
-        <div>
-          <p className="text-3xl font-black leading-none">{value}</p>
-          <h3 className="mt-2 truncate text-lg font-black">
-            {restaurant?.name || promo?.title || "Featured restaurant"}
-          </h3>
-          <p className="mt-1 line-clamp-2 text-sm font-semibold text-white/78">
-            {promo?.description || promo?.code || "Tap to explore today's deal."}
-          </p>
-          <Link
-            to={
-              restaurant?._id
-                ? getCustomerRestaurantRoute(restaurant._id)
-                : appRoutes.customerSearch
-            }
-            className="mt-4 inline-flex rounded-2xl bg-white px-4 py-2.5 text-sm font-black text-stone-950 no-underline transition hover:bg-orange-50"
-          >
-            Order deal
-          </Link>
-        </div>
-      </div>
-    </Motion.article>
-  );
-};
-
-const DecisionWheelCard = ({
-  restaurants = [],
-  popularDishes = [],
-}) => {
-  const [spinning, setSpinning] = useState(false);
-  const [result, setResult] = useState(null);
-  const [rotation, setRotation] = useState(0);
-
-  const choices = useMemo(() => {
-    const dishChoices = popularDishes
-      .filter((dish) => dish?.name && dish?.restaurant?._id)
-      .map((dish) => ({
-        id: `dish-${dish._id}`,
-        label: dish.name,
-        type: "Dish",
-        restaurant: dish.restaurant,
-        gameName: "Craving Spinner",
-      }));
-
-    const restaurantChoices = restaurants.slice(0, 12).map((restaurant) => ({
-      id: `restaurant-${restaurant._id}`,
-      label: restaurant.name,
-      type: "Restaurant",
-      restaurant,
-      gameName: "Restaurant Duel",
-    }));
-
-    return shuffle([...dishChoices, ...restaurantChoices]).slice(0, 16);
-  }, [popularDishes, restaurants]);
-
-  const wheelSegments = choices.length > 0 ? choices.slice(0, 10) : [];
-
-  const spinChoice = () => {
-    if (spinning || choices.length === 0) return;
-
-    setSpinning(true);
-    const finalChoice = choices[Math.floor(Math.random() * choices.length)];
-    setRotation((value) => value + 1080 + Math.floor(Math.random() * 360));
-    window.setTimeout(() => {
-      setResult(finalChoice);
-      setSpinning(false);
-    }, 1450);
-  };
-
-  return (
-    <Card className="relative overflow-hidden border-0 bg-[linear-gradient(135deg,#180b05_0%,#7c2d12_42%,#f97316_72%,#f43f5e_100%)] p-5 text-white shadow-[0_32px_90px_-44px_rgba(249,115,22,0.85)]">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.22),transparent_24%),radial-gradient(circle_at_bottom_left,rgba(255,237,213,0.18),transparent_28%)]" />
-      <div className="relative grid gap-6 lg:grid-cols-[0.95fr,1.05fr] lg:items-center">
-        <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-white/70">
-            Craving wheel
-          </p>
-          <h3 className="mt-2 text-3xl font-black leading-tight">
-            {result?.label || "Pick your next bite"}
-          </h3>
-          <p className="mt-2 text-sm font-semibold text-white/82">
-            {result?.restaurant?.name
-              ? result.restaurant.name
-              : "Spin through live restaurants and dishes."}
-          </p>
-          <button
-            type="button"
-            onClick={spinChoice}
-            disabled={spinning || choices.length === 0}
-            className="mt-5 rounded-[20px] bg-white px-5 py-3 text-sm font-black text-orange-700 shadow-[0_18px_34px_-22px_rgba(255,255,255,0.75)] transition hover:scale-[1.02] hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {spinning ? "Picking..." : "Spin"}
-          </button>
-        </div>
-
-        <div className="relative mx-auto aspect-square w-full max-w-[320px]">
-          <div className="absolute inset-[-10px] rounded-full bg-white/10 blur-xl" />
-          <div className="absolute left-1/2 top-0 z-10 h-0 w-0 -translate-x-1/2 border-l-[12px] border-r-[12px] border-t-[24px] border-l-transparent border-r-transparent border-t-white drop-shadow" />
-          <Motion.div
-            animate={{ rotate: rotation }}
-            transition={{ duration: 1.45, ease: [0.12, 0.76, 0.16, 1] }}
-            className="relative h-full w-full rounded-full border-[10px] border-white/20 bg-[conic-gradient(from_0deg,#fb923c,#f43f5e,#fde047,#22c55e,#38bdf8,#a78bfa,#fb923c)] p-5 shadow-[inset_0_0_40px_rgba(0,0,0,0.22),0_28px_70px_-36px_rgba(0,0,0,0.9)]"
-          >
-            <div className="absolute inset-[18%] rounded-full border border-white/30 bg-stone-950/72 backdrop-blur" />
-            {wheelSegments.map((choice, index) => {
-              const angle = (360 / wheelSegments.length) * index;
-              return (
-                <div
-                  key={choice.id}
-                  className="absolute left-1/2 top-1/2 origin-left text-[10px] font-black uppercase tracking-[0.08em] text-white drop-shadow"
-                  style={{ transform: `rotate(${angle}deg) translateX(70px) rotate(90deg)` }}
-                >
-                  <span className="block max-w-[76px] truncate">{choice.label}</span>
-                </div>
-              );
-            })}
-            <div className="absolute left-1/2 top-1/2 grid h-20 w-20 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/25 bg-white text-center text-xs font-black uppercase tracking-[0.12em] text-orange-700 shadow-xl">
-              Spin
-            </div>
-          </Motion.div>
-        </div>
-      </div>
-    </Card>
-  );
-};
+    ))}
+  </div>
+);
 
 const CustomerHome = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { favoriteIds } = useFavorites();
-  const {
-    location,
-    status: locationStatus,
-    error: locationError,
-    requestLocation,
-    clearLocation,
-  } = useUserLocation();
-  const { feed, loading, error, loadDiscovery, filters, filteredRestaurants } =
-    useRestaurantDiscovery();
-
+  const { favoriteIds, toggleFavorite, isPending } = useFavorites();
+  const { location, status: locationStatus, error: locationError, requestLocation, clearLocation } = useUserLocation();
+  const { feed, loading, error, loadDiscovery, filters, filteredRestaurants } = useRestaurantDiscovery();
   const [activeCategory, setActiveCategory] = useState("All");
-  const [restaurantMode, setRestaurantMode] = useState("recommended");
   const [tiffins, setTiffins] = useState([]);
   const [promos, setPromos] = useState([]);
-  const [loyaltyInfo, setLoyaltyInfo] = useState(null);
+  const [loyalty, setLoyalty] = useState(null);
 
   useEffect(() => {
     let mounted = true;
-
-    Promise.allSettled([
-      api.get("/tiffins"),
-      api.get("/promos/active"),
-      api.get("/orders/loyalty"),
-    ]).then(([tiffinResult, promoResult, loyaltyResult]) => {
-      if (!mounted) return;
-
-      if (tiffinResult.status === "fulfilled") {
-        const payload = tiffinResult.value;
-        const providers = Array.isArray(payload.data)
-          ? payload.data
-          : Array.isArray(payload.data?.data)
-          ? payload.data.data
-          : [];
-        setTiffins(providers);
-      }
-
-      if (promoResult.status === "fulfilled") {
-        setPromos(Array.isArray(promoResult.value.data) ? promoResult.value.data : []);
-      }
-
-      if (loyaltyResult.status === "fulfilled") {
-        setLoyaltyInfo(loyaltyResult.value.data || null);
-      }
-    });
-
-    return () => {
-      mounted = false;
-    };
+    Promise.allSettled([api.get("/tiffins"), api.get("/promos/active"), api.get("/orders/loyalty")])
+      .then(([tiffinResult, promoResult, loyaltyResult]) => {
+        if (!mounted) return;
+        if (tiffinResult.status === "fulfilled") {
+          const payload = tiffinResult.value?.data;
+          setTiffins(Array.isArray(payload) ? payload : Array.isArray(payload?.data) ? payload.data : []);
+        }
+        if (promoResult.status === "fulfilled") setPromos(Array.isArray(promoResult.value?.data) ? promoResult.value.data : []);
+        if (loyaltyResult.status === "fulfilled") setLoyalty(loyaltyResult.value?.data || null);
+      });
+    return () => { mounted = false; };
   }, []);
 
   const firstName = user?.name?.split(" ")[0] || "there";
-  const categoryOptions = useMemo(() => buildCategoryOptions(feed), [feed]);
-  const hasActiveFilters = Boolean(filters.search.trim()) || activeCategory !== "All";
-
-  const recommendedRestaurants = useMemo(() => {
-    if (hasActiveFilters) return filteredRestaurants.slice(0, 6);
-    return (feed.featuredRestaurants?.length
-      ? feed.featuredRestaurants
-      : filteredRestaurants
-    ).slice(0, 6);
-  }, [feed.featuredRestaurants, filteredRestaurants, hasActiveFilters]);
-
-  const topRatedRestaurants = useMemo(() => {
-    const source = hasActiveFilters
-      ? filteredRestaurants
-      : feed.restaurants?.length
-      ? feed.restaurants
+  const categories = useMemo(() => buildCategories(feed), [feed]);
+  const restaurants = useMemo(() => {
+    const source = activeCategory === "All" && !filters.search.trim()
+      ? (feed.featuredRestaurants?.length ? feed.featuredRestaurants : filteredRestaurants)
       : filteredRestaurants;
-
-    return [...source]
-      .sort(
-        (left, right) =>
-          Number(right.rating || 0) - Number(left.rating || 0) ||
-          Number(left.deliveryTime || 999) - Number(right.deliveryTime || 999) ||
-          Number(right.availableItemCount || 0) - Number(left.availableItemCount || 0)
-      )
-      .slice(0, 6);
-  }, [feed.restaurants, filteredRestaurants, hasActiveFilters]);
-
-  const showcaseRestaurants =
-    restaurantMode === "top-rated" ? topRatedRestaurants : recommendedRestaurants;
-
-  const popularDishes = useMemo(
-    () => (feed.popularDishes || []).filter((dish) => dish.restaurant?._id).slice(0, 6),
-    [feed.popularDishes]
-  );
-
-  const popularRestaurants = useMemo(
-    () =>
-      (
-        feed.trendingRestaurants?.length
-          ? feed.trendingRestaurants
-          : filteredRestaurants
-      ).slice(0, 4),
-    [feed.trendingRestaurants, filteredRestaurants]
-  );
-
+    return source.slice(0, 6);
+  }, [activeCategory, feed.featuredRestaurants, filteredRestaurants, filters.search]);
+  const heroRestaurant = restaurants.find((restaurant) => restaurant.imageUrl) || restaurants[0];
+  const popularDishes = useMemo(() => (feed.popularDishes || []).filter((dish) => dish.restaurant?._id).slice(0, 5), [feed.popularDishes]);
   const tiffinMinPrice = useMemo(() => {
-    const prices = tiffins
-      .map((item) => Number(item.price || 0))
-      .filter((price) => price > 0);
+    const prices = tiffins.map((item) => Number(item.price || 0)).filter((price) => price > 0);
     return prices.length ? Math.min(...prices) : 0;
   }, [tiffins]);
 
-  const handleCategory = (label) => {
-    setActiveCategory(label);
-    filters.setSelectedCuisine(label === "All" ? "All" : label);
-  };
-
-  const handleSearchSubmit = (event) => {
+  const handleSearch = (event) => {
     event.preventDefault();
     const query = filters.search.trim();
-    if (query) {
-      navigate(`${appRoutes.customerSearch}?q=${encodeURIComponent(query)}`);
+    navigate(query ? `${appRoutes.customerSearch}?q=${encodeURIComponent(query)}` : appRoutes.customerSearch);
+  };
+  const handleCategory = (label) => {
+    setActiveCategory(label);
+    filters.setSelectedCuisine(label);
+  };
+  const handleFavorite = async (restaurant) => {
+    try {
+      await toggleFavorite(restaurant);
+    } catch {
+      // Favorites remain non-blocking on this screen.
     }
   };
-
-  const focusFood = () => {
-    document
-      .getElementById("recommended-restaurants")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const openOffers = () => {
-    const restaurantName = promos[0]?.restaurant?.name;
-    navigate(
-      restaurantName
-        ? `${appRoutes.customerSearch}?q=${encodeURIComponent(restaurantName)}`
-        : appRoutes.customerSearch
-    );
-  };
-
-  const clearFilters = () => {
-    setActiveCategory("All");
-    setRestaurantMode("recommended");
-    filters.resetFilters();
-  };
+  const promo = promos[0];
+  const promoTitle = promo
+    ? promo.discountType === "PERCENTAGE" ? `${promo.value}% off today` : `${formatCurrency(promo.value)} off today`
+    : "Offers near you";
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 pb-8 text-stone-950">
-      <Motion.section
-        {...fadeUp}
-        className="relative overflow-hidden rounded-[28px] bg-[#211008] px-5 py-6 text-white shadow-[0_28px_80px_-54px_rgba(234,88,12,0.9)] sm:px-7 sm:py-8"
-      >
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(234,88,12,0.42),transparent_44%),radial-gradient(circle_at_88%_12%,rgba(255,255,255,0.16),transparent_28%)]" />
-        <div className="relative grid gap-6 lg:grid-cols-[1fr,360px] lg:items-end">
-          <div>
-            <p className="text-sm font-black uppercase tracking-[0.14em] text-orange-200">
-              {getGreeting()}
-            </p>
-            <h1 className="mt-3 text-3xl font-black leading-tight sm:text-5xl">
-              Hi, {firstName} <span aria-hidden="true">👋</span>
-            </h1>
-          </div>
+    <div className="clean-home">
+      <style>{`
+        .clean-home{--ink:#211915;--muted:#82766f;--orange:#ec4d16;--line:#eadbd0;width:100%;max-width:1260px;min-width:0;margin:0 auto;overflow-x:clip;color:var(--ink)}.clean-home *{min-width:0}.clean-home section{min-width:0}
+        .clean-stack{display:grid;min-width:0;gap:34px}.clean-stack>*{min-width:0}.clean-hero{display:grid;min-width:0;overflow:hidden;border:1px solid #eadfd8;border-radius:28px;background:linear-gradient(135deg,#fff 0%,#fffaf5 100%);box-shadow:0 22px 55px -45px rgba(53,30,18,.55)}.clean-hero-copy{display:flex;min-width:0;flex-direction:column;justify-content:center;padding:28px}.clean-hero-copy>p{margin:0 0 9px;color:var(--orange);font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.14em}.clean-hero-copy h1{max-width:540px;margin:0;font-size:clamp(36px,5vw,60px);font-weight:900;line-height:1.02;letter-spacing:-.06em}.clean-hero-copy>span{max-width:500px;margin-top:16px;color:var(--muted);font-size:16px;font-weight:650;line-height:1.65}
+        .clean-search{display:flex;align-items:center;gap:11px;margin-top:25px;padding:8px 8px 8px 16px;border:1px solid #ded3cc;border-radius:17px;background:#fff;color:#9d9189;box-shadow:0 14px 30px -25px rgba(49,27,15,.5)}.clean-search input{min-width:0;flex:1;border:0;outline:0;color:var(--ink);font-size:15px;font-weight:700}.clean-search input::placeholder{color:#a79c95}.clean-search button{height:44px;padding:0 20px;border:0;border-radius:12px;background:var(--orange);color:#fff;font-size:14px;font-weight:900;cursor:pointer}.clean-location{display:flex;align-items:center;gap:8px;margin-top:15px;border:0;background:transparent;color:#6d615a;font-size:13px;font-weight:850;cursor:pointer}.clean-location svg:first-child{color:var(--orange)}.clean-location-error{margin-top:7px;color:#c2413a;font-size:11px;font-weight:700}
+        .clean-hero-visual{position:relative;min-height:300px;overflow:hidden;background:#ead9ca}.clean-hero-visual>img{width:100%;height:100%;object-fit:cover}.clean-hero-placeholder{display:grid;height:100%;min-height:300px;place-items:center;background:linear-gradient(145deg,#f0c5a5,#c96b39);color:#fff;font-size:90px;font-weight:900}.clean-hero-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(24,13,8,.84),transparent 72%)}.clean-featured{position:absolute;right:22px;bottom:88px;left:22px;color:#fff}.clean-featured small,.clean-featured strong,.clean-featured span{display:block}.clean-featured small{color:#ffcbaa;font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.clean-featured strong{margin-top:5px;font-size:28px;font-weight:900}.clean-featured span{margin-top:4px;color:#e1d3ca;font-size:13px;font-weight:700}.clean-featured a{display:inline-flex;align-items:center;gap:6px;margin-top:13px;color:#fff;font-size:12px;font-weight:900;text-decoration:none}.clean-live-stats{position:absolute;right:14px;bottom:14px;left:14px;display:grid;grid-template-columns:repeat(3,1fr);overflow:hidden;border-radius:14px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px)}.clean-live-stats div{padding:11px;border-right:1px solid #e8ddd5}.clean-live-stats div:last-child{border:0}.clean-live-stats strong,.clean-live-stats span{display:block}.clean-live-stats strong{font-size:15px;font-weight:900}.clean-live-stats span{margin-top:2px;color:#8c7f77;font-size:9px;font-weight:800;text-transform:uppercase}
+        .clean-info-grid{display:grid;min-width:0;gap:14px}.clean-info-card{display:flex;min-width:0;align-items:center;gap:15px;overflow:hidden;border:1px solid var(--line);border-radius:20px;padding:19px;background:linear-gradient(135deg,#fff,#fffaf6);text-align:left;cursor:pointer;box-shadow:0 18px 40px -37px rgba(52,29,16,.5)}.clean-info-card:nth-child(2){background:linear-gradient(135deg,#fff,#f5fbf5)}.clean-info-card.accent{background:linear-gradient(135deg,#30221b,#1f1713);color:#fff;border-color:#241a15}.clean-info-icon{display:grid;width:48px;height:48px;flex:none;place-items:center;border-radius:15px;background:#fff0e7;color:var(--orange)}.clean-info-card.accent .clean-info-icon{background:rgba(255,255,255,.1);color:#ffae79}.clean-info-copy{min-width:0;flex:1}.clean-info-copy small,.clean-info-copy strong,.clean-info-copy span{display:block}.clean-info-copy small{color:var(--orange);font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.clean-info-card.accent small{color:#ffae79}.clean-info-copy strong{overflow:hidden;margin-top:4px;font-size:17px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.clean-info-copy span{overflow:hidden;margin-top:4px;color:#958880;font-size:12px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}.clean-info-card.accent .clean-info-copy span{color:#bdb0a8}.clean-info-action{display:flex;align-items:center;gap:4px;flex:none;color:#c64113;font-size:12px;font-weight:900}.clean-info-card.accent .clean-info-action{color:#fff}
+        .clean-section-heading{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:20px}.clean-section-heading p{margin:0 0 5px;color:var(--orange);font-size:11px;font-weight:900;letter-spacing:.17em;text-transform:uppercase}.clean-section-heading h2{margin:0;font-size:30px;font-weight:900;letter-spacing:-.045em}.clean-section-heading>a{color:#bd4014;font-size:13px;font-weight:900;text-decoration:none}
+        .clean-cuisine-section,.clean-popular-section{min-width:0;border:1px solid rgba(234,219,208,.8);border-radius:24px;padding:22px}.clean-cuisine-section{background:linear-gradient(135deg,rgba(255,246,238,.9),rgba(255,251,247,.72))}.clean-popular-section{background:linear-gradient(135deg,rgba(255,255,255,.78),rgba(255,247,239,.68))}
+        .clean-categories{display:flex;width:100%;max-width:100%;gap:10px;overflow-x:auto;overscroll-behavior-inline:contain;padding:2px 2px 7px;scrollbar-width:none}.clean-categories::-webkit-scrollbar{display:none}.clean-categories button{display:flex;align-items:center;gap:8px;flex:none;border:1px solid var(--line);border-radius:999px;padding:12px 17px;background:#fff;color:#5f544e;font-size:13px;font-weight:900;cursor:pointer}.clean-categories button span{font-size:18px}.clean-categories button.active{border-color:#251b16;background:#251b16;color:#fff}
+        .clean-decision{display:grid;min-width:0;gap:16px}.clean-wheel-panel,.clean-random-panel{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:25px;background:#fff}.clean-wheel-panel{display:grid;gap:20px;align-items:center;padding:25px;background:linear-gradient(135deg,#fffaf5 0%,#fff2e8 100%)}.clean-decision-copy p,.clean-random-heading p{margin:0;color:var(--orange);font-size:11px;font-weight:900;letter-spacing:.15em;text-transform:uppercase}.clean-decision-copy h2,.clean-random-heading h2{margin:7px 0 0;font-size:28px;font-weight:900;letter-spacing:-.045em;line-height:1.08}.clean-decision-copy>span,.clean-random-heading>span{display:block;margin-top:8px;color:#85776f;font-size:13px;font-weight:700;line-height:1.55}.clean-decision-copy button{margin-top:17px;border:0;border-radius:13px;padding:12px 18px;background:#241a15;color:#fff;font-size:13px;font-weight:900;cursor:pointer}.clean-decision-copy button:disabled{opacity:.55}.clean-wheel-wrap{position:relative;width:210px;height:250px;margin:auto}.clean-wheel{position:relative;display:grid;width:210px;height:210px;place-items:center;border:9px solid #fff;border-radius:50%;background:conic-gradient(#f4511e 0 12.5%,#ffb74d 12.5% 25%,#4e342e 25% 37.5%,#ff8a65 37.5% 50%,#fdd835 50% 62.5%,#8d6e63 62.5% 75%,#ff7043 75% 87.5%,#ffca28 87.5% 100%);box-shadow:0 18px 35px -22px rgba(73,32,13,.65)}.clean-wheel:before{content:"";position:absolute;z-index:2;width:64px;height:64px;border:7px solid #fff;border-radius:50%;background:#241a15}.clean-wheel>span{position:relative;z-index:3;color:#fff;font-size:11px;font-weight:900;letter-spacing:.12em}.clean-wheel-labels{position:absolute;inset:0}.clean-wheel-label{position:absolute;z-index:1;top:50%;left:50%;width:64px;margin-top:-8px;margin-left:-32px;overflow:hidden;color:#fff;font-size:7px;font-weight:900;line-height:1;text-align:center;text-overflow:ellipsis;text-shadow:0 1px 2px rgba(0,0,0,.35);white-space:nowrap}.clean-wheel-pointer{position:absolute;z-index:4;top:-5px;left:50%;width:0;height:0;transform:translateX(-50%);border-right:11px solid transparent;border-left:11px solid transparent;border-top:0;border-bottom:22px solid #241a15}.clean-choice-reel{position:absolute;right:0;bottom:0;left:0;overflow:hidden;border:1px solid #ead4c5;border-radius:13px;padding:7px 10px;background:#fff;text-align:center;box-shadow:0 12px 25px -22px rgba(62,28,11,.7)}.clean-choice-reel small,.clean-choice-reel strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.clean-choice-reel small{color:var(--orange);font-size:7px;font-weight:900;text-transform:uppercase}.clean-choice-reel strong{margin-top:2px;font-size:11px;font-weight:900}.clean-choice-reel.spinning{animation:choicePulse .28s ease-in-out infinite alternate}@keyframes choicePulse{to{transform:scale(1.025);border-color:#f29a70}}.clean-wheel-result{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:4px 13px;min-height:106px;border:1px solid #eadfd8;border-radius:18px;padding:13px;background:#fff;opacity:.75}.clean-wheel-result.visible{opacity:1}.clean-wheel-result>div{grid-row:span 4;width:68px;height:68px;overflow:hidden;border-radius:14px;background:#f2d5c0}.clean-wheel-result img{width:100%;height:100%;object-fit:cover}.clean-wheel-result>div>span{display:grid;height:100%;place-items:center;color:#cf6633;font-size:28px;font-weight:900}.clean-wheel-result small{color:var(--orange);font-size:9px;font-weight:900;text-transform:uppercase}.clean-wheel-result strong{overflow:hidden;font-size:15px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.clean-wheel-result p{overflow:hidden;margin:0;color:#8b7e76;font-size:11px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}.clean-wheel-result button{display:flex;align-items:center;gap:5px;width:max-content;max-width:100%;border:0;background:transparent;color:#be4014;font-size:11px;font-weight:900;cursor:pointer}
+        .clean-random-panel{display:flex;flex-direction:column;padding:25px;background:#241a15;color:#fff}.clean-random-heading p{color:#ffae79}.clean-random-heading>span{color:#bfb2aa}.clean-random-result{display:flex;align-items:center;gap:15px;margin-top:22px;padding:13px;border-radius:19px;background:rgba(255,255,255,.08)}.clean-random-image{width:86px;height:86px;flex:none;overflow:hidden;border-radius:16px;background:#d88a60}.clean-random-image img{width:100%;height:100%;object-fit:cover}.clean-random-image>span{display:grid;height:100%;place-items:center;font-size:35px;font-weight:900}.clean-random-copy{min-width:0}.clean-random-copy small,.clean-random-copy strong,.clean-random-copy p{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.clean-random-copy small{color:#ffae79;font-size:9px;font-weight:900;text-transform:uppercase}.clean-random-copy strong{margin-top:4px;font-size:18px;font-weight:900}.clean-random-copy p{margin:4px 0 8px;color:#bfb2aa;font-size:11px;font-weight:700}.clean-random-copy>div{display:flex;gap:11px;color:#eee5df;font-size:10px;font-weight:800}.clean-random-copy>div span{display:flex;align-items:center;gap:4px}.clean-random-copy>div span:first-child{color:#ffd36b}.clean-random-actions{display:flex;gap:9px;margin-top:auto;padding-top:20px}.clean-random-actions button{display:flex;align-items:center;justify-content:center;gap:5px;flex:1;border:1px solid rgba(255,255,255,.16);border-radius:13px;padding:11px;background:transparent;color:#fff;font-size:11px;font-weight:900;cursor:pointer}.clean-random-actions button:last-child{border-color:#fff;background:#fff;color:#241a15}
+        .clean-dish-row{display:flex;width:100%;max-width:100%;gap:14px;overflow-x:auto;overscroll-behavior-inline:contain;padding:2px 1px 8px;scrollbar-width:none}.clean-dish-row::-webkit-scrollbar{display:none}.clean-dish{min-width:180px;max-width:230px;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#fff,#fffaf7)}.clean-dish a{display:block;color:inherit;text-decoration:none}.clean-dish a>div{height:135px;overflow:hidden;background:#f0d3bd}.clean-dish img{width:100%;height:100%;object-fit:cover}.clean-dish a>div>span{display:grid;height:100%;place-items:center;color:#ce6534;font-size:38px;font-weight:900}.clean-dish strong,.clean-dish small,.clean-dish p{display:block;overflow:hidden;margin-right:14px;margin-left:14px;text-overflow:ellipsis;white-space:nowrap}.clean-dish strong{margin-top:13px;font-size:14px;font-weight:900}.clean-dish small{margin-top:3px;color:#91847c;font-size:11px;font-weight:700}.clean-dish p{margin-top:10px;margin-bottom:14px;color:#c94113;font-size:13px;font-weight:900}
+        .clean-restaurant-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.clean-restaurant-card{overflow:hidden;border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:0 18px 42px -38px rgba(51,28,15,.65)}.clean-restaurant-image{position:relative;height:170px;overflow:hidden;background:#f0d1b8}.clean-restaurant-image>a{display:block;height:100%}.clean-restaurant-image img{width:100%;height:100%;object-fit:cover;transition:transform .35s}.clean-restaurant-card:hover img{transform:scale(1.035)}.clean-restaurant-image>a>span{display:grid;height:100%;place-items:center;color:#cb6534;font-size:50px;font-weight:900}.clean-favorite{position:absolute;right:10px;top:10px;display:grid;width:38px;height:38px;place-items:center;border:0;border-radius:50%;background:rgba(255,255,255,.94);color:#766a63;cursor:pointer;box-shadow:0 5px 14px rgba(0,0,0,.12)}.clean-favorite.active{color:#dd4545}.clean-rating{position:absolute;right:10px;bottom:10px;display:flex;align-items:center;gap:3px;border-radius:999px;padding:6px 9px;background:#fff;color:#14804a;font-size:11px;font-weight:900}.clean-restaurant-copy{display:block;padding:17px;color:inherit;text-decoration:none}.clean-restaurant-copy>div{display:flex;align-items:center;gap:7px}.clean-restaurant-copy h3{overflow:hidden;flex:1;margin:0;font-size:17px;font-weight:900;text-overflow:ellipsis;white-space:nowrap}.clean-restaurant-copy>div svg{color:#bd4115}.clean-restaurant-copy p{overflow:hidden;margin:6px 0 11px;color:#8c7f77;font-size:12px;font-weight:700;text-overflow:ellipsis;white-space:nowrap}.clean-meta{display:flex;gap:12px;color:#665b55;font-size:11px;font-weight:850}.clean-meta span{display:flex;align-items:center;gap:4px}.clean-price{display:block;margin-top:13px;padding-top:11px;border-top:1px solid #f0e7e1;color:#c74314;font-size:12px;font-weight:900}.clean-empty{padding:30px;border:1px dashed #e1d4cb;border-radius:20px;background:#fff;text-align:center}.clean-empty h3{margin:0;font-size:17px;font-weight:900}.clean-empty p{margin:6px 0 16px;color:#8e8179;font-size:13px;font-weight:700}
+        @media(min-width:700px){.clean-stack{gap:44px}.clean-hero{grid-template-columns:minmax(0,1.08fr) minmax(0,.92fr);min-height:410px}.clean-hero-copy{padding:42px}.clean-hero-visual{min-height:410px}.clean-info-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.clean-decision{grid-template-columns:minmax(0,1.45fr) minmax(280px,.8fr)}.clean-wheel-panel{grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto}.clean-wheel-result{grid-column:1/-1}.clean-restaurant-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.clean-restaurant-image{height:225px}.clean-dish{min-width:205px}.clean-dish a>div{height:155px}}
+        @media(min-width:1100px){.clean-restaurant-image{height:235px}.clean-dish-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible}.clean-dish{min-width:0;max-width:none}}
+        @media(max-width:430px){.clean-stack{gap:32px}.clean-hero{border-radius:23px}.clean-hero-copy{padding:23px 17px}.clean-hero-visual{min-height:260px}.clean-hero-placeholder{min-height:260px}.clean-search button{height:38px;padding:0 13px}.clean-live-stats{right:9px;bottom:9px;left:9px}.clean-info-card{padding:14px}.clean-info-action{display:none}.clean-info-copy strong{font-size:14px}.clean-info-copy span{font-size:10px}.clean-section-heading h2{font-size:24px}.clean-decision-copy h2,.clean-random-heading h2{font-size:24px}.clean-wheel-panel,.clean-random-panel{padding:20px}.clean-wheel-wrap{width:170px;height:170px}.clean-restaurant-image{height:145px}.clean-restaurant-copy h3{font-size:14px}.clean-restaurant-copy p,.clean-meta,.clean-price{font-size:10px}}
+      `}</style>
 
-          <Card className="border-white/15 bg-white/10 p-4 text-white backdrop-blur-xl">
-            <button
-              type="button"
-              onClick={locationStatus === "granted" ? clearLocation : requestLocation}
-              className="flex w-full items-center gap-3 rounded-2xl border border-white/15 bg-white/10 p-3 text-left transition hover:bg-white/15"
-            >
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-orange-600">
-                <PinIcon />
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block text-xs font-black uppercase tracking-[0.12em] text-orange-100">
-                  Delivery location
-                </span>
-                <span className="mt-1 block truncate text-sm font-black text-white">
-                  {locationStatus === "requesting"
-                    ? "Locating..."
-                    : locationStatus === "granted"
-                    ? location?.city || "Your location"
-                    : "Use current location"}
-                </span>
-              </span>
-              <ArrowIcon className="h-4 w-4 text-orange-100" />
-            </button>
-            {locationError ? (
-              <p className="mt-3 text-xs font-semibold text-orange-100">
-                {locationError}
-              </p>
-            ) : null}
-          </Card>
-        </div>
-      </Motion.section>
+      <div className="clean-stack">
+        <Hero
+          firstName={firstName}
+          restaurant={heroRestaurant}
+          highlights={feed.highlights || {}}
+          search={filters.search}
+          onSearchChange={(event) => filters.setSearch(event.target.value)}
+          onSearchSubmit={handleSearch}
+          location={location}
+          locationStatus={locationStatus}
+          locationError={locationError}
+          requestLocation={requestLocation}
+          clearLocation={clearLocation}
+        />
 
-      <Motion.form
-        {...fadeUp}
-        onSubmit={handleSearchSubmit}
-        className="sticky top-[68px] z-30 -mx-2 rounded-[24px] bg-[#fafaf8]/92 px-2 py-2 backdrop-blur-xl sm:top-[72px]"
-      >
-        <div className="relative">
-          <SearchIcon className="absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-stone-400" />
-          <input
-            type="search"
-            value={filters.search}
-            onChange={(event) => filters.setSearch(event.target.value)}
-            placeholder="Search restaurants, dishes, cuisines..."
-            className="h-[60px] w-full rounded-[20px] border border-[#e8dfd2] bg-white py-4 pl-[52px] pr-24 text-base font-bold text-stone-950 shadow-[0_18px_55px_-42px_rgba(15,23,42,0.55)] outline-none transition placeholder:text-stone-400 focus:border-orange-400 focus:ring-4 focus:ring-orange-100"
+        <section className="clean-info-grid">
+          <InfoCard
+            icon={<CoinIcon className="h-5 w-5" />}
+            eyebrow={`${String(loyalty?.tier || "Bronze").toLowerCase()} member`}
+            title={`${Number(loyalty?.points || 0).toLocaleString()} NearCoins`}
+            description="Your rewards and redemption balance"
+            action="View"
+            onClick={() => navigate(appRoutes.customerProfile)}
           />
-          <button
-            type="submit"
-            className="absolute right-2 top-1/2 inline-flex h-11 -translate-y-1/2 items-center justify-center rounded-2xl bg-orange-600 px-4 text-sm font-black text-white transition hover:bg-orange-700"
-          >
-            Search
-          </button>
-        </div>
-      </Motion.form>
+          <InfoCard
+            icon={<MealIcon className="h-5 w-5" />}
+            eyebrow={`${tiffins.length || 0} providers`}
+            title="Daily tiffin plans"
+            description={tiffinMinPrice ? `Home-style meals from ${formatCurrency(tiffinMinPrice)}` : "Fresh home-style meals delivered daily"}
+            action="Explore"
+            onClick={() => navigate(appRoutes.customerTiffin)}
+          />
+          <InfoCard
+            accent
+            icon={<GameIcon className="h-5 w-5" />}
+            eyebrow={promo?.code || "NearBites extras"}
+            title={promoTitle}
+            description="Offers, food games and NearCoins rewards"
+            action="Open"
+            onClick={() => navigate(promos.length ? appRoutes.customerSearch : appRoutes.customerGames)}
+          />
+        </section>
 
-      <RewardStrip loyalty={loyaltyInfo} />
-
-      {promos.length > 0 ? (
-        <SectionWrapper
-          eyebrow="Today"
-          title="Restaurant offers"
-          subtitle="Fresh deals from restaurants near you."
-          action={
-            <Button size="sm" variant="secondary" onClick={openOffers}>
-              View deals
-            </Button>
-          }
-        >
-          <div className="scrollbar-hide -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:px-0">
-            {promos.slice(0, 8).map((promo, index) => (
-              <div key={promo._id || `${promo.code}-${index}`} className="snap-start">
-                <OfferCard promo={promo} index={index} />
-              </div>
-            ))}
-          </div>
-        </SectionWrapper>
-      ) : null}
-
-      <DecisionWheelCard
-        restaurants={topRatedRestaurants.length > 0 ? topRatedRestaurants : filteredRestaurants}
-        popularDishes={popularDishes}
-      />
-
-      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <QuickActionCard
-          title="Tiffin Service"
-          subtitle={
-            tiffins.length > 0
-              ? `${tiffins.length} provider${tiffins.length === 1 ? "" : "s"}${tiffinMinPrice ? ` from ${formatCurrency(tiffinMinPrice)}` : ""}`
-              : "Daily meal plans from active providers"
-          }
-          icon="🍱"
-          highlight
-          badge={tiffins.length > 0 ? `${tiffins.length} live` : null}
-          onClick={() => navigate(appRoutes.customerTiffin)}
-        />
-        <QuickActionCard
-          title="Order Food"
-          subtitle={`${feed.highlights.activeRestaurantCount || 0} restaurant${
-            feed.highlights.activeRestaurantCount === 1 ? "" : "s"
-          } available`}
-          icon="🍔"
-          onClick={focusFood}
-        />
-        <QuickActionCard
-          title="Favorites"
-          subtitle={`${favoriteIds.length || 0} saved place${
-            favoriteIds.length === 1 ? "" : "s"
-          }`}
-          icon="★"
-          onClick={() => navigate(appRoutes.customerFavorites)}
-        />
-        <QuickActionCard
-          title="Offers"
-          subtitle={
-            promos.length > 0
-              ? `${promos.length} active offer${promos.length === 1 ? "" : "s"}`
-              : "Browse restaurants with current deals"
-          }
-          icon="%"
-          onClick={openOffers}
-        />
-      </section>
-
-      <SectionWrapper title="Categories" subtitle="Pick a craving.">
-        <div className="scrollbar-hide flex gap-3 overflow-x-auto pb-1">
-          {categoryOptions.map((category) => {
-            const active = activeCategory === category.label;
-            return (
-              <button
-                key={category.label}
-                type="button"
-                onClick={() => handleCategory(category.label)}
-                className={[
-                  "flex shrink-0 items-center gap-2 rounded-[18px] border px-4 py-3 text-sm font-black transition",
-                  active
-                    ? "border-orange-600 bg-orange-600 text-white shadow-[0_16px_32px_-24px_rgba(234,88,12,0.9)]"
-                    : "border-[#eee7dc] bg-white text-stone-700 hover:border-orange-200 hover:text-orange-700",
-                ].join(" ")}
-              >
-                <span aria-hidden="true">{getCategoryIcon(category.label)}</span>
-                <span>{category.label}</span>
-                {category.count > 0 ? (
-                  <span
-                    className={[
-                      "rounded-full px-2 py-0.5 text-[11px]",
-                      active ? "bg-white/20 text-white" : "bg-stone-100 text-stone-500",
-                    ].join(" ")}
-                  >
-                    {category.count}
-                  </span>
-                ) : null}
+        <section className="clean-cuisine-section">
+          <SectionHeading eyebrow="Browse by cuisine" title="What are you craving?" />
+          <div className="clean-categories">
+            {categories.map((label) => (
+              <button key={label} type="button" className={activeCategory === label ? "active" : ""} onClick={() => handleCategory(label)}>
+                <span dangerouslySetInnerHTML={{ __html: CATEGORY_ICONS[label] || "&#127860;" }} />
+                {label}
               </button>
-            );
-          })}
-        </div>
-      </SectionWrapper>
+            ))}
+          </div>
+        </section>
 
-      <SectionWrapper
-        id="recommended-restaurants"
-        eyebrow={restaurantMode === "top-rated" ? "Top rated" : "Recommended"}
-        title={
-          restaurantMode === "top-rated"
-            ? "Top rated near you"
-            : "Restaurants for you"
-        }
-        subtitle={
-          restaurantMode === "top-rated"
-            ? "Sorted by rating."
-            : hasActiveFilters
-            ? `${showcaseRestaurants.length} result${
-                showcaseRestaurants.length === 1 ? "" : "s"
-              } match your filters`
-            : "Picked from the live feed."
-        }
-        action={
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setRestaurantMode("recommended")}
-              className={`rounded-full px-4 py-2 text-sm font-black transition ${
-                restaurantMode === "recommended"
-                  ? "bg-orange-600 text-white shadow-[0_16px_28px_-20px_rgba(234,88,12,0.9)]"
-                  : "border border-orange-200 bg-white text-orange-700 hover:bg-orange-50"
-              }`}
-            >
-              Recommended
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setRestaurantMode("top-rated");
-                filters.setSortBy("rating_desc");
-              }}
-              className={`rounded-full px-4 py-2 text-sm font-black transition ${
-                restaurantMode === "top-rated"
-                  ? "bg-stone-950 text-white shadow-[0_16px_28px_-20px_rgba(15,23,42,0.9)]"
-                  : "border border-[#e6ded1] bg-white text-stone-700 hover:bg-stone-50"
-              }`}
-            >
-              Top rated
-            </button>
-            {hasActiveFilters ? (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="rounded-full border border-orange-200 bg-white px-4 py-2 text-sm font-black text-orange-700 transition hover:bg-orange-50"
-              >
-                Clear filters
-              </button>
-            ) : null}
-          </div>
-        }
-      >
-        {loading ? (
-          <SectionSkeleton cards={6} />
-        ) : error ? (
-          <EmptyPanel
-            title="Restaurants could not load"
-            description={error}
-            action={<Button onClick={loadDiscovery}>Retry</Button>}
-          />
-        ) : showcaseRestaurants.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {showcaseRestaurants.map((restaurant, index) => (
-              <RestaurantTile
-                key={restaurant._id}
-                restaurant={restaurant}
-                index={index}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyPanel
-            title="No restaurants found"
-            description="Try another category or search for a different craving."
-            action={
-              <Button variant="secondary" onClick={clearFilters}>
-                Reset
-              </Button>
-            }
-          />
-        )}
-      </SectionWrapper>
+        <DecisionLab
+          restaurants={restaurants}
+          dishes={popularDishes}
+          onOpenRestaurant={(restaurant) => navigate(getCustomerRestaurantRoute(restaurant._id))}
+        />
 
-      <SectionWrapper
-        eyebrow="Live"
-        title="Popular near you"
-        subtitle="Live picks from the feed."
-      >
-        {loading ? (
-          <SectionSkeleton cards={3} />
-        ) : popularDishes.length > 0 ? (
-          <div className="scrollbar-hide flex gap-4 overflow-x-auto pb-1 md:grid md:grid-cols-2 md:overflow-visible xl:grid-cols-3">
-            {popularDishes.map((dish, index) => (
-              <DishTile key={dish._id} dish={dish} index={index} />
-            ))}
-          </div>
-        ) : popularRestaurants.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {popularRestaurants.map((restaurant, index) => (
-              <RestaurantTile
-                key={restaurant._id}
-                restaurant={restaurant}
-                index={index}
-              />
-            ))}
-          </div>
-        ) : (
-          <EmptyPanel
-            title="Nothing trending yet"
-            description="Popular dishes will appear here as real orders come in."
+        {popularDishes.length > 0 ? (
+          <section className="clean-popular-section">
+            <SectionHeading eyebrow="Popular right now" title="People nearby are ordering" action={<Link to={appRoutes.customerSearch}>See all</Link>} />
+            <div className="clean-dish-row">{popularDishes.map((dish) => <DishCard key={dish._id} dish={dish} />)}</div>
+          </section>
+        ) : null}
+
+        <section id="restaurants">
+          <SectionHeading
+            eyebrow={`${feed.highlights?.activeRestaurantCount || restaurants.length} restaurants open`}
+            title={activeCategory === "All" ? "Restaurants near you" : `${activeCategory} near you`}
+            action={<Link to={appRoutes.customerSearch}>See all</Link>}
           />
-        )}
-      </SectionWrapper>
+          {loading ? (
+            <RestaurantSkeleton />
+          ) : error ? (
+            <div className="clean-empty"><h3>Restaurants could not load</h3><p>{error}</p><Button onClick={loadDiscovery}>Retry</Button></div>
+          ) : restaurants.length ? (
+            <div className="clean-restaurant-grid">
+              {restaurants.map((restaurant) => (
+                <RestaurantCard
+                  key={restaurant._id}
+                  restaurant={restaurant}
+                  favorite={favoriteIds.includes(String(restaurant._id))}
+                  pending={isPending(restaurant._id)}
+                  onFavorite={handleFavorite}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="clean-empty"><h3>No restaurants found</h3><p>Try another cuisine or search.</p><Button onClick={() => handleCategory("All")}>Show all</Button></div>
+          )}
+        </section>
+      </div>
     </div>
   );
 };

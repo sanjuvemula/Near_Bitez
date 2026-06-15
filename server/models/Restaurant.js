@@ -65,6 +65,42 @@ const restaurantSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    location: {
+      lat: { type: Number, default: null },
+      lng: { type: Number, default: null },
+    },
+    deliveryRadiusKm: {
+      type: Number,
+      default: 5,
+      min: 1,
+      max: 50,
+    },
+    baseDeliveryFee: {
+      type: Number,
+      default: 40,
+      min: 0,
+      max: 1000,
+    },
+    freeDeliveryAbove: {
+      type: Number,
+      default: 500,
+      min: 0,
+      max: 100000,
+    },
+    isSelfDelivery: {
+      type: Boolean,
+      default: true,
+    },
+    extraTiers: {
+      type: [
+        {
+          fromKm: { type: Number, required: true, min: 0 },
+          toKm: { type: Number, required: true, min: 0 },
+          extraCharge: { type: Number, required: true, min: 0 },
+        },
+      ],
+      default: [],
+    },
 
     // ── Tiffin fields ──────────────────────────────────────────────────────
     tiffinAvailable: {

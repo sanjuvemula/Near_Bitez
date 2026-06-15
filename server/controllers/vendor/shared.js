@@ -4,6 +4,7 @@ import { ORDER_STATUSES } from "../../models/Order.js";
 import { cloudinary } from "../../middleware/upload.js";
 
 export const LIVE_ORDER_STATUSES = [
+  "SCHEDULED",
   "PLACED",
   "ACCEPTED",
   "PREPARING",
