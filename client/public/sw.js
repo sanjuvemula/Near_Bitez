@@ -1,7 +1,6 @@
-const CACHE_NAME = "nearbites-shell-v1";
+const CACHE_NAME = "nearbites-shell-v2";
 const APP_SHELL = [
   "/",
-  "/app",
   "/manifest.webmanifest",
   "/favicon.svg",
 ];
@@ -35,11 +34,15 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
+          if (!response || !response.ok) {
+            return caches.match("/").then((cached) => cached || response);
+          }
+
           const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("/app", copy));
+          caches.open(CACHE_NAME).then((cache) => cache.put("/", copy));
           return response;
         })
-        .catch(() => caches.match("/app").then((cached) => cached || caches.match("/")))
+        .catch(() => caches.match("/"))
     );
     return;
   }

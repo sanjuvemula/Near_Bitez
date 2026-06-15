@@ -2,7 +2,7 @@
   "name": "NearBites",
   "short_name": "NearBites",
   "description": "Food delivery with rewards, games, live tracking, and NearCoins.",
-  "start_url": "/app",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
