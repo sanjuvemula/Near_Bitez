@@ -1,4 +1,4 @@
-// ─── NearBites Profanity Filter ───────────────────────────────────────────────
+// ─── NearBitez Profanity Filter ───────────────────────────────────────────────
 // Blocks common English + Hindi abusive words, replaces with ***
 
 const BAD_WORDS = [

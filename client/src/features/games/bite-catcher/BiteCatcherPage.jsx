@@ -104,7 +104,7 @@ const BiteCatcherPage = memo(function BiteCatcherPage() {
 
         <div className="min-w-[160px] flex-1 px-1">
           <p className="text-[10px] font-black uppercase tracking-[0.16em] text-cyan-100/70">
-            NearBites Arcade
+            NearBitez Arcade
           </p>
           <h1 className="truncate text-xl font-black leading-tight sm:text-2xl">
             Bite Catcher

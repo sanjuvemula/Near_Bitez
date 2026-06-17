@@ -2206,7 +2206,7 @@ const AdminDashboard = () => {
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex min-w-0 flex-col gap-3 lg:flex-row lg:items-center">
             <div className="shrink-0">
-              <p className="text-sm font-bold text-gray-900">NearBites Admin</p>
+              <p className="text-sm font-bold text-gray-900">NearBitez Admin</p>
               <p className="text-xs text-gray-400">{user.email}</p>
             </div>
             <nav className="flex gap-1 overflow-x-auto pb-1 lg:ml-4 lg:flex-wrap lg:overflow-visible lg:pb-0">

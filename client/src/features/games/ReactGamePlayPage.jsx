@@ -939,7 +939,7 @@ const FoodMemoryGame = ({ restaurants, popularDishes, onComplete }) => {
             ].join(" ")}
           >
             <span className="line-clamp-2">
-              {card.flipped || card.matched ? card.label : "NearBites"}
+              {card.flipped || card.matched ? card.label : "NearBitez"}
             </span>
           </button>
         ))}
@@ -2800,7 +2800,7 @@ const ReactGamePlayPage = ({ routeGameKey }) => {
               {postOrderMode ? `Order #${orderId?.slice(-6)}` : "Game Mode"}
             </p>
             <h1 className="truncate text-xl font-black sm:text-2xl">
-              {activeGame?.title || "NearBites Game"}
+              {activeGame?.title || "NearBitez Game"}
             </h1>
           </div>
 
@@ -2873,7 +2873,7 @@ const ReactGamePlayPage = ({ routeGameKey }) => {
             ) : null}
 
             {booting || gamesLoading ? (
-              <GameBootLoader title={activeGame?.title || "NearBites Game"} />
+              <GameBootLoader title={activeGame?.title || "NearBitez Game"} />
             ) : restaurantLoading ? (
               <div className="space-y-3">
                 <Skeleton className="h-56 rounded-[24px]" />

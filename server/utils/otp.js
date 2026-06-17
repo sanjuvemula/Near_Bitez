@@ -40,14 +40,14 @@ export const verifyOTP = (email, otp) => {
 
 export const sendOTPEmail = async (email, otp, name = "") => {
   await resend.emails.send({
-    from: "NearBites <onboarding@resend.dev>",
+    from: "NearBitez <onboarding@resend.dev>",
     to: email,
-    subject: "Your NearBites verification code",
+    subject: "Your NearBitez verification code",
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px; background: #fff;">
         <div style="text-align: center; margin-bottom: 32px;">
           <div style="background: #ea580c; display: inline-block; padding: 12px 20px; border-radius: 12px;">
-            <span style="color: white; font-size: 20px; font-weight: 900;">NearBites</span>
+            <span style="color: white; font-size: 20px; font-weight: 900;">NearBitez</span>
           </div>
         </div>
         
@@ -55,7 +55,7 @@ export const sendOTPEmail = async (email, otp, name = "") => {
           ${name ? `Hi ${name},` : "Hi there,"}
         </h1>
         <p style="color: #555; font-size: 15px; line-height: 1.6; margin-bottom: 32px;">
-          Your verification code for NearBites is:
+          Your verification code for NearBitez is:
         </p>
         
         <div style="background: #fff7ed; border: 2px solid #fed7aa; border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 32px;">

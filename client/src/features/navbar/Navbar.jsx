@@ -260,7 +260,7 @@ const Navbar = () => {
       : location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   const handleLogout = async () => {
-    if (!window.confirm("Log out from NearBites?")) return;
+    if (!window.confirm("Log out from NearBitez?")) return;
     await logout();
     navigate(appRoutes.customerLogin, { replace: true });
   };
@@ -280,15 +280,15 @@ const Navbar = () => {
         ].join(" ")}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-          <Link to={appRoutes.publicHome} className="flex items-center gap-3 no-underline">
+          <Link to={appRoutes.publicHome} className="flex min-w-0 items-center gap-2 no-underline sm:gap-3">
             <span className="flex h-10 w-10 items-center justify-center rounded-[18px] bg-orange-600 text-base font-black text-white shadow-[0_16px_32px_-24px_rgba(234,88,12,0.9)]">
               N
             </span>
-            <span className="hidden sm:block">
-              <span className="block text-lg font-black text-stone-950">
-                Near<span className="text-orange-600">Bites</span>
+            <span className="block min-w-0">
+              <span className="block truncate text-base font-black text-stone-950 sm:text-lg">
+                Near<span className="text-orange-600">Bitez</span>
               </span>
-              <span className="block text-[10px] font-black uppercase tracking-[0.14em] text-stone-400">
+              <span className="hidden text-[10px] font-black uppercase tracking-[0.14em] text-stone-400 sm:block">
                 Food delivery
               </span>
             </span>
@@ -369,7 +369,7 @@ const Navbar = () => {
             >
               <div className="mb-5 flex items-center justify-between">
                 <span className="text-xl font-black text-stone-950">
-                  Near<span className="text-orange-600">Bites</span>
+                  Near<span className="text-orange-600">Bitez</span>
                 </span>
                 <button
                   type="button"

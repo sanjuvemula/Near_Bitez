@@ -699,7 +699,7 @@ const SearchPage = () => {
               letterSpacing: "-0.01em",
             }}
           >
-            Search NearBites
+            Search NearBitez
           </p>
           <p
             style={{

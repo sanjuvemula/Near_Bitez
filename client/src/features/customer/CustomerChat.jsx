@@ -576,7 +576,7 @@ const CustomerChat = ({ restaurantId, restaurantName, onClose }) => {
           </motion.button>
         </div>
         <p className="text-[9px] text-gray-300 text-center mt-1.5">
-          🍽️ NearBites · Messages are end-to-end private
+          🍽️ NearBitez · Messages are end-to-end private
         </p>
       </div>
     </motion.div>

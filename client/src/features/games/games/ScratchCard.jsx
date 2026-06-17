@@ -144,7 +144,7 @@ const ScratchCard = ({ order, onScore }) => {
               <p className="text-[11px] font-black uppercase text-orange-600">Reward</p>
               <h2 className="mt-2 text-4xl font-black text-stone-950">{reward?.label || "Mystery reward"}</h2>
               <p className="mt-3 text-sm font-bold text-stone-500">
-                {reward?.code ? `Code: ${reward.code}` : reward?.restaurant || "NearBites"}
+                {reward?.code ? `Code: ${reward.code}` : reward?.restaurant || "NearBitez"}
               </p>
             </div>
           </div>

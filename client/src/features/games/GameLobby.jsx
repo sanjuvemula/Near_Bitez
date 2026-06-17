@@ -336,7 +336,7 @@ const GameLobby = ({ order = null, onClose, onOutForDelivery }) => {
               ) : null}
               <div>
                 <p className="text-[11px] font-black uppercase text-orange-600">Game lobby</p>
-                <h1 className="text-2xl font-black text-stone-950">NearBites Gaming Zone</h1>
+                <h1 className="text-2xl font-black text-stone-950">NearBitez Gaming Zone</h1>
               </div>
             </div>
             <div className="flex flex-wrap gap-3">

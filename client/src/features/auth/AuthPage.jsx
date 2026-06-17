@@ -269,7 +269,7 @@ const AuthPage = ({ mode, role }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </span>
-              <span className="text-2xl font-black tracking-tight text-gray-900">NearBites</span>
+              <span className="text-2xl font-black tracking-tight text-gray-900">NearBitez</span>
             </Link>
             <Link to={appRoutes.publicHome} className="text-sm font-bold text-gray-500 transition hover:text-orange-600">
               Continue browsing

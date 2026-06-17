@@ -51,6 +51,8 @@ const getYesterdayIstDate = () => {
 const app = express();
 const httpServer = createServer(app);
 
+app.set("trust proxy", 1);
+
 app.use(cors(corsOptions));
 app.use(helmet());
 app.use(cookieParser());
@@ -62,7 +64,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 app.get("/api/v1/health", (req, res) => {
-  res.status(200).json({ success: true, message: "NearBites API is running" });
+  res.status(200).json({ success: true, message: "NearBitez API is running" });
 });
 
 app.use("/api/v1/auth",        authRoutes);
@@ -122,7 +124,7 @@ const startServer = async () => {
     });
 
     httpServer.listen(port, () => {
-      console.log(`NearBites API listening on port ${port}`);
+      console.log(`NearBitez API listening on port ${port}`);
     });
   } catch (error) {
     console.error(error.message);
@@ -131,7 +133,6 @@ const startServer = async () => {
 };
 
 startServer();
-
 
 
 

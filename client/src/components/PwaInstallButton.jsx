@@ -41,7 +41,7 @@ const PwaInstallButton = () => {
           onClick={install}
           className="fixed bottom-[94px] right-4 z-50 rounded-[18px] border border-orange-200 bg-white px-4 py-3 text-sm font-black text-orange-700 shadow-[0_24px_70px_-42px_rgba(234,88,12,0.85)] lg:bottom-5"
         >
-          Install NearBites
+          Install NearBitez
         </Motion.button>
       ) : null}
     </AnimatePresence>

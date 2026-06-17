@@ -264,7 +264,7 @@ const Sidebar = ({ user, cartCount, onLogout }) => {
         </span>
         <span>
           <span className="block text-xl font-black text-stone-950">
-            Near<span className="text-orange-600">Bites</span>
+            Near<span className="text-orange-600">Bitez</span>
           </span>
           <span className="block text-[10px] font-black uppercase tracking-[0.14em] text-stone-400">
             Customer
@@ -339,7 +339,7 @@ const Drawer = ({ open, user, cartCount, onClose, onLogout }) => (
         >
           <div className="mb-5 flex items-center justify-between">
             <Link to={appRoutes.customerHome} onClick={onClose} className="text-xl font-black text-stone-950 no-underline">
-              Near<span className="text-orange-600">Bites</span>
+              Near<span className="text-orange-600">Bitez</span>
             </Link>
             <button
               type="button"
@@ -527,7 +527,7 @@ const CustomerShell = () => {
   const cartCount = cart?.totals?.totalItems || 0;
 
   const handleLogout = async () => {
-    if (!window.confirm("Sign out of NearBites?")) return;
+    if (!window.confirm("Sign out of NearBitez?")) return;
     await logout();
     navigate(appRoutes.customerLogin, { replace: true });
   };
@@ -561,7 +561,7 @@ const CustomerShell = () => {
             </button>
 
             <Link to={appRoutes.customerHome} className="text-xl font-black text-stone-950 no-underline lg:hidden">
-              Near<span className="text-orange-600">Bites</span>
+              Near<span className="text-orange-600">Bitez</span>
             </Link>
 
             <p className="hidden flex-1 truncate text-sm font-bold text-stone-500 lg:block">

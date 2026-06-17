@@ -335,6 +335,91 @@ const DIET = [
 ];
 
 // ─── Main Component ────────────────────────────────────────────────────────────
+const PUBLIC_OPTIONS = [
+  {
+    title: "Order as customer",
+    description: "Browse live restaurant menus, save favorites, and checkout faster.",
+    to: appRoutes.customerRegister,
+    action: "Create account",
+  },
+  {
+    title: "Restaurant partner",
+    description: "Open a vendor dashboard for menu, orders, promos, and payouts.",
+    to: appRoutes.vendorRegister,
+    action: "Start selling",
+  },
+  {
+    title: "Daily tiffin plans",
+    description: "Find home-style weekly and monthly meal options near you.",
+    to: appRoutes.customerLogin,
+    action: "Explore tiffins",
+  },
+  {
+    title: "Rewards and games",
+    description: "Play food games, collect NearCoins, and unlock offer codes.",
+    to: appRoutes.customerLogin,
+    action: "Unlock rewards",
+  },
+];
+
+const PUBLIC_STEPS = [
+  { label: "Find", text: "Search restaurants, cuisines, dishes, or tiffin plans around your area." },
+  { label: "Choose", text: "Compare live menus, ratings, delivery time, prices, and dietary filters." },
+  { label: "Track", text: "Sign in to checkout, track orders, chat with restaurants, and earn rewards." },
+];
+
+const PublicHomeExtras = ({ feed }) => {
+  const highlights = feed.highlights || {};
+  const metrics = [
+    { value: highlights.activeRestaurantCount || 0, label: "restaurants live" },
+    { value: highlights.availableDishCount || 0, label: "dishes available" },
+    { value: highlights.averageDeliveryTime ? `${highlights.averageDeliveryTime} min` : "Fast", label: "average delivery" },
+  ];
+
+  return (
+    <div className="nb-public-stack">
+      <section className="nb-option-grid" aria-label="NearBitez options">
+        {PUBLIC_OPTIONS.map((option) => (
+          <Link key={option.title} to={option.to} className="nb-option-card">
+            <span>{option.title}</span>
+            <strong>{option.description}</strong>
+            <small>{option.action}</small>
+          </Link>
+        ))}
+      </section>
+
+      <section className="nb-public-info">
+        <div>
+          <p>Why NearBitez</p>
+          <h2>Everything you need before your first order.</h2>
+          <span>
+            Check real restaurant data, compare food options, then sign in only when you are ready to save,
+            checkout, chat, or earn rewards.
+          </span>
+        </div>
+        <div className="nb-public-metrics">
+          {metrics.map((metric) => (
+            <div key={metric.label}>
+              <strong>{metric.value}</strong>
+              <span>{metric.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="nb-step-grid" aria-label="How NearBitez works">
+        {PUBLIC_STEPS.map((step, index) => (
+          <div key={step.label} className="nb-step-card">
+            <small>{String(index + 1).padStart(2, "0")}</small>
+            <strong>{step.label}</strong>
+            <span>{step.text}</span>
+          </div>
+        ))}
+      </section>
+    </div>
+  );
+};
+
 const RestaurantDiscoveryView = ({ variant = "public" }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -378,6 +463,47 @@ const RestaurantDiscoveryView = ({ variant = "public" }) => {
           font-family: 'Plus Jakarta Sans', sans-serif;
           font-size: 13px; font-weight: 600; color: #444; cursor: pointer;
         }
+        .nb-public-stack { display: grid; gap: 18px; margin-bottom: 24px; }
+        .nb-option-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+        .nb-option-card {
+          display: flex; min-height: 150px; flex-direction: column; justify-content: space-between;
+          border: 1px solid #f0ddd0; border-radius: 18px; padding: 18px;
+          background: linear-gradient(135deg,#fff,#fff8f1); color: #251b16; text-decoration: none;
+          box-shadow: 0 20px 46px -42px rgba(74,32,10,.55); transition: transform .18s ease, border-color .18s ease;
+        }
+        .nb-option-card:nth-child(2) { background: linear-gradient(135deg,#fff,#fff1f2); }
+        .nb-option-card:nth-child(3) { background: linear-gradient(135deg,#fff,#f0fdf4); }
+        .nb-option-card:nth-child(4) { background: linear-gradient(135deg,#251b16,#3b261b); color: #fff; border-color: #2f2119; }
+        .nb-option-card:hover { transform: translateY(-3px); border-color: #fb923c; }
+        .nb-option-card span { color: #ea580c; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .12em; }
+        .nb-option-card:nth-child(4) span { color: #fdba74; }
+        .nb-option-card strong { display: block; margin-top: 12px; font-size: 18px; font-weight: 900; line-height: 1.25; }
+        .nb-option-card small { margin-top: 18px; color: inherit; font-size: 12px; font-weight: 900; opacity: .76; }
+        .nb-public-info {
+          display: grid; gap: 18px; align-items: center; border: 1px solid #eadbd0;
+          border-radius: 22px; padding: 22px; background: linear-gradient(135deg,#fffaf5,#ffffff);
+        }
+        .nb-public-info p { margin: 0 0 8px; color: #ea580c; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .14em; }
+        .nb-public-info h2 { margin: 0; color: #211915; font-size: 28px; font-weight: 900; line-height: 1.1; }
+        .nb-public-info div > span { display: block; margin-top: 10px; max-width: 680px; color: #7c6f64; font-size: 14px; font-weight: 650; line-height: 1.65; }
+        .nb-public-metrics { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .nb-public-metrics div { border-radius: 16px; background: #fff; border: 1px solid #f0e4dc; padding: 14px; }
+        .nb-public-metrics strong, .nb-public-metrics span { display: block; }
+        .nb-public-metrics strong { color: #211915; font-size: 22px; font-weight: 900; }
+        .nb-public-metrics span { margin-top: 4px; color: #9a8c84; font-size: 10px; font-weight: 900; text-transform: uppercase; }
+        .nb-step-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+        .nb-step-card { border: 1px solid #eadbd0; border-radius: 18px; padding: 18px; background: #fff; }
+        .nb-step-card small { color: #f97316; font-size: 11px; font-weight: 900; }
+        .nb-step-card strong { display: block; margin-top: 9px; color: #211915; font-size: 18px; font-weight: 900; }
+        .nb-step-card span { display: block; margin-top: 7px; color: #82766f; font-size: 13px; font-weight: 650; line-height: 1.55; }
+        @media (min-width: 820px) {
+          .nb-public-info { grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); }
+        }
+        @media (max-width: 520px) {
+          .nb-public-info { padding: 18px; }
+          .nb-public-info h2 { font-size: 23px; }
+          .nb-public-metrics { grid-template-columns: 1fr; }
+        }
       `}</style>
 
       {/* ── Public Hero (only on public/landing page) ── */}
@@ -401,7 +527,7 @@ const RestaurantDiscoveryView = ({ variant = "public" }) => {
           }}>
             <div>
               <p style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.18em", textTransform: "uppercase", color: "#e8380d", marginBottom: 10 }}>
-                NearBites
+                NearBitez
               </p>
               <h1 style={{ fontSize: 34, fontWeight: 900, color: "#1c1c1c", lineHeight: 1.2, letterSpacing: "-0.02em", margin: 0 }}>
                 Real restaurants,<br />
@@ -442,6 +568,8 @@ const RestaurantDiscoveryView = ({ variant = "public" }) => {
       )}
 
       {/* ── Customer Page Header (replaces duplicate topbar greeting) ── */}
+      {!isCustomer && <PublicHomeExtras feed={feed} />}
+
       {isCustomer && (
         <div style={{ marginBottom: 20 }}>
           <h1 style={{

@@ -527,7 +527,7 @@ const CustomerHome = () => {
           <InfoCard
             accent
             icon={<GameIcon className="h-5 w-5" />}
-            eyebrow={promo?.code || "NearBites extras"}
+            eyebrow={promo?.code || "NearBitez extras"}
             title={promoTitle}
             description="Offers, food games and NearCoins rewards"
             action="Open"

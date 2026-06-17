@@ -49,7 +49,7 @@ const PublicLayout = () => (
 
 const LandingRoute = () => {
   const { authReady, loading, user } = useAuth();
-  if (!authReady || loading) return <Loader label="Preparing NearBites..." />;
+  if (!authReady || loading) return <Loader label="Preparing NearBitez..." />;
   if (user?.role === "admin")    return <Navigate to="/admin" replace />;
   if (user?.role === "customer") return <Navigate to={appRoutes.customerHome} replace />;
   if (user?.role === "vendor")   return <Navigate to={appRoutes.vendorDashboard} replace />;
@@ -70,7 +70,7 @@ function App() {
   return (
     <BrowserRouter>
       <NotificationProvider>
-        <Suspense fallback={<Loader label="Loading NearBites..." />}>
+        <Suspense fallback={<Loader label="Loading NearBitez..." />}>
           <Routes>
             {/* ── Auth ── */}
             <Route path={appRoutes.customerLogin}    element={<CustomerLogin />} />

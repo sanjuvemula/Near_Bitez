@@ -1,6 +1,6 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import passport from "../config/passport.js";
+import passport, { isGoogleAuthConfigured } from "../config/passport.js";
 import {
   getMe,
   loginCustomer,
@@ -20,15 +20,9 @@ import {
 import { getPrimaryClientUrl } from "../config/cors.js";
 import { authorize, protect } from "../middleware/auth.js";
 import { ensureAdminRole, getEffectiveRole } from "../utils/adminAccess.js";
+import { getAuthCookieOptions } from "../utils/authCookies.js";
 
 const router = express.Router();
-
-const cookieOptions = {
-  httpOnly: true,
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-  secure: process.env.NODE_ENV === "production",
-  maxAge: 30 * 24 * 60 * 60 * 1000,
-};
 
 // Normal auth
 router.post("/customer/register", registerCustomer);
@@ -48,15 +42,27 @@ router.get("/favorites", protect, authorize("customer", "admin"), getFavoriteRes
 router.put("/favorites/:restaurantId", protect, authorize("customer", "admin"), addFavoriteRestaurant);
 router.delete("/favorites/:restaurantId", protect, authorize("customer", "admin"), removeFavoriteRestaurant);
 
-// Google OAuth
-router.get("/google", passport.authenticate("google", { scope: ["profile", "email"], session: false }));
-
 const clientRedirect = (path) => `${getPrimaryClientUrl()}${path}`;
 
+// Google OAuth
+router.get("/google", (req, res, next) => {
+  if (!isGoogleAuthConfigured()) {
+    res.redirect(clientRedirect("/customer/login?oauth=google_not_configured"));
+    return;
+  }
+
+  passport.authenticate("google", { scope: ["profile", "email"], session: false })(req, res, next);
+});
+
 router.get("/google/callback", (req, res, next) => {
+  if (!isGoogleAuthConfigured()) {
+    res.redirect(clientRedirect("/customer/login?oauth=google_not_configured"));
+    return;
+  }
+
   passport.authenticate("google", { session: false }, async (error, user) => {
     if (error || !user) {
-      res.redirect(clientRedirect("/customer/login"));
+      res.redirect(clientRedirect("/customer/login?oauth=google_failed"));
       return;
     }
 
@@ -67,7 +73,7 @@ router.get("/google/callback", (req, res, next) => {
         expiresIn: process.env.JWT_EXPIRE || "30d",
       });
 
-      res.cookie("token", token, cookieOptions);
+      res.cookie("token", token, getAuthCookieOptions(req));
 
       const redirectMap = {
         admin: "/admin",

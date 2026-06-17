@@ -41,7 +41,7 @@ const BADGE_THRESHOLDS = [
   { type: "GAME_ROOKIE", name: "Snack Hunter", minScore: 100, points: 10, coins: 20 },
   { type: "GAME_HOT_STREAK", name: "Street Food Master", minScore: 250, points: 25, coins: 50 },
   { type: "GAME_CHAMPION", name: "Elite Food Warrior", minScore: 500, points: 50, coins: 100 },
-  { type: "NB_LEGEND", name: "NearBites Legend", minScore: 1000, points: 120, coins: 250 },
+  { type: "NB_LEGEND", name: "NearBitez Legend", minScore: 1000, points: 120, coins: 250 },
 ];
 
 const DAILY_MISSIONS = [
@@ -58,7 +58,7 @@ const LEVELS = [
   { name: "Street Food Master", minXp: 500 },
   { name: "Pro Explorer", minXp: 1200 },
   { name: "Elite Food Warrior", minXp: 2500 },
-  { name: "NearBites Legend", minXp: 5000 },
+  { name: "NearBitez Legend", minXp: 5000 },
 ];
 
 const leaderboardCache = new Map();
@@ -568,14 +568,14 @@ export const getScratchRewards = async (req, res) => {
           type: "discount",
           label: promo.discountType === "PERCENTAGE" ? `${promo.value}% off` : `Rs ${promo.value} off`,
           code: promo.code,
-          restaurant: promo.restaurant?.name || "NearBites",
+          restaurant: promo.restaurant?.name || "NearBitez",
           xp: 0,
         }
       : {
           type: "xp",
           label: "XP reward",
           code: null,
-          restaurant: "NearBites",
+          restaurant: "NearBitez",
           xp: 20,
         };
 
@@ -825,7 +825,7 @@ export const claimGameReward = async (req, res) => {
           discountType: rewardTier === "TOP" ? "PERCENTAGE" : "FLAT",
           value: rewardTier === "TOP" ? 20 : 49,
           minOrderValue: rewardTier === "TOP" ? 299 : 199,
-          restaurant: { name: "NearBites" },
+          restaurant: { name: "NearBitez" },
         },
       },
     });

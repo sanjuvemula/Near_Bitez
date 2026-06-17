@@ -10,7 +10,7 @@ const PHASER_GAME_COMPONENTS = {
   "bite-catcher": BiteCatcherPage,
 };
 
-const FullscreenGameFallback = ({ title = "NearBites Game" }) => (
+const FullscreenGameFallback = ({ title = "NearBitez Game" }) => (
   <div className="grid min-h-screen place-items-center bg-[#07111f] px-4 text-white">
     <div className="w-[min(360px,calc(100vw-48px))] text-center">
       <div className="mx-auto grid h-20 w-20 place-items-center rounded-[22px] border border-cyan-300/20 bg-cyan-300/10">

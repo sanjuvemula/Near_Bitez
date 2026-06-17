@@ -6,24 +6,21 @@ import {
   isAdminEmail,
   normalizeEmail,
 } from "../utils/adminAccess.js";
+import {
+  getAuthCookieOptions,
+  getClearAuthCookieOptions,
+} from "../utils/authCookies.js";
 import { generateOTP, saveOTP, verifyOTP, sendOTPEmail } from "../utils/otp.js";
-
-const cookieOptions = {
-  httpOnly: true,
-  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-  secure: process.env.NODE_ENV === "production",
-  maxAge: 30 * 24 * 60 * 60 * 1000,
-};
 
 const signToken = (userId) =>
   jwt.sign({ id: userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE || "30d",
   });
 
-const sendAuthResponse = async (user, statusCode, res, message) => {
+const sendAuthResponse = async (user, statusCode, req, res, message) => {
   await ensureAdminRole(user);
   const token = signToken(user._id);
-  res.status(statusCode).cookie("token", token, cookieOptions).json({
+  res.status(statusCode).cookie("token", token, getAuthCookieOptions(req)).json({
     success: true,
     message,
     user: user.toSafeObject(),
@@ -55,6 +52,7 @@ const createRegisterHandler = (role) => async (req, res) => {
     await sendAuthResponse(
       user,
       201,
+      req,
       res,
       isAdminEmail(normalizedEmail)
         ? "Admin account created successfully"
@@ -103,6 +101,7 @@ const createLoginHandler = (role) => async (req, res) => {
     await sendAuthResponse(
       user,
       200,
+      req,
       res,
       effectiveRole === "admin"
         ? "Admin login successful"
@@ -149,7 +148,7 @@ export const verifyOTPLogin = async (req, res) => {
     const user = await User.findOne({ email: normalizeEmail(email) });
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
-    await sendAuthResponse(user, 200, res, "Login successful");
+    await sendAuthResponse(user, 200, req, res, "Login successful");
   } catch (error) {
     res.status(500).json({ success: false, message: "Unable to verify OTP" });
   }
@@ -183,7 +182,7 @@ export const updateMe = async (req, res) => {
 };
 
 export const logout = async (req, res) => {
-  res.status(200).cookie("token", "", { ...cookieOptions, maxAge: 0 }).json({
+  res.status(200).cookie("token", "", getClearAuthCookieOptions(req)).json({
     success: true,
     message: "Logged out successfully",
   });
