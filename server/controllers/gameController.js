@@ -6,35 +6,13 @@ import User, { getTierFromPoints } from "../models/User.js";
 import WalletTransaction from "../models/WalletTransaction.js";
 
 export const GAME_CONFIGS = [
-  { key: "food-quiz-battle", title: "Food Quiz Battle", difficulty: "PvP", rewardType: "xp", mode: "multiplayer" },
-  { key: "tap-battle", title: "Tap Battle", difficulty: "PvP", rewardType: "coins", mode: "multiplayer" },
-  { key: "spin-clash", title: "Spin Clash", difficulty: "PvP", rewardType: "coupon", mode: "multiplayer" },
-  { key: "delivery-race", title: "Delivery Race", difficulty: "PvP", rewardType: "coins", mode: "multiplayer" },
-  { key: "memory-duel", title: "Memory Match Duel", difficulty: "PvP", rewardType: "xp", mode: "multiplayer" },
-  { key: "food-memory", title: "Food Memory Match", difficulty: "Medium", rewardType: "xp", mode: "solo" },
-  { key: "burger-stack", title: "Burger Stack", difficulty: "Medium", rewardType: "coins", mode: "solo" },
-  { key: "pizza-catcher", title: "Pizza Catcher", difficulty: "Medium", rewardType: "coins", mode: "solo" },
-  { key: "fruit-slice", title: "Fruit Slice", difficulty: "Hard", rewardType: "xp", mode: "solo" },
-  { key: "guess-the-dish", title: "Guess The Dish", difficulty: "Medium", rewardType: "xp", mode: "solo" },
-  { key: "craving-spinner", title: "Craving Spinner", difficulty: "Easy", rewardType: "coupon" },
-  { key: "delivery-race", title: "Delivery Race", difficulty: "Medium", rewardType: "coins" },
-  { key: "cook-combo", title: "Cook Combo", difficulty: "Medium", rewardType: "xp" },
-  { key: "hungry-monster", title: "Hungry Monster", difficulty: "Easy", rewardType: "streak" },
-  { key: "coupon-hunt", title: "Coupon Hunt", difficulty: "Easy", rewardType: "coupon" },
-  { key: "spin-battle", title: "Spin Battle", difficulty: "Medium", rewardType: "coins" },
-  { key: "mystery-food-box", title: "Mystery Food Box", difficulty: "Easy", rewardType: "badge" },
-  { key: "chef-boss-fight", title: "Chef Boss Fight", difficulty: "Hard", rewardType: "badge" },
-  { key: "food-snake", title: "Food Snake", difficulty: "Medium", rewardType: "coins" },
-  { key: "restaurant-empire", title: "Restaurant Empire", difficulty: "Idle", rewardType: "passive" },
-  { key: "blind-taste", title: "Blind Taste Challenge", difficulty: "Medium", rewardType: "xp" },
-  { key: "bite-catcher", title: "Pizza Catcher", difficulty: "Medium", rewardType: "coins" },
-  { key: "food-memory", title: "Food Memory", difficulty: "Medium", rewardType: "xp" },
-  { key: "tap-the-food", title: "Tap The Burger", difficulty: "Hard", rewardType: "coins" },
-  { key: "lucky-tray", title: "Lucky Card Flip", difficulty: "Easy", rewardType: "coupon" },
-  { key: "speed-quiz", title: "Food Quiz", difficulty: "Medium", rewardType: "xp" },
-  { key: "snakes-sprint", title: "Delivery Rider Runner", difficulty: "Medium", rewardType: "coins" },
-  { key: "cuisine-match", title: "Guess The Dish", difficulty: "Medium", rewardType: "xp" },
-  { key: "tray-shuffle", title: "Daily Treasure Hunt", difficulty: "Easy", rewardType: "coupon" },
+  { key: "food-quiz-battle", title: "Food Quiz Battle", difficulty: "Live PvP", rewardType: "xp", mode: "multiplayer" },
+  { key: "delivery-race", title: "Delivery Race", difficulty: "Live PvP", rewardType: "coins", mode: "multiplayer" },
+  { key: "hand-cricket", title: "Hand Cricket Night", difficulty: "Hard Bot", rewardType: "coins", mode: "bot" },
+  { key: "snakes-sprint", title: "Snakes Sprint", difficulty: "Hard Bot", rewardType: "coins", mode: "bot" },
+  { key: "bite-catcher", title: "Bite Catcher", difficulty: "Arcade", rewardType: "coins", mode: "solo" },
+  { key: "food-memory", title: "Food Memory", difficulty: "Timed", rewardType: "xp", mode: "solo" },
+  { key: "tray-shuffle", title: "Tray Shuffle", difficulty: "Timed", rewardType: "coupon", mode: "solo" },
 ];
 
 const BADGE_THRESHOLDS = [
@@ -314,6 +292,7 @@ export const addOrUpdateScore = async (req, res) => {
     );
 
     await recalculateRanks(date);
+    leaderboardCache.delete(`leaderboard:${date}`);
     const freshScore = await GameScore.findById(score._id).populate("userId", "name badges").lean();
     const badges = await maybeAwardBadges({
       req,
@@ -673,7 +652,7 @@ export const getGamesFeed = async (req, res) => {
         _id: "daily-free-delivery",
         gameKey: "any",
         gameRewardTier: "PLAY",
-        gameMinScore: 80,
+        gameMinScore: 120,
         discountType: "FLAT",
         value: 49,
         minOrderValue: 199,
@@ -683,7 +662,7 @@ export const getGamesFeed = async (req, res) => {
         _id: "legend-bonus",
         gameKey: "any",
         gameRewardTier: "TOP",
-        gameMinScore: 350,
+        gameMinScore: 600,
         discountType: "PERCENTAGE",
         value: 20,
         minOrderValue: 299,
@@ -762,7 +741,7 @@ export const claimGameReward = async (req, res) => {
       archived: false,
     }).lean();
 
-    const minScore = rewardTier === "TOP" ? 350 : 80;
+    const minScore = rewardTier === "TOP" ? 600 : 120;
     if (!todayScore || Number(todayScore.totalScore || 0) < minScore) {
       return res.status(403).json({
         success: false,

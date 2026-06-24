@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion as Motion } from "framer-motion";
-import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import Skeleton from "../../components/Skeleton.jsx";
-import { appRoutes, getCustomerGameRoute } from "../../app/routes.jsx";
+import { getCustomerGameRoute } from "../../app/routes.jsx";
 import { useUserLocation } from "../../hooks/useUserLocation.js";
 import { api } from "../../services/api.js";
+import LockedGameAccess from "./LockedGameAccess.jsx";
 import GameCard from "./components/GameCard.jsx";
 import MultiplayerBattleArena from "./components/MultiplayerBattleArena.jsx";
+import useOrderGameAccess from "./useOrderGameAccess.js";
 import {
   DEFAULT_GAME_KEY,
   GAME_GROUPS,
@@ -37,40 +39,6 @@ const ArcadeDecor = () => (
       transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
       className="absolute -left-16 bottom-20 h-56 w-56 rounded-full border border-fuchsia-200/50 bg-fuchsia-200/30 blur-2xl"
     />
-  </div>
-);
-
-const LockedGames = () => (
-  <div className="relative mx-auto max-w-4xl overflow-hidden rounded-[32px] border border-white/80 bg-[linear-gradient(135deg,#ecfeff,#fff7ed_52%,#fdf2f8)] p-6 text-center text-stone-950 shadow-[0_30px_80px_-58px_rgba(14,116,144,0.45)] sm:p-10">
-    <ArcadeDecor />
-    <div className="relative">
-      <div className="mx-auto grid h-20 w-20 place-items-center rounded-[28px] border border-cyan-200 bg-cyan-50 text-3xl font-black text-cyan-700 shadow-[0_20px_44px_-32px_rgba(14,116,144,0.55)]">
-        XP
-      </div>
-      <p className="mt-6 text-[11px] font-black uppercase tracking-[0.18em] text-teal-600">
-        Reward zone locked
-      </p>
-      <h1 className="mt-3 text-3xl font-black leading-tight sm:text-5xl">
-        Place an order to unlock the arcade.
-      </h1>
-      <p className="mx-auto mt-4 max-w-xl text-sm font-semibold leading-6 text-stone-600">
-        Gaming Zone opens as a bonus after checkout so rewards feel earned, timed, and tied to your food journey.
-      </p>
-      <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
-        <Link
-          to={appRoutes.customerHome}
-          className="rounded-[18px] bg-orange-600 px-5 py-3 text-sm font-black text-white no-underline transition hover:bg-orange-700"
-        >
-          Order food
-        </Link>
-        <Link
-          to={appRoutes.customerOrders}
-          className="rounded-[18px] border border-orange-100 bg-white px-5 py-3 text-sm font-black text-orange-700 no-underline backdrop-blur transition hover:bg-orange-50"
-        >
-          View orders
-        </Link>
-      </div>
-    </div>
   </div>
 );
 
@@ -190,6 +158,7 @@ const CustomerGamesPage = () => {
   const requestedGame = searchParams.get("game");
   const orderId = searchParams.get("orderId");
   const { location, status: locationStatus, requestLocation } = useUserLocation();
+  const access = useOrderGameAccess(orderId);
 
   const [gameFeed, setGameFeed] = useState({ games: [], rewards: [], myScores: [] });
   const [loading, setLoading] = useState(true);
@@ -199,7 +168,7 @@ const CustomerGamesPage = () => {
   const [battleGame, setBattleGame] = useState(null);
 
   const areaLabel = location?.city || "Nearby";
-  const postOrderMode = Boolean(orderId);
+  const postOrderMode = Boolean(orderId || access.order?._id);
 
   const loadGames = useCallback(async () => {
     setLoading(true);
@@ -216,15 +185,16 @@ const CustomerGamesPage = () => {
   }, [areaLabel]);
 
   useEffect(() => {
-    loadGames();
-  }, [loadGames]);
+    if (access.unlocked) loadGames();
+  }, [access.unlocked, loadGames]);
 
   const games = useMemo(() => {
-    const liveGames = Array.isArray(gameFeed.games) && gameFeed.games.length
-      ? gameFeed.games
-      : GAME_LIBRARY;
-
-    return liveGames.map(withGameTheme);
+    const liveByKey = new Map(
+      (Array.isArray(gameFeed.games) ? gameFeed.games : []).map((game) => [game.key, game])
+    );
+    return GAME_LIBRARY.map((game) =>
+      withGameTheme({ ...game, ...(liveByKey.get(game.key) || {}) })
+    );
   }, [gameFeed.games]);
 
   const filteredGames = useMemo(
@@ -236,6 +206,20 @@ const CustomerGamesPage = () => {
   );
 
   const redirectGameKey = requestedGame || "";
+  if (access.loading) {
+    return (
+      <div className="-mx-4 -my-5 min-h-[calc(100vh-4rem)] bg-[linear-gradient(180deg,#fff7ed_0%,#f0fdfa_48%,#eef2ff_100%)] px-4 py-6 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+        <div className="mx-auto max-w-5xl">
+          <Skeleton className="h-[360px] rounded-[32px]" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!access.unlocked) {
+    return <LockedGameAccess message={access.message} compact />;
+  }
+
   if (redirectGameKey) {
     const targetSlug = getGameSlug(redirectGameKey || DEFAULT_GAME_KEY);
     const target = `${getCustomerGameRoute(targetSlug)}${orderId ? `?orderId=${encodeURIComponent(orderId)}` : ""}`;
@@ -256,7 +240,7 @@ const CustomerGamesPage = () => {
         <div className="relative grid gap-5 lg:grid-cols-[minmax(0,1fr),430px] lg:items-end">
           <div>
             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-teal-600">
-              {postOrderMode ? "Order reward unlocked" : "Gaming zone open"}
+              {postOrderMode ? "Order reward unlocked" : "Arcade access unlocked"}
             </p>
             <h1 className="mt-2 text-4xl font-black leading-tight text-stone-950 sm:text-6xl">
               Gaming Zone
@@ -264,7 +248,7 @@ const CustomerGamesPage = () => {
             <p className="mt-3 max-w-2xl text-sm font-semibold leading-6 text-stone-600">
               {postOrderMode
                 ? "Arcade rounds, live missions, XP bursts, coins, and restaurant rewards while your food is on the way."
-                : "Play anytime in free-play mode. Order rewards still unlock when you enter from an active order."}
+                : "Your order history unlocks seven focused games: live battles first, hard bot fallback, solo score runs, and daily top rewards."}
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
               <button

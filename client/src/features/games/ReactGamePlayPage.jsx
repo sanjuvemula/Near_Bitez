@@ -9,8 +9,11 @@ import { useUserLocation } from "../../hooks/useUserLocation.js";
 import { api } from "../../services/api.js";
 import { formatCurrency } from "../../utils/formatters.js";
 import { useRestaurantDiscovery } from "../home/useRestaurantDiscovery.js";
+import LockedGameAccess from "./LockedGameAccess.jsx";
+import useOrderGameAccess from "./useOrderGameAccess.js";
 import {
   DEFAULT_GAME_KEY,
+  GAME_LIBRARY,
   getGameTheme,
   withGameTheme,
 } from "./gameCatalog.js";
@@ -2583,6 +2586,7 @@ const ReactGamePlayPage = ({ routeGameKey }) => {
   const { enabled: soundEnabled, setEnabled: setSoundEnabled, play: playSound } = useGameAudio();
 
   const orderId = searchParams.get("orderId");
+  const access = useOrderGameAccess(orderId);
   const postOrderMode = Boolean(orderId);
   const areaLabel = location?.city || "Nearby";
 
@@ -2630,8 +2634,8 @@ const ReactGamePlayPage = ({ routeGameKey }) => {
   }, [activeGameKey, areaLabel]);
 
   useEffect(() => {
-    loadGamesFeed();
-  }, [loadGamesFeed]);
+    if (access.unlocked) loadGamesFeed();
+  }, [access.unlocked, loadGamesFeed]);
 
   useEffect(() => {
     loadLeaderboard();
@@ -2677,7 +2681,14 @@ const ReactGamePlayPage = ({ routeGameKey }) => {
   }, [restaurants]);
 
   const games = useMemo(
-    () => (gameFeed.games || []).map(withGameTheme),
+    () => {
+      const liveByKey = new Map(
+        (Array.isArray(gameFeed.games) ? gameFeed.games : []).map((game) => [game.key, game])
+      );
+      return GAME_LIBRARY.map((game) =>
+        withGameTheme({ ...game, ...(liveByKey.get(game.key) || {}) })
+      );
+    },
     [gameFeed.games]
   );
   const activeGame =
@@ -2779,6 +2790,19 @@ const ReactGamePlayPage = ({ routeGameKey }) => {
 
   if (!routeGameKey) {
     return <Navigate to={appRoutes.customerGames} replace />;
+  }
+
+  if (access.loading) {
+    return (
+      <div className="nb-game-mode grid min-h-screen place-items-center px-4 py-8 text-stone-950">
+        <GameModeStyles />
+        <GameBootLoader title="Checking order access" />
+      </div>
+    );
+  }
+
+  if (!access.unlocked) {
+    return <LockedGameAccess message={access.message} />;
   }
 
   return (

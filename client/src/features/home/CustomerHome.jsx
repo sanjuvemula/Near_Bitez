@@ -527,11 +527,11 @@ const CustomerHome = () => {
           <InfoCard
             accent
             icon={<GameIcon className="h-5 w-5" />}
-            eyebrow={promo?.code || "NearBitez extras"}
+            eyebrow={promo?.code || "Daily leaderboard"}
             title={promoTitle}
-            description="Offers, food games and NearCoins rewards"
-            action="Open"
-            onClick={() => navigate(promos.length ? appRoutes.customerSearch : appRoutes.customerGames)}
+            description="Track rank, chase rewards, and unlock games from orders"
+            action={promos.length ? "Offers" : "Orders"}
+            onClick={() => navigate(promos.length ? appRoutes.customerSearch : appRoutes.customerOrders)}
           />
         </section>
 

@@ -25,11 +25,11 @@ const battleState = {
 };
 
 const BATTLE_CONFIGS = {
-  "food-quiz-battle": { duration: 45, botMin: 8, botMax: 18 },
-  "tap-battle": { duration: 20, botMin: 24, botMax: 54 },
-  "spin-clash": { duration: 18, botMin: 45, botMax: 110 },
-  "delivery-race": { duration: 40, botMin: 32, botMax: 82 },
-  "memory-duel": { duration: 50, botMin: 18, botMax: 58 },
+  "food-quiz-battle": { duration: 45, botMin: 30, botMax: 62 },
+  "tap-battle": { duration: 20, botMin: 42, botMax: 84 },
+  "spin-clash": { duration: 18, botMin: 70, botMax: 135 },
+  "delivery-race": { duration: 40, botMin: 58, botMax: 118 },
+  "memory-duel": { duration: 50, botMin: 34, botMax: 78 },
 };
 
 const BOT_NAMES = ["Turbo Taster", "Neon Nibbler", "Combo King", "Rush Rider", "Pixel Foodie"];

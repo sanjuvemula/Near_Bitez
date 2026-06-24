@@ -101,6 +101,30 @@ const restaurantSchema = new mongoose.Schema(
       ],
       default: [],
     },
+    subscriptionPlan: {
+      type: String,
+      enum: ["STARTER", "GROWTH", "PREMIUM"],
+      default: "STARTER",
+      index: true,
+    },
+    planStatus: {
+      type: String,
+      enum: ["ACTIVE", "PAST_DUE", "CANCELLED"],
+      default: "ACTIVE",
+      index: true,
+    },
+    planActivatedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    planChangedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    planRenewalDate: {
+      type: Date,
+      default: null,
+    },
 
     // ── Tiffin fields ──────────────────────────────────────────────────────
     tiffinAvailable: {

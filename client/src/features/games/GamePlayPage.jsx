@@ -1,7 +1,9 @@
 import { Suspense, lazy } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { appRoutes } from "../../app/routes.jsx";
 import { getGameKeyFromSlug } from "./gameCatalog.js";
+import LockedGameAccess from "./LockedGameAccess.jsx";
+import useOrderGameAccess from "./useOrderGameAccess.js";
 
 const BiteCatcherPage = lazy(() => import("./bite-catcher/BiteCatcherPage.jsx"));
 const ReactGamePlayPage = lazy(() => import("./ReactGamePlayPage.jsx"));
@@ -26,10 +28,20 @@ const FullscreenGameFallback = ({ title = "NearBitez Game" }) => (
 
 const GamePlayPage = () => {
   const { gameSlug } = useParams();
+  const [searchParams] = useSearchParams();
   const routeGameKey = getGameKeyFromSlug(gameSlug);
+  const access = useOrderGameAccess(searchParams.get("orderId"));
 
   if (!routeGameKey) {
     return <Navigate to={appRoutes.customerGames} replace />;
+  }
+
+  if (access.loading) {
+    return <FullscreenGameFallback title="Checking order access" />;
+  }
+
+  if (!access.unlocked) {
+    return <LockedGameAccess message={access.message} />;
   }
 
   const PhaserGameComponent = PHASER_GAME_COMPONENTS[routeGameKey];

@@ -77,12 +77,13 @@ const STATUS_THEME = {
 const LIVE_STATUSES = ["PLACED", "ACCEPTED", "PREPARING", "READY", "OUT_FOR_DELIVERY"];
 const GAME_STATUSES = ["PLACED", "ACCEPTED", "PREPARING", "READY"];
 const WAIT_FEATURED_GAME_KEYS = [
+  "food-quiz-battle",
+  "delivery-race",
   "hand-cricket",
-  "tray-shuffle",
-  "lucky-tray",
-  "snack-snap",
   "snakes-sprint",
-  "craving-spinner",
+  "bite-catcher",
+  "food-memory",
+  "tray-shuffle",
 ];
 
 const WaitAndPlayPanel = ({ orderId }) => {
@@ -204,7 +205,7 @@ const WaitAndPlayPanel = ({ orderId }) => {
         <div className="grid gap-5 p-5 lg:grid-cols-[minmax(0,1fr),320px] sm:p-6">
           <div className="space-y-4">
             <div className="grid gap-3 md:grid-cols-2">
-              {orderedGames.slice(0, 6).map((game) => {
+              {orderedGames.slice(0, 7).map((game) => {
                 const active = activeGameKey === game.key;
                 const theme = getGameTheme(game.key);
 
@@ -244,7 +245,7 @@ const WaitAndPlayPanel = ({ orderId }) => {
               to={`${getCustomerGameRoute(getGameSlug(activeGameKey || games[0]?.key || DEFAULT_GAME_KEY))}?orderId=${orderId}`}
               className="inline-flex rounded-[18px] bg-gradient-to-r from-orange-500 to-rose-500 px-4 py-3 text-sm font-black text-white no-underline shadow-[0_18px_34px_-24px_rgba(244,63,94,0.75)] transition hover:brightness-105"
             >
-              Open full games hub
+              Open selected game
             </Link>
           </div>
 

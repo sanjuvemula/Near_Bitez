@@ -4,12 +4,9 @@ import { getCustomerGameRoute } from "../../../app/routes.jsx";
 import { withGameTheme } from "../gameCatalog.js";
 
 const THUMBNAIL_GRADIENTS = {
-  quick: "from-orange-200 via-rose-200 to-sky-200",
-  brain: "from-sky-200 via-indigo-200 to-fuchsia-200",
-  daily: "from-emerald-200 via-lime-100 to-amber-200",
-  duo: "from-cyan-200 via-fuchsia-200 to-orange-200",
-  board: "from-violet-200 via-pink-200 to-amber-200",
-  party: "from-pink-200 via-yellow-100 to-cyan-200",
+  multiplayer: "from-cyan-200 via-fuchsia-200 to-orange-200",
+  bot: "from-violet-200 via-pink-200 to-amber-200",
+  solo: "from-orange-200 via-rose-200 to-sky-200",
 };
 
 const getThumbnailGradient = (game) =>
@@ -79,7 +76,7 @@ const GameCard = ({ game, index = 0, orderId = "", onBattle }) => {
             onClick={() => onBattle?.(item)}
             className="mt-5 inline-flex w-full items-center justify-center rounded-[16px] bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-black text-white shadow-[0_18px_45px_-28px_rgba(34,211,238,0.85)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110"
           >
-            Find Match
+            Find Live Match
           </button>
         ) : (
           <Link

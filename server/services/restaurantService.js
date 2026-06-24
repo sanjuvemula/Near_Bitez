@@ -342,7 +342,7 @@ export const getPopularDishes = async (restaurants) => {
       };
     })
     .filter(Boolean);
-
+  
   cache.popularDishes = { data: result, restaurantHash, expiresAt: now + CACHE_TTL_MS };
   return result;
 };

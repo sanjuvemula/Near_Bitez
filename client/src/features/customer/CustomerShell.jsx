@@ -10,6 +10,7 @@ import { AnimatePresence, motion as Motion } from "framer-motion";
 import { appRoutes } from "../../app/routes.jsx";
 import { useAuth } from "../../hooks/useAuth.js";
 import { useCart } from "../../hooks/useCart.js";
+import useGameScore from "../../hooks/useGameScore.js";
 import { useNotifications } from "../../context/NotificationContext.jsx";
 
 const HomeIcon = (props) => (
@@ -79,6 +80,17 @@ const BellIcon = (props) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
     <path d="M13.7 21a2 2 0 0 1-3.4 0" />
+  </svg>
+);
+
+const TrophyIcon = (props) => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
+    <path d="M8 4h8v4a4 4 0 0 1-8 0V4Z" />
+    <path d="M8 6H5a2 2 0 0 0 2 4h1" />
+    <path d="M16 6h3a2 2 0 0 1-2 4h-1" />
+    <path d="M12 12v4" />
+    <path d="M9 20h6" />
+    <path d="M10 16h4v4h-4z" />
   </svg>
 );
 
@@ -173,16 +185,6 @@ const MoreMenu = ({ cartCount = 0, onNavigate }) => {
               Search
             </Link>
             <Link
-              to={appRoutes.customerGames}
-              onClick={handleClick}
-              className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-black text-stone-600 transition hover:bg-orange-50 hover:text-orange-700"
-            >
-              <span className="grid h-5 w-5 place-items-center rounded-md bg-orange-100 text-[10px] font-black text-orange-700">
-                XP
-              </span>
-              Games
-            </Link>
-            <Link
               to={appRoutes.customerCart}
               onClick={handleClick}
               className="flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-black text-stone-600 transition hover:bg-orange-50 hover:text-orange-700"
@@ -249,6 +251,107 @@ const NotificationPanel = ({ notifications, clearAll }) => (
           </div>
         ))
       )}
+    </div>
+  </Motion.div>
+);
+
+const LeaderboardPanel = ({
+  leaderboard,
+  currentUser,
+  todayScore,
+  myRank,
+  loading,
+  error,
+  onRefresh,
+}) => (
+  <Motion.div
+    initial={{ opacity: 0, y: 10, scale: 0.98 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    exit={{ opacity: 0, y: 10, scale: 0.98 }}
+    className="absolute right-0 top-[calc(100%+10px)] z-50 w-[min(390px,calc(100vw-24px))] overflow-hidden rounded-[22px] border border-[#eee7dc] bg-white shadow-[0_30px_90px_-48px_rgba(15,23,42,0.65)]"
+  >
+    <div className="border-b border-stone-100 bg-[linear-gradient(135deg,#fff7ed,#ecfeff)] px-4 py-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-[0.14em] text-orange-600">
+            Daily leaderboard
+          </p>
+          <h2 className="mt-1 text-2xl font-black text-stone-950">
+            {myRank ? `Rank #${myRank}` : "Start the chase"}
+          </h2>
+          <p className="mt-1 text-xs font-bold text-stone-500">
+            {Number(todayScore || 0).toLocaleString()} pts today
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onRefresh}
+          className="rounded-full border border-orange-100 bg-white px-3 py-1.5 text-xs font-black text-orange-700 transition hover:bg-orange-50"
+        >
+          Refresh
+        </button>
+      </div>
+      <div className="mt-3 rounded-[16px] border border-white/80 bg-white/78 p-3 text-xs font-bold leading-5 text-stone-600">
+        {myRank === 1
+          ? "You are #1. Keep the lead and claim the top reward from the unlocked game zone."
+          : "Games unlock after an order. Live battles and bot matches feed this board."}
+      </div>
+    </div>
+
+    <div className="max-h-[340px] overflow-y-auto p-3">
+      {loading ? (
+        <div className="rounded-[18px] bg-stone-50 p-5 text-center text-sm font-bold text-stone-400">
+          Loading ranks...
+        </div>
+      ) : error ? (
+        <div className="rounded-[18px] border border-red-100 bg-red-50 p-4 text-sm font-bold text-red-600">
+          {error}
+        </div>
+      ) : leaderboard.length ? (
+        leaderboard.slice(0, 8).map((row) => {
+          const active =
+            row.isCurrentUser ||
+            String(row.userId) === String(currentUser?.userId);
+          return (
+            <div
+              key={row.userId || row._id}
+              className={`mb-2 flex items-center gap-3 rounded-[18px] border px-3 py-3 last:mb-0 ${
+                active
+                  ? "border-orange-200 bg-orange-50"
+                  : "border-stone-100 bg-white"
+              }`}
+            >
+              <span className="grid h-9 w-9 place-items-center rounded-[14px] bg-stone-950 text-xs font-black text-white">
+                {row.rank || "-"}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-black text-stone-950">
+                  {row.name || "Foodie"}
+                </span>
+                <span className="block text-xs font-bold text-stone-400">
+                  {row.plays || row.gamesPlayed?.length || 0} plays
+                </span>
+              </span>
+              <strong className="text-base font-black text-stone-950">
+                {Number(row.score || row.totalScore || 0).toLocaleString()}
+              </strong>
+            </div>
+          );
+        })
+      ) : (
+        <div className="rounded-[18px] border border-dashed border-stone-200 bg-stone-50 p-5 text-center text-sm font-bold text-stone-500">
+          No game scores yet today.
+        </div>
+      )}
+    </div>
+
+    <div className="border-t border-stone-100 p-3">
+      <Link
+        to={appRoutes.customerOrders}
+        className="flex items-center justify-center rounded-[16px] bg-orange-600 px-4 py-3 text-sm font-black text-white no-underline transition hover:bg-orange-700"
+      >
+        Open orders to play
+      </Link>
     </div>
   </Motion.div>
 );
@@ -458,16 +561,6 @@ const BottomNav = ({ cartCount }) => {
               Search
             </Link>
             <Link
-              to={appRoutes.customerGames}
-              onClick={() => setMoreOpen(false)}
-              className="flex items-center gap-3 rounded-[18px] px-4 py-3 text-sm font-black text-stone-700 no-underline hover:bg-orange-50"
-            >
-              <span className="grid h-5 w-5 place-items-center rounded-md bg-orange-100 text-[10px] font-black text-orange-700">
-                XP
-              </span>
-              Games
-            </Link>
-            <Link
               to={appRoutes.customerCart}
               onClick={() => setMoreOpen(false)}
               className="flex items-center gap-3 rounded-[18px] px-4 py-3 text-sm font-black text-stone-700 no-underline hover:bg-orange-50"
@@ -491,31 +584,46 @@ const CustomerShell = () => {
   const { user, logout } = useAuth();
   const { cart } = useCart();
   const { notifications, unreadCount, markAllRead, clearAll } = useNotifications();
+  const {
+    todayScore,
+    myRank,
+    leaderboard,
+    currentUser,
+    loading: leaderboardLoading,
+    error: leaderboardError,
+    refresh: refreshLeaderboard,
+  } = useGameScore();
   const navigate = useNavigate();
   const location = useLocation();
   const bellRef = useRef(null);
+  const leaderboardRef = useRef(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
       setDrawerOpen(false);
       setBellOpen(false);
+      setLeaderboardOpen(false);
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
   }, [location.pathname]);
 
   useEffect(() => {
-    if (!bellOpen) return undefined;
+    if (!bellOpen && !leaderboardOpen) return undefined;
     const handler = (event) => {
       if (bellRef.current && !bellRef.current.contains(event.target)) {
         setBellOpen(false);
       }
+      if (leaderboardRef.current && !leaderboardRef.current.contains(event.target)) {
+        setLeaderboardOpen(false);
+      }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [bellOpen]);
+  }, [bellOpen, leaderboardOpen]);
 
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? "hidden" : "";
@@ -534,7 +642,14 @@ const CustomerShell = () => {
 
   const handleBell = () => {
     setBellOpen((value) => !value);
+    setLeaderboardOpen(false);
     if (!bellOpen && unreadCount > 0) markAllRead();
+  };
+
+  const handleLeaderboard = () => {
+    setLeaderboardOpen((value) => !value);
+    setBellOpen(false);
+    refreshLeaderboard();
   };
 
   return (
@@ -569,6 +684,33 @@ const CustomerShell = () => {
             </p>
 
             <div className="ml-auto flex items-center gap-2">
+              <div ref={leaderboardRef} className="relative">
+                <button
+                  type="button"
+                  onClick={handleLeaderboard}
+                  className="relative flex h-12 items-center gap-2 rounded-[18px] border border-[#eedfd2] bg-white px-3 text-stone-600 shadow-[0_14px_30px_-24px_rgba(68,35,15,0.8)] transition hover:border-orange-200 hover:text-orange-700 lg:h-11"
+                  aria-label="Daily leaderboard"
+                >
+                  <TrophyIcon className="h-5 w-5 stroke-[2.3]" />
+                  <span className="hidden text-xs font-black sm:inline">
+                    {myRank ? `#${myRank}` : "Rank"}
+                  </span>
+                </button>
+                <AnimatePresence>
+                  {leaderboardOpen ? (
+                    <LeaderboardPanel
+                      leaderboard={leaderboard}
+                      currentUser={currentUser}
+                      todayScore={todayScore}
+                      myRank={myRank}
+                      loading={leaderboardLoading}
+                      error={leaderboardError}
+                      onRefresh={refreshLeaderboard}
+                    />
+                  ) : null}
+                </AnimatePresence>
+              </div>
+
               <div ref={bellRef} className="relative">
                 <button
                   type="button"
