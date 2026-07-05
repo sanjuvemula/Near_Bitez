@@ -18,31 +18,31 @@ const feedbackTypes = [
 ];
 
 const contactCards = [
-  { label: "Admin email", value: adminEmail, href: `mailto:${adminEmail}` },
-  { label: "Owner", value: "Krish Taliyan" },
-  { label: "Support", value: "Sanju Sri" },
+  { label: "Admin email", value: adminEmail, href: `mailto:${adminEmail}`, tone: "orange" },
+  { label: "Owner", value: "Krish Taliyan", tone: "sky" },
+  { label: "Support", value: "Sanju Sri", tone: "emerald" },
 ];
 
 const supportTopics = [
   {
     title: "Order help",
-    text: "Share order ID, restaurant name, and the issue.",
-    tone: "bg-orange-50 border-orange-100 text-orange-700",
+    text: "Share order ID, restaurant name, and what went wrong.",
+    tone: "orange",
   },
   {
     title: "Account help",
-    text: "Send your registered email and what is not working.",
-    tone: "bg-sky-50 border-sky-100 text-sky-700",
+    text: "Send the registered email or phone number linked to the account.",
+    tone: "sky",
   },
   {
     title: "Vendor help",
     text: "Mention restaurant name, owner email, and dashboard issue.",
-    tone: "bg-emerald-50 border-emerald-100 text-emerald-700",
+    tone: "emerald",
   },
 ];
 
 const inputClass =
-  "w-full rounded-[18px] border border-[#ece4d7] bg-[#fcfbf8] px-4 py-3 text-sm font-semibold text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:bg-white";
+  "w-full rounded-[18px] border border-[#ece4d7] bg-[#fcfbf8] px-4 py-3 text-sm font-semibold text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100";
 
 const statusClass = {
   OPEN: "bg-orange-50 text-orange-700",
@@ -51,6 +51,149 @@ const statusClass = {
   IN_PROGRESS: "bg-amber-50 text-amber-700",
   RESOLVED: "bg-emerald-50 text-emerald-700",
   CLOSED: "bg-stone-100 text-stone-600",
+};
+
+const toneMap = {
+  orange: {
+    dot: "bg-orange-500",
+    soft: "border-orange-100 bg-orange-50 text-orange-700",
+    panel: "border-orange-100 bg-[linear-gradient(135deg,#fff,#fff7ed)]",
+  },
+  sky: {
+    dot: "bg-sky-500",
+    soft: "border-sky-100 bg-sky-50 text-sky-700",
+    panel: "border-sky-100 bg-[linear-gradient(135deg,#fff,#f0f9ff)]",
+  },
+  emerald: {
+    dot: "bg-emerald-500",
+    soft: "border-emerald-100 bg-emerald-50 text-emerald-700",
+    panel: "border-emerald-100 bg-[linear-gradient(135deg,#fff,#f0fdf4)]",
+  },
+};
+
+const Icon = ({ children, className = "h-4 w-4" }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2.3"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    {children}
+  </svg>
+);
+
+const ArrowIcon = (props) => (
+  <Icon {...props}>
+    <path d="M5 12h14" />
+    <path d="m14 7 5 5-5 5" />
+  </Icon>
+);
+
+const MailIcon = (props) => (
+  <Icon {...props}>
+    <path d="M4 6h16v12H4z" />
+    <path d="m4 7 8 6 8-6" />
+  </Icon>
+);
+
+const CheckIcon = (props) => (
+  <Icon {...props}>
+    <path d="m5 12 4 4L19 6" />
+  </Icon>
+);
+
+const ContactTile = ({ item }) => {
+  const tone = toneMap[item.tone] || toneMap.orange;
+  const content = (
+    <>
+      <span className={`mb-4 inline-flex h-2.5 w-2.5 rounded-full ${tone.dot}`} />
+      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-stone-400">{item.label}</p>
+      <p className="mt-2 truncate text-sm font-black text-stone-950">{item.value}</p>
+    </>
+  );
+
+  if (item.href) {
+    return (
+      <a
+        href={item.href}
+        className={`block min-w-0 rounded-[22px] border p-4 no-underline shadow-[0_18px_44px_-38px_rgba(15,23,42,0.5)] ${tone.panel}`}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <div className={`min-w-0 rounded-[22px] border p-4 shadow-[0_18px_44px_-38px_rgba(15,23,42,0.5)] ${tone.panel}`}>
+      {content}
+    </div>
+  );
+};
+
+const SupportHero = ({ isFeedback, feedbackHref }) => (
+  <section className="relative overflow-hidden rounded-[32px] border border-[#eadfd4] bg-[#fffaf5] p-6 shadow-[0_30px_90px_-62px_rgba(15,23,42,0.42)] sm:p-8">
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_11%_12%,rgba(251,146,60,0.2),transparent_28%),radial-gradient(circle_at_82%_10%,rgba(14,165,233,0.12),transparent_28%),radial-gradient(circle_at_78%_86%,rgba(16,185,129,0.12),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.72),rgba(255,247,237,0.88))]" />
+    <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.05fr),minmax(340px,0.95fr)] lg:items-center">
+      <div className="max-w-3xl">
+        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-orange-600">
+          {isFeedback ? "Feedback" : "Contact"}
+        </p>
+        <h1 className="mt-3 max-w-3xl text-4xl font-black leading-tight text-stone-950 sm:text-5xl">
+          {isFeedback ? "Send the team a clear signal." : "Get help without hunting around."}
+        </h1>
+        <p className="mt-4 max-w-2xl text-sm font-bold leading-7 text-stone-600 sm:text-base">
+          {isFeedback
+            ? "Ideas, bugs, restaurant issues, and complaints go straight into the admin feedback queue."
+            : "Use one clean contact route for orders, accounts, vendors, and partnership questions."}
+        </p>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a
+            href={`mailto:${adminEmail}`}
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[18px] bg-orange-600 px-5 text-sm font-black text-white no-underline shadow-[0_18px_35px_-20px_rgba(234,88,12,0.75)] transition hover:bg-orange-700"
+          >
+            <MailIcon />
+            Email admin
+          </a>
+          <Link
+            to={feedbackHref}
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[18px] border border-[#eadfd4] bg-white px-5 text-sm font-black text-stone-800 no-underline transition hover:border-orange-200 hover:text-orange-700"
+          >
+            Open feedback
+            <ArrowIcon />
+          </Link>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+        {contactCards.map((item) => (
+          <ContactTile key={item.label} item={item} />
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
+const TopicCard = ({ topic }) => {
+  const tone = toneMap[topic.tone] || toneMap.orange;
+
+  return (
+    <div className={`rounded-[20px] border p-4 ${tone.soft}`}>
+      <div className="flex items-start gap-3">
+        <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/82">
+          <CheckIcon className="h-4 w-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-black">{topic.title}</p>
+          <p className="mt-1 text-xs font-bold leading-5 text-stone-600">{topic.text}</p>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const SupportPage = ({ mode = "contact" }) => {
@@ -103,43 +246,13 @@ const SupportPage = ({ mode = "contact" }) => {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <section className="overflow-hidden rounded-[28px] border border-white/80 bg-[linear-gradient(135deg,#fff7ed,#ffffff_52%,#ecfeff)] p-6 shadow-[0_30px_90px_-62px_rgba(15,23,42,0.42)] sm:p-8">
-        <div className="max-w-3xl">
-          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-600">
-            {isFeedback ? "Feedback" : "Contact"}
-          </p>
-          <h1 className="mt-2 text-4xl font-black leading-tight text-stone-950">
-            {isFeedback ? "Tell admin what to improve." : "We are here to help."}
-          </h1>
-          <p className="mt-3 text-sm font-semibold leading-6 text-stone-500">
-            {isFeedback
-              ? "Send product ideas, bugs, and restaurant issues directly to admin."
-              : "For orders, accounts, vendors, and partnerships, reach the NearBitez admin team here."}
-          </p>
-        </div>
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          {contactCards.map((item) => (
-            <div key={item.label} className="rounded-[20px] border border-white/80 bg-white/86 p-4 shadow-sm">
-              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-stone-400">
-                {item.label}
-              </p>
-              {item.href ? (
-                <a className="mt-2 block truncate text-sm font-black text-orange-700" href={item.href}>
-                  {item.value}
-                </a>
-              ) : (
-                <p className="mt-2 truncate text-sm font-black text-stone-950">{item.value}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
+    <div className="mx-auto max-w-6xl space-y-8">
+      <SupportHero isFeedback={isFeedback} feedbackHref={feedbackHref} />
 
       {isFeedback ? (
         canSubmit ? (
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr),340px]">
-            <Card className="p-5 sm:p-6">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr),360px]">
+            <Card className="border-orange-100 bg-[linear-gradient(135deg,#ffffff,#fff7ed)] p-5 sm:p-6">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <label className="block">
                   <span className="mb-2 block text-sm font-black text-stone-900">Type</span>
@@ -165,7 +278,7 @@ const SupportPage = ({ mode = "contact" }) => {
                 <label className="block">
                   <span className="mb-2 block text-sm font-black text-stone-900">Details</span>
                   <textarea
-                    className={`${inputClass} min-h-[160px] resize-y`}
+                    className={`${inputClass} min-h-[170px] resize-y`}
                     value={form.message}
                     onChange={updateForm("message")}
                     placeholder="Write the issue, idea, or request"
@@ -173,14 +286,22 @@ const SupportPage = ({ mode = "contact" }) => {
                     required
                   />
                 </label>
-                <Button type="submit" loading={submitting} disabled={!form.title.trim() || !form.message.trim()}>
+                <Button
+                  type="submit"
+                  loading={submitting}
+                  disabled={!form.title.trim() || !form.message.trim()}
+                  trailingIcon={<ArrowIcon />}
+                >
                   Send feedback
                 </Button>
               </form>
             </Card>
 
             <aside className="space-y-3">
-              <h2 className="text-lg font-black text-stone-950">Your recent feedback</h2>
+              <div>
+                <p className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-600">Activity</p>
+                <h2 className="mt-1 text-xl font-black text-stone-950">Your recent feedback</h2>
+              </div>
               {loadingTickets ? (
                 <Card className="p-4 text-sm font-bold text-stone-500">Loading...</Card>
               ) : tickets.length ? (
@@ -207,10 +328,10 @@ const SupportPage = ({ mode = "contact" }) => {
             </aside>
           </div>
         ) : (
-          <Card className="p-6 text-center">
-            <h2 className="text-2xl font-black text-stone-950">Login to send feedback</h2>
+          <Card className="border-orange-100 bg-[linear-gradient(135deg,#ffffff,#fff7ed)] p-6 text-center">
+            <h2 className="text-2xl font-black text-stone-950">Login to send trackable feedback</h2>
             <p className="mx-auto mt-2 max-w-md text-sm font-semibold leading-6 text-stone-500">
-              Direct admin contact is always open by email. In-app feedback needs an account so admin can reply to the right user.
+              Direct admin contact stays open by email. In-app feedback needs an account so admin can reply to the right user.
             </p>
             <div className="mt-5 flex flex-wrap justify-center gap-3">
               <Link
@@ -229,51 +350,58 @@ const SupportPage = ({ mode = "contact" }) => {
           </Card>
         )
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[1.05fr,0.95fr]">
-          <Card className="border-orange-100 bg-[linear-gradient(135deg,#fff,#fff7ed)] p-6">
+        <div className="grid gap-6 lg:grid-cols-[1.02fr,0.98fr]">
+          <Card className="border-orange-100 bg-[linear-gradient(135deg,#ffffff,#fff7ed)] p-6">
             <p className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-600">
-              Fastest contact
+              Fastest route
             </p>
-            <h2 className="mt-2 text-2xl font-black text-stone-950">Email admin directly</h2>
-            <p className="mt-2 text-sm font-semibold leading-6 text-stone-500">
-              Add the order ID or registered email so the team can find the right account quickly.
+            <h2 className="mt-2 text-3xl font-black leading-tight text-stone-950">Email admin directly</h2>
+            <p className="mt-3 text-sm font-semibold leading-6 text-stone-500">
+              Add the order ID, registered email, or restaurant name so the team can find the exact record quickly.
             </p>
+            <div className="mt-6 rounded-[20px] border border-orange-100 bg-white p-4">
+              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-stone-400">Send to</p>
+              <a className="mt-2 block truncate text-lg font-black text-orange-700" href={`mailto:${adminEmail}`}>
+                {adminEmail}
+              </a>
+            </div>
             <a
               href={`mailto:${adminEmail}`}
-              className="mt-5 inline-flex min-h-12 items-center justify-center rounded-[18px] bg-stone-950 px-5 text-sm font-black text-white no-underline transition hover:bg-stone-800"
+              className="mt-5 inline-flex min-h-12 items-center justify-center gap-2 rounded-[18px] bg-stone-950 px-5 text-sm font-black text-white no-underline transition hover:bg-stone-800"
             >
+              <MailIcon />
               Email admin
             </a>
           </Card>
 
           <Card className="border-sky-100 bg-[linear-gradient(135deg,#ffffff,#f0f9ff)] p-6">
             <p className="text-[11px] font-black uppercase tracking-[0.16em] text-sky-700">
-              Good message
+              Message checklist
             </p>
-            <h2 className="mt-2 text-2xl font-black text-stone-950">What to include</h2>
-            <div className="mt-4 space-y-3">
+            <h2 className="mt-2 text-3xl font-black leading-tight text-stone-950">Include the right details</h2>
+            <div className="mt-5 space-y-3">
               {supportTopics.map((topic) => (
-                <div key={topic.title} className={`rounded-[18px] border p-4 ${topic.tone}`}>
-                  <p className="text-sm font-black">{topic.title}</p>
-                  <p className="mt-1 text-xs font-bold leading-5 text-stone-600">{topic.text}</p>
-                </div>
+                <TopicCard key={topic.title} topic={topic} />
               ))}
             </div>
           </Card>
+
           <div className="lg:col-span-2">
             <Card className="border-emerald-100 bg-[linear-gradient(135deg,#f0fdf4,#ffffff)] p-5">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm font-black text-stone-950">Want to suggest a feature?</p>
-                  <p className="mt-1 text-sm font-semibold text-stone-500">
-                    Logged-in users can send trackable feedback from the app.
+                  <p className="text-[11px] font-black uppercase tracking-[0.16em] text-emerald-700">Feedback queue</p>
+                  <h2 className="mt-1 text-xl font-black text-stone-950">Want to suggest a feature or report a product issue?</h2>
+                  <p className="mt-1 text-sm font-semibold leading-6 text-stone-500">
+                    Logged-in users can send feedback that stays attached to their account.
                   </p>
                 </div>
                 <Link
                   to={feedbackHref}
-                  className="inline-flex min-h-11 items-center justify-center rounded-[16px] bg-emerald-600 px-4 text-sm font-black text-white no-underline transition hover:bg-emerald-700"
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-[16px] bg-emerald-600 px-4 text-sm font-black text-white no-underline transition hover:bg-emerald-700"
                 >
                   Open feedback
+                  <ArrowIcon />
                 </Link>
               </div>
             </Card>
