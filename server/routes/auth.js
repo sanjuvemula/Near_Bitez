@@ -1,6 +1,11 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import passport, { isGoogleAuthConfigured } from "../config/passport.js";
+import passport, {
+  createGoogleOAuthState,
+  getGoogleCallbackUrl,
+  getGoogleOAuthIntent,
+  isGoogleAuthConfigured,
+} from "../config/passport.js";
 import {
   getMe,
   loginCustomer,
@@ -47,22 +52,40 @@ const clientRedirect = (path) => `${getPrimaryClientUrl()}${path}`;
 // Google OAuth
 router.get("/google", (req, res, next) => {
   if (!isGoogleAuthConfigured()) {
-    res.redirect(clientRedirect("/customer/login?oauth=google_not_configured"));
+    const intent = getGoogleOAuthIntent(req);
+    res.redirect(clientRedirect(`/${intent.role}/login?oauth=google_not_configured`));
     return;
   }
 
-  passport.authenticate("google", { scope: ["profile", "email"], session: false })(req, res, next);
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    session: false,
+    callbackURL: getGoogleCallbackUrl(req),
+    state: createGoogleOAuthState(req),
+    prompt: "select_account",
+  })(req, res, next);
 });
 
 router.get("/google/callback", (req, res, next) => {
+  const intent = getGoogleOAuthIntent(req);
+  const failurePath = `/${intent.role}/login`;
+
   if (!isGoogleAuthConfigured()) {
-    res.redirect(clientRedirect("/customer/login?oauth=google_not_configured"));
+    res.redirect(clientRedirect(`${failurePath}?oauth=google_not_configured`));
     return;
   }
 
-  passport.authenticate("google", { session: false }, async (error, user) => {
+  if (req.query.error) {
+    res.redirect(clientRedirect(`${failurePath}?oauth=${encodeURIComponent(req.query.error)}`));
+    return;
+  }
+
+  passport.authenticate("google", {
+    session: false,
+    callbackURL: getGoogleCallbackUrl(req),
+  }, async (error, user, info) => {
     if (error || !user) {
-      res.redirect(clientRedirect("/customer/login?oauth=google_failed"));
+      res.redirect(clientRedirect(`${failurePath}?oauth=${info?.code || "google_failed"}`));
       return;
     }
 

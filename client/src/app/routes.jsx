@@ -13,8 +13,12 @@ export const appRoutes = {
   customerTiffin: "/app/tiffin",
   customerGames: "/app/games",
   customerGame: "/app/games/:gameSlug",
+  customerContact: "/app/contact",
+  customerFeedback: "/app/feedback",
   vendorDashboard: "/vendor/dashboard",
   customerSearch: "/app/search",
+  contact: "/contact",
+  feedback: "/feedback",
   
 };
 

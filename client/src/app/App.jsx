@@ -1,10 +1,11 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import {
   BrowserRouter,
   Navigate,
   Outlet,
   Route,
   Routes,
+  useLocation,
   useParams,
 } from "react-router-dom";
 import Loader from "../components/Loader.jsx";
@@ -14,6 +15,7 @@ import Navbar from "../features/navbar/Navbar.jsx";
 import ProtectedRoute from "../features/auth/ProtectedRoute.jsx";
 import { NotificationProvider } from "../context/NotificationContext.jsx";
 import PwaInstallButton from "../components/PwaInstallButton.jsx";
+import SiteFooter from "../components/SiteFooter.jsx";
 
 const Home            = lazy(() => import("../features/home/Home.jsx"));
 const CustomerHome    = lazy(() => import("../features/home/CustomerHome.jsx"));
@@ -35,6 +37,7 @@ const AdminDashboard  = lazy(() => import("../features/admin/AdminDashboard.jsx"
 const TiffinPage = lazy(() => import("../features/tiffin/TiffinPage.jsx"));
 const CustomerGamesPage = lazy(() => import("../features/games/CustomerGamesPage.jsx"));
 const GamePlayPage = lazy(() => import("../features/games/GamePlayPage.jsx"));
+const SupportPage = lazy(() => import("../features/support/SupportPage.jsx"));
 
 const PublicLayout = () => (
   <div className="relative min-h-screen overflow-x-hidden bg-surface">
@@ -44,8 +47,19 @@ const PublicLayout = () => (
     <main className="mx-auto max-w-7xl px-4 pb-16 pt-32 sm:px-6 lg:px-8">
       <Outlet />
     </main>
+    <SiteFooter />
   </div>
 );
+
+const ScrollToTop = () => {
+  const { pathname, search } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [pathname, search]);
+
+  return null;
+};
 
 const LandingRoute = () => {
   const { authReady, loading, user } = useAuth();
@@ -69,6 +83,7 @@ const LegacyGameRedirect = () => {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <NotificationProvider>
         <Suspense fallback={<Loader label="Loading NearBitez..." />}>
           <Routes>
@@ -84,6 +99,8 @@ function App() {
             <Route element={<PublicLayout />}>
               <Route path={appRoutes.publicHome} element={<LandingRoute />} />
               <Route path="/search"              element={<Navigate to={appRoutes.publicHome} replace />} />
+              <Route path={appRoutes.contact}    element={<SupportPage mode="contact" />} />
+              <Route path={appRoutes.feedback}   element={<SupportPage mode="feedback" />} />
               <Route path="/restaurants/:id"     element={<RestaurantMenu />} />
               <Route path="/restaurant/:id"      element={<RestaurantMenu />} />
             </Route>
@@ -107,6 +124,8 @@ function App() {
               <Route path="profile"                 element={<UserProfile />} />
               <Route path="favorites"               element={<FavoritesPage />} />
               <Route path="tiffin"                  element={<TiffinPage />} />
+              <Route path="contact"                 element={<SupportPage mode="contact" />} />
+              <Route path="feedback"                element={<SupportPage mode="feedback" />} />
               <Route path="games"                   element={<CustomerGamesPage />} />
             </Route>
 

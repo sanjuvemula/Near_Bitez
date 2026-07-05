@@ -59,9 +59,19 @@ const toggleClassName = (active, tone = "orange") =>
       : "bg-white text-gray-600 hover:bg-orange-50 hover:text-gray-900"
   }`;
 
-const GoogleButton = () => (
+const oauthMessages = {
+  google_not_configured: "Google login is not configured on the server yet.",
+  google_failed: "Google login could not finish. Please try again.",
+  google_role_mismatch: "This Google account is already registered as a customer. Use a different email for vendor access.",
+  access_denied: "Google access was cancelled.",
+};
+
+const GoogleButton = ({ role, mode }) => {
+  const params = new URLSearchParams({ role, mode });
+
+  return (
   <a
-    href={getApiUrl("/auth/google")}
+    href={getApiUrl(`/auth/google?${params.toString()}`)}
     className="flex w-full items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
   >
     <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -72,7 +82,8 @@ const GoogleButton = () => (
     </svg>
     Continue with Google
   </a>
-);
+  );
+};
 
 // OTP Login Component
 const OTPLogin = ({ onBack }) => {
@@ -211,6 +222,12 @@ const AuthPage = ({ mode, role }) => {
     return () => { active = false; };
   }, []);
 
+  useEffect(() => {
+    const oauth = new URLSearchParams(location.search).get("oauth");
+    if (!oauth) return;
+    setError(oauthMessages[oauth] || "Google login could not finish. Please try again.");
+  }, [location.search]);
+
   const liveMetrics = useMemo(
     () => [
       { label: "Restaurants live", value: discovery.highlights.activeRestaurantCount },
@@ -302,21 +319,25 @@ const AuthPage = ({ mode, role }) => {
           </div>
 
           {/* Google + OTP — only for customer login */}
-          {role === "customer" && mode === "login" && !showOTP && (
+          {!showOTP && (
             <div className="mt-6 space-y-3">
-              <GoogleButton />
-              <button
-                onClick={() => setShowOTP(true)}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
-              >
-                <svg className="h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                Login with OTP
-              </button>
+              <GoogleButton role={role} mode={mode} />
+              {role === "customer" && mode === "login" ? (
+                <button
+                  onClick={() => setShowOTP(true)}
+                  className="flex w-full items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+                >
+                  <svg className="h-4 w-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Login with OTP
+                </button>
+              ) : null}
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-gray-200" />
-                <span className="text-xs font-semibold text-gray-400">or use password</span>
+                <span className="text-xs font-semibold text-gray-400">
+                  {mode === "login" ? "or use password" : "or use email"}
+                </span>
                 <div className="flex-1 h-px bg-gray-200" />
               </div>
             </div>

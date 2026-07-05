@@ -12,6 +12,7 @@ import { useAuth } from "../../hooks/useAuth.js";
 import { useCart } from "../../hooks/useCart.js";
 import useGameScore from "../../hooks/useGameScore.js";
 import { useNotifications } from "../../context/NotificationContext.jsx";
+import SiteFooter from "../../components/SiteFooter.jsx";
 
 const HomeIcon = (props) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" {...props}>
@@ -754,6 +755,7 @@ const CustomerShell = () => {
 
         <main className="mx-auto w-full min-w-0 max-w-[1480px] overflow-x-hidden px-4 pb-28 pt-3 sm:px-6 sm:pt-5 lg:px-7 lg:pb-12">
           <Outlet />
+          <SiteFooter compact />
         </main>
       </div>
 

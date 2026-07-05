@@ -1,5 +1,5 @@
-import RestaurantDiscoveryView from "./RestaurantDiscoveryView.jsx";
+import PublicHome from "./PublicHome.jsx";
 
-const Home = () => <RestaurantDiscoveryView variant="public" />;
+const Home = () => <PublicHome />;
 
 export default Home;
