@@ -24,8 +24,19 @@ const fadeUp = {
   transition: { duration: 0.28, ease: "easeOut" },
 };
 
-const SectionCard = ({ title, subtitle, aside = null, children }) => (
-  <Card className="p-5 sm:p-6">
+const SECTION_TONES = {
+  default: "bg-white",
+  warm: "border-orange-100 bg-[linear-gradient(135deg,#ffffff,#fff7ed)]",
+  time: "border-sky-100 bg-[linear-gradient(135deg,#ffffff,#eff6ff)]",
+  offer: "border-emerald-100 bg-[linear-gradient(135deg,#ffffff,#f0fdf4)]",
+  referral: "border-violet-100 bg-[linear-gradient(135deg,#ffffff,#f5f3ff)]",
+  loyalty: "border-amber-100 bg-[linear-gradient(135deg,#ffffff,#fffbeb)]",
+  combo: "border-cyan-100 bg-[linear-gradient(135deg,#ffffff,#ecfeff)]",
+  items: "border-rose-100 bg-[linear-gradient(135deg,#ffffff,#fff1f2)]",
+};
+
+const SectionCard = ({ title, subtitle, aside = null, tone = "default", children }) => (
+  <Card className={`p-5 sm:p-6 ${SECTION_TONES[tone] || SECTION_TONES.default}`}>
     <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
       <div>
         <p className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-600">
@@ -70,6 +81,7 @@ const SchedulePicker = ({ enabled, value, onToggle, onChange }) => {
     <SectionCard
       title="Delivery time"
       subtitle="Now or later."
+      tone="time"
       aside={
         <button
           type="button"
@@ -160,6 +172,7 @@ const ComboBuilder = ({ restaurantId, onAddCombo }) => {
     <SectionCard
       title="Combo ideas"
       subtitle="Build around a budget."
+      tone="combo"
       aside={
         <button
           type="button"
@@ -529,6 +542,7 @@ const CheckoutPage = () => {
             <SectionCard
               title="Delivery details"
               subtitle="Where should we deliver?"
+              tone="warm"
             >
               <div className="grid gap-4">
                 <Field label="Delivery address">
@@ -565,6 +579,7 @@ const CheckoutPage = () => {
             <SectionCard
               title="Promo code"
               subtitle="Apply an offer."
+              tone="offer"
             >
               {promoData ? (
                 <div className="rounded-[20px] border border-emerald-200 bg-emerald-50 p-4">
@@ -628,6 +643,7 @@ const CheckoutPage = () => {
             <SectionCard
               title="Referral code"
               subtitle="Optional"
+              tone="referral"
             >
               <input
                 className={`${inputClassName} uppercase tracking-[0.12em]`}
@@ -643,6 +659,7 @@ const CheckoutPage = () => {
               <SectionCard
                 title="Loyalty points"
                 subtitle="Use points on this order."
+                tone="loyalty"
                 aside={
                   <span
                     className={`rounded-full border px-3 py-1 text-xs font-black uppercase tracking-[0.12em] ${tierConfig.tone}`}
@@ -720,6 +737,7 @@ const CheckoutPage = () => {
             <SectionCard
               title="Order items"
               subtitle={`${items.length} ${items.length === 1 ? "item" : "items"} from ${restaurant?.name || "your selected restaurant"}.`}
+              tone="items"
             >
               <div className="space-y-3">
                 {items.map((item) => (

@@ -39,17 +39,22 @@ const CustomerGamesPage = lazy(() => import("../features/games/CustomerGamesPage
 const GamePlayPage = lazy(() => import("../features/games/GamePlayPage.jsx"));
 const SupportPage = lazy(() => import("../features/support/SupportPage.jsx"));
 
-const PublicLayout = () => (
-  <div className="relative min-h-screen overflow-x-hidden bg-surface">
-    <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[520px] bg-[radial-gradient(circle_at_top_left,_rgba(251,146,60,0.2),transparent_28%),radial-gradient(circle_at_top_right,_rgba(244,63,94,0.12),transparent_20%),linear-gradient(180deg,rgba(255,247,237,0.92),rgba(248,245,242,0))]" />
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 -z-10 h-[360px] bg-[radial-gradient(circle_at_bottom_right,_rgba(251,146,60,0.12),transparent_25%),linear-gradient(180deg,rgba(248,245,242,0),rgba(255,255,255,0.6))]" />
-    <Navbar />
-    <main className="mx-auto max-w-7xl px-4 pb-16 pt-32 sm:px-6 lg:px-8">
-      <Outlet />
-    </main>
-    <SiteFooter />
-  </div>
-);
+const PublicLayout = () => {
+  const location = useLocation();
+  const showHomeFooter = location.pathname === appRoutes.publicHome;
+
+  return (
+    <div className="relative min-h-screen overflow-x-hidden bg-surface">
+      <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[520px] bg-[radial-gradient(circle_at_top_left,_rgba(251,146,60,0.2),transparent_28%),radial-gradient(circle_at_top_right,_rgba(244,63,94,0.12),transparent_20%),linear-gradient(180deg,rgba(255,247,237,0.92),rgba(248,245,242,0))]" />
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 -z-10 h-[360px] bg-[radial-gradient(circle_at_bottom_right,_rgba(251,146,60,0.12),transparent_25%),linear-gradient(180deg,rgba(248,245,242,0),rgba(255,255,255,0.6))]" />
+      <Navbar />
+      <main className="mx-auto max-w-7xl px-4 pb-16 pt-32 sm:px-6 lg:px-8">
+        <Outlet />
+      </main>
+      {showHomeFooter ? <SiteFooter /> : null}
+    </div>
+  );
+};
 
 const ScrollToTop = () => {
   const { pathname, search } = useLocation();

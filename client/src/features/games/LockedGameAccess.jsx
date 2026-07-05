@@ -25,8 +25,8 @@ const LockedGameAccess = ({ message = "Place an order to unlock games.", compact
           Games unlock after a real order.
         </h1>
         <p className="mx-auto mt-4 max-w-xl text-sm font-semibold leading-6 text-stone-600">
-          {message} Once you place an order, the arcade opens with live battles,
-          hard bot matches, daily ranks, and top-player rewards.
+          {message} Once you place an order, the arcade opens for fun rounds,
+          live battles, and bot matches. Rewards are being prepared and will come soon.
         </p>
         <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
           <Link

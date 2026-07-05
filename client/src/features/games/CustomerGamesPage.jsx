@@ -105,6 +105,27 @@ const WalletPanel = ({ wallet, event }) => {
   );
 };
 
+const RewardNotice = () => (
+  <section className="relative overflow-hidden rounded-[22px] border border-amber-200 bg-[linear-gradient(135deg,#fffbeb,#ffffff_56%,#ecfeff)] p-4 shadow-sm sm:p-5">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="text-[11px] font-black uppercase tracking-[0.16em] text-amber-700">
+          Reward update
+        </p>
+        <h2 className="mt-1 text-xl font-black text-stone-950">
+          Rewards are coming soon.
+        </h2>
+        <p className="mt-1 max-w-3xl text-sm font-semibold leading-6 text-stone-600">
+          You can try Game Zone just for fun right now. Reward work is in progress, so play scores are for practice until the final rewards go live.
+        </p>
+      </div>
+      <span className="w-max rounded-full border border-amber-200 bg-white px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-amber-700">
+        Fun mode
+      </span>
+    </div>
+  </section>
+);
+
 const GroupButton = ({ group, active, onClick }) => (
   <button
     type="button"
@@ -291,6 +312,8 @@ const CustomerGamesPage = () => {
             <FeaturePill label="Area" value={areaLabel} className="col-span-2 sm:col-span-1" />
           </div>
         </Motion.section>
+
+        <RewardNotice />
 
         <WalletPanel
           wallet={gameFeed.wallet}

@@ -2,7 +2,6 @@ import { useMemo, useRef } from "react";
 import { Link } from "react-router-dom";
 import Button from "../../components/Button.jsx";
 import Skeleton from "../../components/Skeleton.jsx";
-import heroImage from "../../assets/hero.png";
 import { appRoutes } from "../../app/routes.jsx";
 import RestaurantCard from "./RestaurantCard.jsx";
 import { useRestaurantDiscovery } from "./useRestaurantDiscovery.js";
@@ -89,18 +88,26 @@ const PublicHome = () => {
   };
 
   const highlights = feed.highlights || {};
+  const heroRestaurant =
+    visibleRestaurants.find((restaurant) => restaurant.imageUrl) ||
+    visibleRestaurants[0] ||
+    null;
+  const heroBackground = heroRestaurant?.imageUrl
+    ? {
+        backgroundImage: `linear-gradient(90deg, rgba(30,21,16,0.92), rgba(30,21,16,0.7) 46%, rgba(30,21,16,0.28)), url(${heroRestaurant.imageUrl})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }
+    : {};
 
   return (
     <div className="space-y-10">
       <section
-        className="relative -mx-4 min-h-[500px] overflow-hidden rounded-none bg-stone-950 px-4 py-8 text-white sm:-mx-6 sm:px-8 lg:-mx-8 lg:rounded-[28px] lg:px-10"
-        style={{
-          backgroundImage: `linear-gradient(90deg, rgba(20,13,8,0.9), rgba(20,13,8,0.55) 48%, rgba(20,13,8,0.22)), url(${heroImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+        className="relative -mx-4 min-h-[500px] overflow-hidden rounded-none bg-[linear-gradient(135deg,#241712_0%,#4c2415_58%,#f97316_140%)] px-4 py-8 text-white sm:-mx-6 sm:px-8 lg:-mx-8 lg:rounded-[28px] lg:px-10"
+        style={heroBackground}
       >
-        <div className="flex min-h-[440px] max-w-3xl flex-col justify-between">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_15%,rgba(255,255,255,0.14),transparent_24%),linear-gradient(180deg,rgba(0,0,0,0.02),rgba(0,0,0,0.16))]" />
+        <div className="relative flex min-h-[440px] max-w-3xl flex-col justify-between">
           <div>
             <p className="text-[11px] font-black uppercase tracking-[0.22em] text-orange-200">
               NearBitez
@@ -109,11 +116,11 @@ const PublicHome = () => {
               Fresh local food, fast.
             </h1>
             <p className="mt-5 max-w-xl text-base font-bold leading-7 text-white/78">
-              Browse live menus from nearby restaurants and sign in only when you are ready to order.
+              Live nearby menus. Login only when you order.
             </p>
 
             <form
-              className="mt-7 flex max-w-xl items-center gap-3 rounded-[20px] border border-white/20 bg-white p-2 text-stone-950 shadow-[0_30px_90px_-50px_rgba(0,0,0,0.8)]"
+              className="mt-7 flex max-w-xl items-center gap-3 rounded-[20px] border border-white/20 bg-white/96 p-2 text-stone-950 shadow-[0_30px_90px_-50px_rgba(0,0,0,0.8)] backdrop-blur"
               onSubmit={(event) => event.preventDefault()}
             >
               <span className="ml-3 text-orange-600">

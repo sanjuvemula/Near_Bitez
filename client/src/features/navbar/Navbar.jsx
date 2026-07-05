@@ -109,8 +109,13 @@ const MoreMenu = ({ user, cartCount, onLogout }) => {
     const handler = (event) => {
       if (ref.current && !ref.current.contains(event.target)) setOpen(false);
     };
+    const closeOnScroll = () => setOpen(false);
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    window.addEventListener("scroll", closeOnScroll, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      window.removeEventListener("scroll", closeOnScroll);
+    };
   }, [open]);
 
   const close = () => setOpen(false);

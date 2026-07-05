@@ -145,8 +145,13 @@ const MoreMenu = ({ cartCount = 0, onNavigate }) => {
     const handler = (event) => {
       if (ref.current && !ref.current.contains(event.target)) setOpen(false);
     };
+    const closeOnScroll = () => setOpen(false);
     document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    window.addEventListener("scroll", closeOnScroll, { passive: true });
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      window.removeEventListener("scroll", closeOnScroll);
+    };
   }, [open]);
 
   const handleClick = () => {
@@ -269,7 +274,7 @@ const LeaderboardPanel = ({
     initial={{ opacity: 0, y: 10, scale: 0.98 }}
     animate={{ opacity: 1, y: 0, scale: 1 }}
     exit={{ opacity: 0, y: 10, scale: 0.98 }}
-    className="absolute right-0 top-[calc(100%+10px)] z-50 w-[min(390px,calc(100vw-24px))] overflow-hidden rounded-[22px] border border-[#eee7dc] bg-white shadow-[0_30px_90px_-48px_rgba(15,23,42,0.65)]"
+    className="fixed left-3 right-3 top-[84px] z-50 overflow-hidden rounded-[22px] border border-[#eee7dc] bg-white shadow-[0_30px_90px_-48px_rgba(15,23,42,0.65)] sm:absolute sm:left-auto sm:right-0 sm:top-[calc(100%+10px)] sm:w-[min(390px,calc(100vw-24px))]"
   >
     <div className="border-b border-stone-100 bg-[linear-gradient(135deg,#fff7ed,#ecfeff)] px-4 py-4">
       <div className="flex items-start justify-between gap-3">
@@ -504,6 +509,17 @@ const BottomNav = ({ cartCount }) => {
 
   const visibleItems = NAV_ITEMS;
 
+  useEffect(() => {
+    setMoreOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!moreOpen) return undefined;
+    const closeOnScroll = () => setMoreOpen(false);
+    window.addEventListener("scroll", closeOnScroll, { passive: true });
+    return () => window.removeEventListener("scroll", closeOnScroll);
+  }, [moreOpen]);
+
   return (
     <>
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-[#eee7dc] bg-white/95 px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 backdrop-blur-xl lg:hidden">
@@ -601,6 +617,7 @@ const CustomerShell = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+  const showHomeFooter = location.pathname === appRoutes.customerHome;
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -755,7 +772,7 @@ const CustomerShell = () => {
 
         <main className="mx-auto w-full min-w-0 max-w-[1480px] overflow-x-hidden px-4 pb-28 pt-3 sm:px-6 sm:pt-5 lg:px-7 lg:pb-12">
           <Outlet />
-          <SiteFooter compact />
+          {showHomeFooter ? <SiteFooter compact /> : null}
         </main>
       </div>
 

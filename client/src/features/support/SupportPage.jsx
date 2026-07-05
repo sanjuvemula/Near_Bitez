@@ -17,6 +17,30 @@ const feedbackTypes = [
   { value: "RESTAURANT_ISSUE", label: "Restaurant issue" },
 ];
 
+const contactCards = [
+  { label: "Admin email", value: adminEmail, href: `mailto:${adminEmail}` },
+  { label: "Owner", value: "Krish Taliyan" },
+  { label: "Support", value: "Sanju Sri" },
+];
+
+const supportTopics = [
+  {
+    title: "Order help",
+    text: "Share order ID, restaurant name, and the issue.",
+    tone: "bg-orange-50 border-orange-100 text-orange-700",
+  },
+  {
+    title: "Account help",
+    text: "Send your registered email and what is not working.",
+    tone: "bg-sky-50 border-sky-100 text-sky-700",
+  },
+  {
+    title: "Vendor help",
+    text: "Mention restaurant name, owner email, and dashboard issue.",
+    tone: "bg-emerald-50 border-emerald-100 text-emerald-700",
+  },
+];
+
 const inputClass =
   "w-full rounded-[18px] border border-[#ece4d7] bg-[#fcfbf8] px-4 py-3 text-sm font-semibold text-stone-900 outline-none transition placeholder:text-stone-400 focus:border-orange-300 focus:bg-white";
 
@@ -42,6 +66,10 @@ const SupportPage = ({ mode = "contact" }) => {
 
   const isFeedback = mode === "feedback";
   const canSubmit = Boolean(user);
+  const feedbackHref =
+    user?.role === "customer" || user?.role === "admin"
+      ? appRoutes.customerFeedback
+      : appRoutes.feedback;
 
   useEffect(() => {
     if (!canSubmit || !isFeedback) return;
@@ -77,33 +105,34 @@ const SupportPage = ({ mode = "contact" }) => {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <section className="overflow-hidden rounded-[28px] border border-white/80 bg-[linear-gradient(135deg,#fff7ed,#ffffff_52%,#ecfeff)] p-6 shadow-[0_30px_90px_-62px_rgba(15,23,42,0.42)] sm:p-8">
-        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-600">
-          {isFeedback ? "Feedback" : "Contact us"}
-        </p>
-        <h1 className="mt-2 text-4xl font-black text-stone-950">
-          {isFeedback ? "Tell admin what to improve." : "Contact NearBitez admin."}
-        </h1>
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-[20px] bg-white/85 p-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-stone-400">
-              Email
-            </p>
-            <a className="mt-2 block truncate text-sm font-black text-orange-700" href={`mailto:${adminEmail}`}>
-              {adminEmail}
-            </a>
-          </div>
-          <div className="rounded-[20px] bg-white/85 p-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-stone-400">
-              Team
-            </p>
-            <p className="mt-2 text-sm font-black text-stone-950">Krish Taliyan</p>
-          </div>
-          <div className="rounded-[20px] bg-white/85 p-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.14em] text-stone-400">
-              Team
-            </p>
-            <p className="mt-2 text-sm font-black text-stone-950">Sanju Sri</p>
-          </div>
+        <div className="max-w-3xl">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-orange-600">
+            {isFeedback ? "Feedback" : "Contact"}
+          </p>
+          <h1 className="mt-2 text-4xl font-black leading-tight text-stone-950">
+            {isFeedback ? "Tell admin what to improve." : "We are here to help."}
+          </h1>
+          <p className="mt-3 text-sm font-semibold leading-6 text-stone-500">
+            {isFeedback
+              ? "Send product ideas, bugs, and restaurant issues directly to admin."
+              : "For orders, accounts, vendors, and partnerships, reach the NearBitez admin team here."}
+          </p>
+        </div>
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          {contactCards.map((item) => (
+            <div key={item.label} className="rounded-[20px] border border-white/80 bg-white/86 p-4 shadow-sm">
+              <p className="text-[10px] font-black uppercase tracking-[0.14em] text-stone-400">
+                {item.label}
+              </p>
+              {item.href ? (
+                <a className="mt-2 block truncate text-sm font-black text-orange-700" href={item.href}>
+                  {item.value}
+                </a>
+              ) : (
+                <p className="mt-2 truncate text-sm font-black text-stone-950">{item.value}</p>
+              )}
+            </div>
+          ))}
         </div>
       </section>
 
@@ -200,22 +229,56 @@ const SupportPage = ({ mode = "contact" }) => {
           </Card>
         )
       ) : (
-        <Card className="p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-2xl font-black text-stone-950">Need admin help?</h2>
-              <p className="mt-2 text-sm font-semibold text-stone-500">
-                Send order, account, vendor, or partnership queries to the admin email.
-              </p>
-            </div>
+        <div className="grid gap-6 lg:grid-cols-[1.05fr,0.95fr]">
+          <Card className="border-orange-100 bg-[linear-gradient(135deg,#fff,#fff7ed)] p-6">
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-600">
+              Fastest contact
+            </p>
+            <h2 className="mt-2 text-2xl font-black text-stone-950">Email admin directly</h2>
+            <p className="mt-2 text-sm font-semibold leading-6 text-stone-500">
+              Add the order ID or registered email so the team can find the right account quickly.
+            </p>
             <a
               href={`mailto:${adminEmail}`}
-              className="inline-flex min-h-12 items-center justify-center rounded-[18px] bg-stone-950 px-5 text-sm font-black text-white no-underline transition hover:bg-stone-800"
+              className="mt-5 inline-flex min-h-12 items-center justify-center rounded-[18px] bg-stone-950 px-5 text-sm font-black text-white no-underline transition hover:bg-stone-800"
             >
               Email admin
             </a>
+          </Card>
+
+          <Card className="border-sky-100 bg-[linear-gradient(135deg,#ffffff,#f0f9ff)] p-6">
+            <p className="text-[11px] font-black uppercase tracking-[0.16em] text-sky-700">
+              Good message
+            </p>
+            <h2 className="mt-2 text-2xl font-black text-stone-950">What to include</h2>
+            <div className="mt-4 space-y-3">
+              {supportTopics.map((topic) => (
+                <div key={topic.title} className={`rounded-[18px] border p-4 ${topic.tone}`}>
+                  <p className="text-sm font-black">{topic.title}</p>
+                  <p className="mt-1 text-xs font-bold leading-5 text-stone-600">{topic.text}</p>
+                </div>
+              ))}
+            </div>
+          </Card>
+          <div className="lg:col-span-2">
+            <Card className="border-emerald-100 bg-[linear-gradient(135deg,#f0fdf4,#ffffff)] p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-black text-stone-950">Want to suggest a feature?</p>
+                  <p className="mt-1 text-sm font-semibold text-stone-500">
+                    Logged-in users can send trackable feedback from the app.
+                  </p>
+                </div>
+                <Link
+                  to={feedbackHref}
+                  className="inline-flex min-h-11 items-center justify-center rounded-[16px] bg-emerald-600 px-4 text-sm font-black text-white no-underline transition hover:bg-emerald-700"
+                >
+                  Open feedback
+                </Link>
+              </div>
+            </Card>
           </div>
-        </Card>
+        </div>
       )}
     </div>
   );

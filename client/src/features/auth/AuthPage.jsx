@@ -64,6 +64,7 @@ const oauthMessages = {
   google_failed: "Google login could not finish. Please try again.",
   google_role_mismatch: "This Google account is already registered as a customer. Use a different email for vendor access.",
   access_denied: "Google access was cancelled.",
+  redirect_uri_mismatch: "Google login redirect URL is not allowed yet. Add the server callback URL in Google Cloud.",
 };
 
 const GoogleButton = ({ role, mode }) => {
