@@ -30,6 +30,7 @@ export const useVendorDashboard = () => {
   const [reviews, setReviews] = useState([]);
   const [chats, setChats] = useState([]);
   const [wallet, setWallet] = useState(null);
+  const [vendorPlan, setVendorPlan] = useState(null);
   const [promos, setPromos] = useState([]);
   const [restaurantOptions, setRestaurantOptions] = useState([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState("");
@@ -163,6 +164,7 @@ export const useVendorDashboard = () => {
         setReviews([]);
         setChats([]);
         setWallet({ balance: 0, totalEarnings: 0, pendingSettlement: 0, history: [] });
+        setVendorPlan(null);
         setPromos([]);
         setLoading(false);
         setRefreshing(false);
@@ -175,7 +177,7 @@ export const useVendorDashboard = () => {
       try {
         const [
           overviewRes, restaurantRes, menuRes, orderRes, subRes, reviewsRes,
-          chatsRes, walletRes, promoRes, logisticsRes,
+          chatsRes, walletRes, planRes, promoRes, logisticsRes,
         ] = await Promise.all([
           api.get(getVendorPath("/vendor/overview")),
           api.get(getVendorPath("/vendor/restaurant")).catch(() => ({ data: null })),
@@ -185,6 +187,7 @@ export const useVendorDashboard = () => {
           api.get(getVendorPath("/vendor/reviews")).catch(() => ({ data: [] })),
           api.get(getVendorPath("/vendor/chats")).catch(() => ({ data: [] })),
           api.get(getVendorPath("/vendor/wallet")).catch(() => ({ data: { balance: 0, totalEarnings: 0, pendingSettlement: 0, history: [] } })),
+          api.get(getVendorPath("/vendor/plan")).catch(() => ({ data: null })),
           api.get(getVendorPath("/vendor/promos")).catch(() => ({ data: [] })),
           api.get(getVendorPath("/vendor/logistics")).catch(() => ({ data: null })),
         ]);
@@ -200,6 +203,7 @@ export const useVendorDashboard = () => {
         setReviews(reviewsRes.data || []);
         setChats(chatsRes.data || []);
         setWallet(walletRes.data || { balance: 0, totalEarnings: 0, pendingSettlement: 0, history: [] });
+        setVendorPlan(planRes.data || null);
         setPromos(promoRes.data || []);
 
         if (logisticsRes.data) setLogistics(logisticsRes.data);
@@ -494,6 +498,19 @@ export const useVendorDashboard = () => {
     } finally { setRequestingPayout(false); }
   }, [getVendorPath, refreshDashboard]);
 
+  const updateVendorPlan = useCallback(async (plan) => {
+    try {
+      const response = await api.patch(getVendorPath("/vendor/plan"), { plan });
+      setVendorPlan(response.data || null);
+      toast.success("Plan updated");
+      refreshDashboard({ silent: true });
+      return true;
+    } catch (apiError) {
+      toast.error(apiError?.message || "Unable to update plan");
+      return false;
+    }
+  }, [getVendorPath, refreshDashboard]);
+
   const saveLogistics = useCallback(async (data) => {
     setSavingLogistics(true);
     try {
@@ -517,7 +534,7 @@ export const useVendorDashboard = () => {
   return {
     tab, setTab, loading, refreshing, lastSyncedAt, error,
     overview, restaurant, menuItems, orders, subscriptions, reviews, chats,
-    wallet, promos, logistics,
+    wallet, vendorPlan, promos, logistics,
     hasLiveOrders, refreshDashboard, handleLogout,
 
     restaurantForm, setRestaurantForm, restaurantDirty, setRestaurantDirty,
@@ -536,6 +553,7 @@ export const useVendorDashboard = () => {
     sendMessage, pendingMessageId,
 
     createPromoCode, togglePromoStatus, deletePromo, pendingPromoId,
+    updateVendorPlan,
     requestPayout, requestingPayout,
     saveLogistics, savingLogistics,
     isAdminWorkspace, restaurantOptions, selectedRestaurantId, setSelectedRestaurantId,

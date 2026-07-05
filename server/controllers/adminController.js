@@ -8,10 +8,22 @@ import TiffinSubscription, {
   TIFFIN_SUBSCRIPTION_STATUSES,
 } from "../models/TiffinSubscription.js";
 import User, { getTierFromPoints } from "../models/User.js";
+import {
+  getAdminEmails,
+  getEffectiveRole,
+  isAdminEmail,
+} from "../utils/adminAccess.js";
+import {
+  applyVendorPlan,
+  buildVendorPlanPayload,
+  getVendorPlanConfig,
+  VENDOR_PLAN_KEYS,
+} from "../services/vendorPlanService.js";
 
 const USER_ROLES = ["customer", "vendor", "admin"];
 const PROMO_TYPES = ["PERCENTAGE", "FLAT"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const RESTAURANT_PLAN_STATUSES = ["ACTIVE", "PAST_DUE", "CANCELLED"];
 
 const asBoolean = (value, defaultValue = false) => {
   if (value === undefined || value === null || value === "") return defaultValue;
@@ -22,6 +34,9 @@ const asBoolean = (value, defaultValue = false) => {
 
 const asCleanString = (value, maxLength = 500) =>
   String(value ?? "").trim().slice(0, maxLength);
+
+const escapeRegex = (value = "") =>
+  String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const asNumber = (value, fallback = 0, { min = Number.NEGATIVE_INFINITY, max = Number.POSITIVE_INFINITY } = {}) => {
   const parsed = Number(value);
@@ -192,6 +207,18 @@ const buildPromoUpdate = (body, restaurant, current = {}) => {
 
 const populateAdminPromo = (query) =>
   query.populate("vendor", "name email phone").populate("restaurant", "name category isActive");
+
+const serializeAdminUser = (user) => {
+  const safeUser = typeof user?.toObject === "function" ? user.toObject() : { ...(user || {}) };
+  delete safeUser.password;
+  delete safeUser.pointsHistory;
+
+  return {
+    ...safeUser,
+    role: getEffectiveRole(safeUser) || safeUser.role,
+    isSystemAdmin: isAdminEmail(safeUser.email),
+  };
+};
 
 export const getStats = async (_req, res) => {
   try {
@@ -408,16 +435,35 @@ export const getStats = async (_req, res) => {
 export const getAllUsers = async (req, res) => {
   try {
     const { role, search, page = 1, limit = 50 } = req.query;
-    const query = {};
-    if (role && role !== "all") query.role = role;
-    if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { email: { $regex: search, $options: "i" } },
-        { phone: { $regex: search, $options: "i" } },
-      ];
+    const filters = [];
+    const requestedRole = asCleanString(role, 20).toLowerCase();
+    const adminEmails = getAdminEmails();
+
+    if (requestedRole && requestedRole !== "all") {
+      if (!USER_ROLES.includes(requestedRole)) {
+        return res.status(400).json({ success: false, message: "Invalid role filter" });
+      }
+
+      if (requestedRole === "admin") {
+        filters.push({ $or: [{ role: "admin" }, { email: { $in: adminEmails } }] });
+      } else {
+        filters.push({ role: requestedRole, email: { $nin: adminEmails } });
+      }
     }
 
+    const safeSearch = asCleanString(search, 100);
+    if (safeSearch) {
+      const pattern = escapeRegex(safeSearch);
+      filters.push({
+        $or: [
+          { name: { $regex: pattern, $options: "i" } },
+          { email: { $regex: pattern, $options: "i" } },
+          { phone: { $regex: pattern, $options: "i" } },
+        ],
+      });
+    }
+
+    const query = filters.length ? { $and: filters } : {};
     const safeLimit = Math.min(100, Math.max(1, Number(limit) || 50));
     const safePage = Math.max(1, Number(page) || 1);
     const [users, total] = await Promise.all([
@@ -425,11 +471,26 @@ export const getAllUsers = async (req, res) => {
         .select("-password")
         .sort({ createdAt: -1 })
         .limit(safeLimit)
-        .skip((safePage - 1) * safeLimit),
+        .skip((safePage - 1) * safeLimit)
+        .lean(),
       User.countDocuments(query),
     ]);
 
-    res.json({ success: true, data: users, total });
+    const totalPages = Math.max(1, Math.ceil(total / safeLimit));
+
+    res.json({
+      success: true,
+      data: users.map(serializeAdminUser),
+      total,
+      pagination: {
+        page: safePage,
+        limit: safeLimit,
+        total,
+        totalPages,
+        hasNextPage: safePage < totalPages,
+        hasPreviousPage: safePage > 1,
+      },
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -441,27 +502,47 @@ export const updateUser = async (req, res) => {
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
     if (req.body.role !== undefined) {
-      if (!USER_ROLES.includes(req.body.role)) {
+      const nextRole = asCleanString(req.body.role, 20).toLowerCase();
+      if (!USER_ROLES.includes(nextRole)) {
         return res.status(400).json({ success: false, message: "Invalid role" });
       }
-      if (String(user._id) === String(req.user._id) && req.body.role !== "admin") {
+      if (isAdminEmail(user.email) && nextRole !== "admin") {
+        return res.status(403).json({ success: false, message: "System admin access cannot be removed here" });
+      }
+      if (String(user._id) === String(req.user._id) && nextRole !== "admin") {
         return res.status(403).json({ success: false, message: "You cannot remove your own admin access" });
       }
-      user.role = req.body.role;
+
+      if (user.role === "vendor" && nextRole !== "vendor") {
+        const ownsRestaurant = await Restaurant.exists({ vendor: user._id });
+        if (ownsRestaurant) {
+          return res.status(409).json({
+            success: false,
+            message: "Delete or transfer this vendor's restaurant before changing their role",
+          });
+        }
+      }
+
+      user.role = nextRole;
     }
 
-    if (req.body.name !== undefined) user.name = asCleanString(req.body.name, 80);
+    if (req.body.name !== undefined) {
+      const nextName = asCleanString(req.body.name, 80);
+      if (!nextName) return res.status(400).json({ success: false, message: "Name is required" });
+      user.name = nextName;
+    }
     if (req.body.phone !== undefined) user.phone = asCleanString(req.body.phone, 40);
     if (req.body.address !== undefined) user.address = asCleanString(req.body.address, 500);
     if (req.body.loyaltyPoints !== undefined) user.loyaltyPoints = asNumber(req.body.loyaltyPoints, user.loyaltyPoints, { min: 0, max: 10000000 });
     if (req.body.nearCoins !== undefined) user.nearCoins = asNumber(req.body.nearCoins, user.nearCoins, { min: 0, max: 10000000 });
     if (req.body.totalPointsEarned !== undefined) user.totalPointsEarned = asNumber(req.body.totalPointsEarned, user.totalPointsEarned, { min: 0, max: 10000000 });
+    user.totalPointsEarned = Math.max(user.totalPointsEarned || 0, user.loyaltyPoints || 0);
 
     user.loyaltyTier = getTierFromPoints(user.loyaltyPoints);
     await user.save();
 
-    const safe = await User.findById(user._id).select("-password");
-    res.json({ success: true, data: safe });
+    const safe = await User.findById(user._id).select("-password").lean();
+    res.json({ success: true, data: serializeAdminUser(safe) });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message || "Unable to update user" });
   }
@@ -473,10 +554,24 @@ export const deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-    if (user.role === "admin") return res.status(403).json({ success: false, message: "Cannot delete admin users" });
+    if (String(user._id) === String(req.user._id)) {
+      return res.status(403).json({ success: false, message: "You cannot delete your own account" });
+    }
+    if (getEffectiveRole(user) === "admin") {
+      return res.status(403).json({ success: false, message: "Cannot delete admin users" });
+    }
 
     if (user.role === "vendor") {
-      await Restaurant.deleteOne({ vendor: user._id });
+      const restaurants = await Restaurant.find({ vendor: user._id }).select("_id").lean();
+      const restaurantIds = restaurants.map((restaurant) => restaurant._id);
+      if (restaurantIds.length) {
+        await Promise.all([
+          Restaurant.deleteMany({ _id: { $in: restaurantIds } }),
+          MenuItem.deleteMany({ restaurant: { $in: restaurantIds } }),
+          Promo.deleteMany({ restaurant: { $in: restaurantIds } }),
+          TiffinSubscription.deleteMany({ restaurant: { $in: restaurantIds } }),
+        ]);
+      }
     }
 
     await User.findByIdAndDelete(req.params.id);
@@ -629,6 +724,98 @@ export const deleteRestaurant = async (req, res) => {
     res.json({ success: true, message: "Restaurant deleted" });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const getRestaurantSubscriptions = async (req, res) => {
+  try {
+    const { plan = "all", status = "all", search = "" } = req.query;
+    const query = {};
+
+    if (plan !== "all") {
+      const normalizedPlan = String(plan || "").trim().toUpperCase();
+      if (!VENDOR_PLAN_KEYS.includes(normalizedPlan)) {
+        return res.status(400).json({ success: false, message: "Invalid plan filter" });
+      }
+      query.subscriptionPlan = normalizedPlan;
+    }
+
+    if (status !== "all") {
+      const normalizedStatus = String(status || "").trim().toUpperCase();
+      if (!RESTAURANT_PLAN_STATUSES.includes(normalizedStatus)) {
+        return res.status(400).json({ success: false, message: "Invalid status filter" });
+      }
+      query.planStatus = normalizedStatus;
+    }
+
+    const safeSearch = asCleanString(search, 100);
+    if (safeSearch) {
+      const pattern = escapeRegex(safeSearch);
+      query.$or = [
+        { name: { $regex: pattern, $options: "i" } },
+        { category: { $regex: pattern, $options: "i" } },
+      ];
+    }
+
+    const restaurants = await Restaurant.find(query)
+      .populate("vendor", "name email phone")
+      .sort({ updatedAt: -1 })
+      .limit(200);
+
+    const rows = await Promise.all(
+      restaurants.map(async (restaurant) => ({
+        restaurant: restaurant.toObject(),
+        subscription: await buildVendorPlanPayload(restaurant),
+      }))
+    );
+
+    const summary = VENDOR_PLAN_KEYS.map((key) => ({
+      ...getVendorPlanConfig(key),
+      count: rows.filter((row) => row.subscription?.current?.key === key).length,
+    }));
+
+    res.json({ success: true, data: rows, summary });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const updateRestaurantSubscription = async (req, res) => {
+  try {
+    const restaurant = await Restaurant.findById(req.params.restaurantId);
+    if (!restaurant) return res.status(404).json({ success: false, message: "Restaurant not found" });
+
+    const planKey = req.body.plan || restaurant.subscriptionPlan;
+    const status = req.body.status
+      ? asCleanString(req.body.status, 20).toUpperCase()
+      : restaurant.planStatus || "ACTIVE";
+
+    if (!RESTAURANT_PLAN_STATUSES.includes(status)) {
+      return res.status(400).json({ success: false, message: "Invalid plan status" });
+    }
+
+    const renewalDate =
+      req.body.renewalDate === ""
+        ? null
+        : req.body.renewalDate !== undefined
+        ? asDateOrNull(req.body.renewalDate)
+        : undefined;
+
+    const payload = await applyVendorPlan(restaurant, planKey, { status, renewalDate });
+    await restaurant.populate("vendor", "name email phone");
+
+    res.json({
+      success: true,
+      data: {
+        restaurant: restaurant.toObject(),
+        subscription: payload,
+      },
+    });
+  } catch (error) {
+    res.status(error.statusCode || 400).json({
+      success: false,
+      message: error.message || "Unable to update restaurant subscription",
+    });
   }
 };
 

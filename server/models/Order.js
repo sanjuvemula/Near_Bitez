@@ -74,6 +74,58 @@ const orderSchema = new mongoose.Schema(
 
     grandTotal: { type: Number, required: true, min: 0 },
 
+    // Vendor monetization snapshot captured when the order is placed.
+    vendorPlan: {
+      type: String,
+      enum: ["STARTER", "GROWTH", "PREMIUM", "PRO"],
+      default: "GROWTH",
+    },
+    vendorPlanName: {
+      type: String,
+      default: "Growth Plan",
+      trim: true,
+    },
+    vendorPlanMonthlyFee: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    commissionBase: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    commissionPercent: {
+      type: Number,
+      default: 0,
+      min: 0,
+      max: 100,
+    },
+    commissionAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    vendorNetAmount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    freeOrderApplied: {
+      type: Boolean,
+      default: false,
+    },
+    freeOrderSequence: {
+      type: Number,
+      default: null,
+      min: 1,
+    },
+    freeOrdersRemainingAfter: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
     // ── Delivery ───────────────────────────────────────────────────────────────
     deliveryAddress: {
       type: String,
@@ -121,5 +173,4 @@ const orderSchema = new mongoose.Schema(
 );
 
 export default mongoose.model("Order", orderSchema);
-
 

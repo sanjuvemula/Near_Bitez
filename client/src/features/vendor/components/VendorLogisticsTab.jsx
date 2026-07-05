@@ -20,6 +20,18 @@ const orangeIcon = new L.Icon({
   iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41],
 });
 
+const DEFAULT_LOCATION = { lat: 30.9010, lng: 75.8573 };
+
+const asMapLocation = (location) => {
+  const lat = Number(location?.lat);
+  const lng = Number(location?.lng);
+
+  return {
+    lat: Number.isFinite(lat) ? lat : DEFAULT_LOCATION.lat,
+    lng: Number.isFinite(lng) ? lng : DEFAULT_LOCATION.lng,
+  };
+};
+
 // Map click handler
 const LocationPicker = ({ position, setPosition }) => {
   useMapEvents({ click(e) { setPosition({ lat: e.latlng.lat, lng: e.latlng.lng }); } });
@@ -62,7 +74,7 @@ const TealInput = ({ label, hint, prefix, ...props }) => (
 // ── Main Component ─────────────────────────────────────────────────────────────
 const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogistics }) => {
   const [form, setForm] = useState({
-    location: { lat: 30.9010, lng: 75.8573 },
+    location: DEFAULT_LOCATION,
     deliveryRadiusKm: 5,
     baseDeliveryFee: 40,
     freeDeliveryAbove: 500,
@@ -78,7 +90,7 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
   useEffect(() => {
     if (logistics?.location) {
       setForm({
-        location: logistics.location,
+        location: asMapLocation(logistics.location),
         deliveryRadiusKm: logistics.deliveryRadiusKm || 5,
         baseDeliveryFee: logistics.baseDeliveryFee || 40,
         freeDeliveryAbove: logistics.freeDeliveryAbove || 500,
@@ -113,10 +125,11 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
 
   const removeTier = (idx) => setForm(f => ({ ...f, extraTiers: f.extraTiers.filter((_, i) => i !== idx) }));
 
-  const handleSave = () => saveLogistics(form);
+  const handleSave = () => saveLogistics({ ...form, location: asMapLocation(form.location) });
 
   if (!restaurant) return <EmptyState title="Store Not Ready" description="Complete your store profile before setting delivery zones." tone="info" />;
 
+  const mapLocation = asMapLocation(form.location);
   const totalRadius = form.deliveryRadiusKm;
 
   return (
@@ -330,12 +343,12 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
           {/* Coordinate display */}
           <div className="absolute bottom-4 left-4 z-[400] bg-white/90 backdrop-blur-md px-3 py-2 rounded-xl border border-teal-200 shadow pointer-events-none">
             <p className="text-[10px] font-black text-teal-600">
-              {form.location.lat.toFixed(4)}, {form.location.lng.toFixed(4)}
+              {mapLocation.lat.toFixed(4)}, {mapLocation.lng.toFixed(4)}
             </p>
           </div>
 
           <MapContainer
-            center={[form.location.lat, form.location.lng]}
+            center={[mapLocation.lat, mapLocation.lng]}
             zoom={13}
             style={{ height: "100%", width: "100%", minHeight: "600px" }}
           >
@@ -344,12 +357,12 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             />
 
-            <MapFlyTo position={form.location} />
-            <LocationPicker position={form.location} setPosition={(pos) => setForm(f => ({ ...f, location: pos }))} />
+            <MapFlyTo position={mapLocation} />
+            <LocationPicker position={mapLocation} setPosition={(pos) => setForm(f => ({ ...f, location: pos }))} />
 
             {/* Main delivery zone */}
             <Circle
-              center={[form.location.lat, form.location.lng]}
+              center={[mapLocation.lat, mapLocation.lng]}
               radius={form.deliveryRadiusKm * 1000}
               pathOptions={{ color: "#14b8a6", fillColor: "#14b8a6", fillOpacity: 0.12, weight: 2.5, dashArray: "6 4" }}
             />
@@ -358,7 +371,7 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
             {(form.extraTiers || []).map((tier, idx) => (
               <Circle
                 key={idx}
-                center={[form.location.lat, form.location.lng]}
+                center={[mapLocation.lat, mapLocation.lng]}
                 radius={tier.toKm * 1000}
                 pathOptions={{ color: "#f59e0b", fillColor: "#f59e0b", fillOpacity: 0.06, weight: 1.5, dashArray: "3 6" }}
               />

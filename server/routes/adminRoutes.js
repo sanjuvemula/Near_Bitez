@@ -11,7 +11,9 @@ import {
   updateUser,
   updateUserRole,
   getAllRestaurants,
+  getRestaurantSubscriptions,
   updateRestaurant,
+  updateRestaurantSubscription,
   toggleRestaurantStatus,
   deleteRestaurant,
   getAllMenuItems,
@@ -37,6 +39,11 @@ import {
   updateAdminBusinessSettings,
   updateAdminPayoutStatus,
 } from "../controllers/adminSettingsController.js";
+import {
+  deleteAdminFeedback,
+  getAdminFeedback,
+  updateAdminFeedback,
+} from "../controllers/feedbackController.js";
 
 const router = express.Router();
 
@@ -53,6 +60,11 @@ router.post("/settings/reset", resetAdminBusinessSettings);
 router.get("/payouts", getAdminPayouts);
 router.patch("/payouts/:id/status", updateAdminPayoutStatus);
 
+// Feedback
+router.get("/feedback", getAdminFeedback);
+router.patch("/feedback/:id", updateAdminFeedback);
+router.delete("/feedback/:id", deleteAdminFeedback);
+
 // Users
 router.get("/users", getAllUsers);
 router.patch("/users/:id", updateUser);
@@ -65,6 +77,10 @@ router.post("/restaurants", createRestaurant);
 router.patch("/restaurants/:id", updateRestaurant);
 router.patch("/restaurants/:id/toggle", toggleRestaurantStatus);
 router.delete("/restaurants/:id", deleteRestaurant);
+
+// Restaurant monetization
+router.get("/subscriptions", getRestaurantSubscriptions);
+router.patch("/subscriptions/:restaurantId", updateRestaurantSubscription);
 
 // Menus
 router.get("/menu", getAllMenuItems);

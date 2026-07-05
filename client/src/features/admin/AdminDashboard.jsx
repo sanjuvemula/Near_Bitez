@@ -20,6 +20,8 @@ const ORDER_STATUSES = [
 const PAYOUT_STATUSES = ["REQUESTED", "APPROVED", "PAID", "REJECTED"];
 const TIFFIN_SUBSCRIPTION_STATUSES = ["ACTIVE", "PAUSED", "EXPIRING_SOON", "EXPIRED", "CANCELLED"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const USER_ROLES = ["customer", "vendor", "admin"];
+const USER_PAGE_SIZE = 25;
 
 const emptyRestaurantForm = {
   vendorId: "",
@@ -127,6 +129,33 @@ const buildQuery = (params = {}) => {
 
 const getData = (response, fallback) => response?.data ?? fallback;
 
+const useDebouncedValue = (value, delay = 350) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => setDebouncedValue(value), delay);
+    return () => window.clearTimeout(timeoutId);
+  }, [delay, value]);
+
+  return debouncedValue;
+};
+
+const getPagination = (response, fallbackCount = 0, fallbackPage = 1, fallbackLimit = USER_PAGE_SIZE) => {
+  const total = Number(response?.pagination?.total ?? response?.total ?? fallbackCount);
+  const limit = Number(response?.pagination?.limit ?? fallbackLimit);
+  const page = Number(response?.pagination?.page ?? fallbackPage);
+  const totalPages = Math.max(1, Number(response?.pagination?.totalPages ?? Math.ceil(total / Math.max(1, limit))));
+
+  return {
+    page,
+    limit,
+    total,
+    totalPages,
+    hasNextPage: response?.pagination?.hasNextPage ?? page < totalPages,
+    hasPreviousPage: response?.pagination?.hasPreviousPage ?? page > 1,
+  };
+};
+
 const displayDate = (value) => (value ? formatDateTime(value) : "N/A");
 
 const statusColor = (status) =>
@@ -228,7 +257,7 @@ const SearchInput = ({ value, onChange, placeholder }) => (
     value={value}
     onChange={(event) => onChange(event.target.value)}
     placeholder={placeholder}
-    className="w-60 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200"
+    className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-200 sm:w-64"
   />
 );
 
@@ -253,6 +282,35 @@ const EmptyRow = ({ colSpan, label }) => (
     </td>
   </tr>
 );
+
+const PaginationControls = ({ pagination, onPageChange, loading }) => {
+  const page = pagination?.page || 1;
+  const limit = pagination?.limit || USER_PAGE_SIZE;
+  const total = pagination?.total || 0;
+  const totalPages = pagination?.totalPages || 1;
+  const start = total === 0 ? 0 : (page - 1) * limit + 1;
+  const end = Math.min(total, page * limit);
+
+  return (
+    <div className="flex flex-col gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3 text-sm shadow-sm sm:flex-row sm:items-center sm:justify-between">
+      <p className="text-gray-500">
+        Showing <span className="font-semibold text-gray-800">{start}</span>-<span className="font-semibold text-gray-800">{end}</span> of{" "}
+        <span className="font-semibold text-gray-800">{total}</span>
+      </p>
+      <div className="flex items-center gap-2">
+        <Btn onClick={() => onPageChange(page - 1)} disabled={loading || page <= 1} small>
+          Previous
+        </Btn>
+        <span className="min-w-20 text-center text-xs font-semibold uppercase tracking-wide text-gray-400">
+          Page {page} / {totalPages}
+        </span>
+        <Btn onClick={() => onPageChange(page + 1)} disabled={loading || page >= totalPages} small>
+          Next
+        </Btn>
+      </div>
+    </div>
+  );
+};
 
 const StatCard = ({ label, value, sub, accent = "bg-orange-500" }) => (
   <div className="rounded-lg border border-gray-100 bg-white p-4 shadow-sm">
@@ -531,45 +589,89 @@ const StatsTab = ({ onNavigate }) => {
 };
 
 const UsersTab = () => {
+  const { user: currentUser } = useAuth();
+  const currentUserId = String(currentUser?._id || "");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search.trim());
   const [roleFilter, setRoleFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState(getPagination(null));
   const [editingId, setEditingId] = useState("");
+  const [editingUserMeta, setEditingUserMeta] = useState({});
   const [form, setForm] = useState(emptyUserForm);
   const [saving, setSaving] = useState(false);
+  const [pendingAction, setPendingAction] = useState("");
 
   const load = useCallback(() => {
     setLoading(true);
     api
-      .get(`/admin/users${buildQuery({ role: roleFilter, search })}`)
-      .then((response) => setUsers(getData(response, [])))
+      .get(`/admin/users${buildQuery({ role: roleFilter, search: debouncedSearch, page, limit: USER_PAGE_SIZE })}`)
+      .then((response) => {
+        const nextUsers = getData(response, []);
+        const nextPagination = getPagination(response, nextUsers.length, page, USER_PAGE_SIZE);
+        setUsers(nextUsers);
+        setPagination(nextPagination);
+
+        if (nextPagination.total > 0 && page > nextPagination.totalPages) {
+          setPage(nextPagination.totalPages);
+        }
+      })
       .catch((error) => toast.error(error.message))
       .finally(() => setLoading(false));
-  }, [roleFilter, search]);
+  }, [debouncedSearch, page, roleFilter]);
 
   useEffect(() => {
     load();
   }, [load]);
 
+  const handleSearchChange = (value) => {
+    setSearch(value);
+    setPage(1);
+  };
+
+  const handleRoleFilterChange = (role) => {
+    setRoleFilter(role);
+    setPage(1);
+  };
+
+  const goToPage = (nextPage) => {
+    setPage(Math.min(Math.max(1, nextPage), pagination.totalPages || 1));
+  };
+
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Delete user "${name}"?`)) return;
+    const actionKey = `delete:${id}`;
+    setPendingAction(actionKey);
     try {
       await api.delete(`/admin/users/${id}`);
       toast.success("User deleted");
-      load();
+      if (users.length === 1 && page > 1) {
+        setPage((current) => Math.max(1, current - 1));
+      } else {
+        load();
+      }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setPendingAction("");
     }
   };
 
-  const handleRoleChange = async (id, role) => {
+  const handleRoleChange = async (item, role) => {
+    if (item.role === role) return;
+    if (!window.confirm(`Change ${item.name}'s role to ${role}?`)) return;
+    const actionKey = `role:${item._id}`;
+    setPendingAction(actionKey);
     try {
-      await api.patch(`/admin/users/${id}/role`, { role });
+      await api.patch(`/admin/users/${item._id}/role`, { role });
       toast.success("Role updated");
       load();
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      setPendingAction("");
     }
   };
 
@@ -577,11 +679,16 @@ const UsersTab = () => {
 
   const resetForm = () => {
     setEditingId("");
+    setEditingUserMeta({});
     setForm(emptyUserForm);
   };
 
   const startEdit = (user) => {
     setEditingId(user._id);
+    setEditingUserMeta({
+      isCurrentUser: String(user._id) === currentUserId,
+      isSystemAdmin: Boolean(user.isSystemAdmin),
+    });
     setForm({
       name: user.name || "",
       role: user.role || "customer",
@@ -597,9 +704,40 @@ const UsersTab = () => {
   const saveUser = async (event) => {
     event.preventDefault();
     if (!editingId) return;
+
+    const name = form.name.trim();
+    if (!name) {
+      toast.error("Name is required");
+      return;
+    }
+
+    const readMetric = (field, label) => {
+      const value = Number(form[field]);
+      if (!Number.isFinite(value) || value < 0) {
+        throw new Error(`${label} must be 0 or higher`);
+      }
+      return value;
+    };
+
+    let payload;
+    try {
+      payload = {
+        name,
+        role: form.role,
+        phone: form.phone.trim(),
+        address: form.address.trim(),
+        loyaltyPoints: readMetric("loyaltyPoints", "Loyalty points"),
+        nearCoins: readMetric("nearCoins", "NearCoins"),
+        totalPointsEarned: readMetric("totalPointsEarned", "Lifetime points"),
+      };
+    } catch (error) {
+      toast.error(error.message);
+      return;
+    }
+
     setSaving(true);
     try {
-      await api.patch(`/admin/users/${editingId}`, form);
+      await api.patch(`/admin/users/${editingId}`, payload);
       toast.success("User updated");
       resetForm();
       load();
@@ -618,16 +756,26 @@ const UsersTab = () => {
           <form onSubmit={saveUser} className="space-y-4">
             <div className="grid gap-3 md:grid-cols-3">
               <TextInput label="Name" value={form.name} onChange={(event) => updateForm("name", event.target.value)} required />
-              <SelectInput label="Role" value={form.role} onChange={(event) => updateForm("role", event.target.value)}>
-                <option value="customer">Customer</option>
-                <option value="vendor">Vendor</option>
-                <option value="admin">Admin</option>
+              <SelectInput
+                label="Role"
+                value={form.role}
+                onChange={(event) => updateForm("role", event.target.value)}
+                disabled={editingUserMeta.isCurrentUser || editingUserMeta.isSystemAdmin}
+              >
+                {USER_ROLES.map((role) => (
+                  <option key={role} value={role}>
+                    {role}
+                  </option>
+                ))}
               </SelectInput>
               <TextInput label="Phone" value={form.phone} onChange={(event) => updateForm("phone", event.target.value)} />
-              <TextInput label="Loyalty points" type="number" value={form.loyaltyPoints} onChange={(event) => updateForm("loyaltyPoints", event.target.value)} />
-              <TextInput label="NearCoins" type="number" value={form.nearCoins} onChange={(event) => updateForm("nearCoins", event.target.value)} />
-              <TextInput label="Lifetime points" type="number" value={form.totalPointsEarned} onChange={(event) => updateForm("totalPointsEarned", event.target.value)} />
+              <TextInput label="Loyalty points" type="number" min="0" value={form.loyaltyPoints} onChange={(event) => updateForm("loyaltyPoints", event.target.value)} />
+              <TextInput label="NearCoins" type="number" min="0" value={form.nearCoins} onChange={(event) => updateForm("nearCoins", event.target.value)} />
+              <TextInput label="Lifetime points" type="number" min="0" value={form.totalPointsEarned} onChange={(event) => updateForm("totalPointsEarned", event.target.value)} />
             </div>
+            {editingUserMeta.isCurrentUser || editingUserMeta.isSystemAdmin ? (
+              <p className="text-xs font-medium text-gray-400">Role locked for this admin account.</p>
+            ) : null}
             <TextArea label="Address" value={form.address} onChange={(event) => updateForm("address", event.target.value)} />
             <div className="flex gap-2">
               <Btn type="submit" variant="primary" disabled={saving}>
@@ -640,12 +788,12 @@ const UsersTab = () => {
       ) : null}
 
       <Toolbar>
-        <SearchInput value={search} onChange={setSearch} placeholder="Search name or email..." />
+        <SearchInput value={search} onChange={handleSearchChange} placeholder="Search name, email, or phone..." />
         <div className="flex gap-1">
-          {["all", "customer", "vendor", "admin"].map((role) => (
+          {["all", ...USER_ROLES].map((role) => (
             <button
               key={role}
-              onClick={() => setRoleFilter(role)}
+              onClick={() => handleRoleFilterChange(role)}
               className={`rounded-lg px-3 py-1.5 text-xs font-semibold capitalize transition-colors ${
                 roleFilter === role ? "bg-orange-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
@@ -654,10 +802,10 @@ const UsersTab = () => {
             </button>
           ))}
         </div>
-        <Btn onClick={load} small>
-          Refresh
+        <Btn onClick={load} disabled={loading} small>
+          {loading ? "Refreshing..." : "Refresh"}
         </Btn>
-        <span className="text-xs text-gray-400">{users.length} users</span>
+        <span className="text-xs text-gray-400">{pagination.total} users</span>
       </Toolbar>
 
       <TableShell>
@@ -677,49 +825,65 @@ const UsersTab = () => {
             ) : users.length === 0 ? (
               <EmptyRow colSpan={8} label="No users found" />
             ) : (
-              users.map((user) => (
-                <tr key={user._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-gray-900">{user.name}</p>
-                    <p className="text-xs text-gray-400">{user.loyaltyTier || "BRONZE"}</p>
-                  </td>
-                  <td className="px-4 py-3 text-gray-500">{user.email}</td>
-                  <td className="px-4 py-3">
-                    <Pill label={user.role} color={roleColor(user.role)} />
-                  </td>
-                  <td className="px-4 py-3 text-gray-500">{user.phone || "N/A"}</td>
-                  <td className="px-4 py-3 text-gray-500">{user.loyaltyPoints || 0} pts</td>
-                  <td className="px-4 py-3 text-gray-500">{user.nearCoins || 0}</td>
-                  <td className="px-4 py-3 text-xs text-gray-400">{displayDate(user.createdAt)}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-1.5">
-                      <Btn onClick={() => startEdit(user)} small>
-                        Edit
-                      </Btn>
-                      {user.role !== "admin" ? (
-                        <select
-                          value={user.role}
-                          onChange={(event) => handleRoleChange(user._id, event.target.value)}
-                          className="rounded-lg border border-gray-200 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-orange-200"
-                        >
-                          <option value="customer">customer</option>
-                          <option value="vendor">vendor</option>
-                          <option value="admin">admin</option>
-                        </select>
-                      ) : null}
-                      {user.role !== "admin" ? (
-                        <Btn onClick={() => handleDelete(user._id, user.name)} variant="danger" small>
-                          Delete
+              users.map((user) => {
+                const isCurrentUser = String(user._id) === currentUserId;
+                const roleLocked = isCurrentUser || user.isSystemAdmin;
+                const rolePending = pendingAction === `role:${user._id}`;
+                const deletePending = pendingAction === `delete:${user._id}`;
+                const canDelete = !roleLocked && user.role !== "admin";
+
+                return (
+                  <tr key={user._id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-gray-900">{user.name}</p>
+                      <p className="text-xs text-gray-400">
+                        {user.loyaltyTier || "BRONZE"}
+                        {isCurrentUser ? " - You" : ""}
+                        {user.isSystemAdmin ? " - System admin" : ""}
+                      </p>
+                    </td>
+                    <td className="px-4 py-3 text-gray-500">{user.email}</td>
+                    <td className="px-4 py-3">
+                      <Pill label={user.role} color={roleColor(user.role)} />
+                    </td>
+                    <td className="px-4 py-3 text-gray-500">{user.phone || "N/A"}</td>
+                    <td className="px-4 py-3 text-gray-500">{user.loyaltyPoints || 0} pts</td>
+                    <td className="px-4 py-3 text-gray-500">{user.nearCoins || 0}</td>
+                    <td className="px-4 py-3 text-xs text-gray-400">{displayDate(user.createdAt)}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-1.5">
+                        <Btn onClick={() => startEdit(user)} disabled={Boolean(pendingAction)} small>
+                          Edit
                         </Btn>
-                      ) : null}
-                    </div>
-                  </td>
-                </tr>
-              ))
+                        {!roleLocked ? (
+                          <select
+                            value={user.role}
+                            onChange={(event) => handleRoleChange(user, event.target.value)}
+                            disabled={rolePending || Boolean(pendingAction)}
+                            className="rounded-lg border border-gray-200 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-orange-200 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {USER_ROLES.map((role) => (
+                              <option key={role} value={role}>
+                                {role}
+                              </option>
+                            ))}
+                          </select>
+                        ) : null}
+                        {canDelete ? (
+                          <Btn onClick={() => handleDelete(user._id, user.name)} variant="danger" disabled={deletePending || Boolean(pendingAction)} small>
+                            {deletePending ? "Deleting..." : "Delete"}
+                          </Btn>
+                        ) : null}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
       </TableShell>
+      <PaginationControls pagination={pagination} onPageChange={goToPage} loading={loading} />
     </div>
   );
 };

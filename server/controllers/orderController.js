@@ -7,6 +7,10 @@ import Restaurant from "../models/Restaurant.js";
 import User from "../models/User.js";
 import { getBusinessSettings } from "../models/BusinessSettings.js";
 import { calculateOrderTotals } from "../services/pricingService.js";
+import {
+  buildOrderMonetizationSnapshot,
+  getVendorRevenueBase,
+} from "../services/vendorPlanService.js";
 
 const serializeOrder = (order) => ({
   _id: order._id,
@@ -21,6 +25,16 @@ const serializeOrder = (order) => ({
   promoDiscount: order.promoDiscount || 0,
   loyaltyDiscount: order.loyaltyDiscount || 0,
   grandTotal: order.grandTotal,
+  vendorPlan: order.vendorPlan,
+  vendorPlanName: order.vendorPlanName,
+  vendorPlanMonthlyFee: order.vendorPlanMonthlyFee,
+  commissionBase: order.commissionBase,
+  commissionPercent: order.commissionPercent,
+  commissionAmount: order.commissionAmount,
+  vendorNetAmount: order.vendorNetAmount,
+  freeOrderApplied: Boolean(order.freeOrderApplied),
+  freeOrderSequence: order.freeOrderSequence || null,
+  freeOrdersRemainingAfter: order.freeOrdersRemainingAfter || 0,
   promoCode: order.promoCode || null,
   pointsRedeemed: order.pointsRedeemed || 0,
   deliveryAddress: order.deliveryAddress,
@@ -235,6 +249,14 @@ export const createOrder = async (req, res) => {
     }
 
     const finalGrandTotal = Math.max(1, totals.grandTotal - promoDiscount - loyaltyDiscount);
+    const monetizationSnapshot = await buildOrderMonetizationSnapshot(
+      restaurant,
+      getVendorRevenueBase({
+        itemTotal: totals.itemTotal,
+        promoDiscount,
+        loyaltyDiscount,
+      })
+    );
 
     // ── Create Order Document ──────────────────────────────────────────────────
     const order = await Order.create({
@@ -257,6 +279,7 @@ export const createOrder = async (req, res) => {
       promoCode: appliedPromo ? appliedPromo.code : null,
       pointsRedeemed: actualPointsRedeemed,
       scheduledFor: scheduledDate,
+      ...monetizationSnapshot,
     });
 
     // ── Apply Promo Usage Count ────────────────────────────────────────────────

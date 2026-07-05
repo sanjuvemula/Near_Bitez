@@ -8,6 +8,7 @@ import { withOptionalImageUpload } from "../middleware/upload.js";
 import { getVendorChats, vendorSendMessage } from "../controllers/chatController.js";
 import { getVendorReviews } from "../controllers/reviewController.js";
 import { getVendorPromos, createPromo, togglePromoStatus, deletePromo } from "../controllers/vendor/promoController.js";
+import { getVendorPlan, updateVendorPlan } from "../controllers/vendor/planController.js";
 import {
   getVendorLogistics,
   getVendorSubscriptions,
@@ -28,6 +29,10 @@ router.get("/overview", getVendorOverview);
 // Restaurant profile
 router.get("/restaurant", getVendorProfile);
 router.put("/restaurant", withOptionalImageUpload("image"), upsertVendorProfile);
+
+// Monetization plan
+router.get("/plan", getVendorPlan);
+router.patch("/plan", updateVendorPlan);
 
 // Menu
 router.get("/menu", getMenuItems);

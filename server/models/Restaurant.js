@@ -103,8 +103,8 @@ const restaurantSchema = new mongoose.Schema(
     },
     subscriptionPlan: {
       type: String,
-      enum: ["STARTER", "GROWTH", "PREMIUM"],
-      default: "STARTER",
+      enum: ["STARTER", "GROWTH", "PREMIUM", "PRO"],
+      default: "GROWTH",
       index: true,
     },
     planStatus: {

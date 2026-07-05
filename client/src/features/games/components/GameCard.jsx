@@ -1,45 +1,39 @@
-import { motion as Motion } from "framer-motion";
+import { motion as Motion, useReducedMotion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { getCustomerGameRoute } from "../../../app/routes.jsx";
 import { withGameTheme } from "../gameCatalog.js";
 
 const THUMBNAIL_GRADIENTS = {
-  multiplayer: "from-cyan-200 via-fuchsia-200 to-orange-200",
-  bot: "from-violet-200 via-pink-200 to-amber-200",
-  solo: "from-orange-200 via-rose-200 to-sky-200",
+  multiplayer: "from-cyan-500 to-blue-700",
+  bot: "from-emerald-500 to-lime-700",
+  solo: "from-orange-500 to-rose-700",
 };
 
 const getThumbnailGradient = (game) =>
-  THUMBNAIL_GRADIENTS[game.group] || THUMBNAIL_GRADIENTS.quick;
+  THUMBNAIL_GRADIENTS[game.group] || THUMBNAIL_GRADIENTS.solo;
 
 const GameThumbnail = ({ game }) => (
-  <div className={`relative aspect-[16/10] overflow-hidden rounded-[16px] bg-gradient-to-br ${getThumbnailGradient(game)}`}>
-    <div className="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(255,255,255,0.7),transparent_28%),linear-gradient(135deg,rgba(255,255,255,0.24),transparent_42%)]" />
-    <div className="absolute left-4 top-4 rounded-full border border-white/80 bg-white/80 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-stone-700 backdrop-blur">
-      {game.group}
-    </div>
-    <div className="absolute right-4 top-4 rounded-full border border-white/80 bg-white/70 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-stone-700 backdrop-blur">
+  <div className={`relative aspect-[16/9] overflow-hidden rounded-2xl bg-gradient-to-br ${getThumbnailGradient(game)}`}>
+    <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.22),transparent_42%)]" />
+    <div className="absolute right-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-stone-800">
       {game.crowd || "1P"}
     </div>
-    <div className="absolute inset-x-5 bottom-5">
-      <div className="mb-4 flex items-end justify-between">
-        <div className="grid h-16 w-16 place-items-center rounded-[16px] border border-white/90 bg-white/80 text-xl font-black text-stone-900 shadow-[0_20px_40px_-28px_rgba(14,116,144,0.42)] backdrop-blur">
-          {game.glyph}
-        </div>
-        <div className="h-14 w-24 rounded-[16px] border border-white/80 bg-white/60 p-2 backdrop-blur">
-          <div className="h-2 rounded-full bg-stone-700/55" />
-          <div className="mt-2 h-2 w-2/3 rounded-full bg-stone-500/32" />
-          <div className="mt-2 h-2 w-4/5 rounded-full bg-stone-500/24" />
-        </div>
+    <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
+      <div className="min-w-0">
+        <p className="text-[11px] font-black uppercase tracking-[0.14em] text-white/70">
+          {game.mark}
+        </p>
+        <p className="truncate text-[1.35rem] font-black leading-tight text-white sm:text-2xl">{game.shortTitle}</p>
       </div>
-      <div className="h-2 rounded-full bg-white/70">
-        <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-orange-400 via-rose-400 to-cyan-400" />
+      <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-white text-lg font-black text-stone-950 shadow-sm">
+        {game.glyph}
       </div>
     </div>
   </div>
 );
 
 const GameCard = ({ game, index = 0, orderId = "", onBattle }) => {
+  const reduceMotion = useReducedMotion();
   const item = withGameTheme(game);
   const isMultiplayer = item.mode === "multiplayer" || item.crowd === "2P";
   const playTo = `${getCustomerGameRoute(item.slug)}${
@@ -48,20 +42,20 @@ const GameCard = ({ game, index = 0, orderId = "", onBattle }) => {
 
   return (
     <Motion.article
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.28, delay: index * 0.035, ease: "easeOut" }}
-      whileHover={{ y: -6, scale: 1.01 }}
-      className="group overflow-hidden rounded-[24px] border border-orange-100 bg-white/90 p-3 shadow-[0_24px_70px_-52px_rgba(14,116,144,0.32)] backdrop-blur-xl transition duration-300 hover:border-orange-200 hover:bg-white"
+      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
+      animate={reduceMotion ? undefined : { opacity: 1, y: 0 }}
+      transition={{ duration: 0.22, delay: reduceMotion ? 0 : Math.min(index * 0.025, 0.16), ease: "easeOut" }}
+      whileHover={reduceMotion ? undefined : { y: -3 }}
+      className="group h-full overflow-hidden rounded-[22px] border border-stone-200 bg-white p-3 shadow-sm transition duration-200 hover:border-stone-300"
     >
       <GameThumbnail game={item} />
       <div className="p-3">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex min-h-[58px] items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-extrabold uppercase text-orange-500">
+            <p className="text-[10px] font-black uppercase tracking-[0.12em] text-stone-500">
               {item.group}
             </p>
-            <h3 className="mt-1 truncate text-2xl font-black leading-none text-stone-950">
+            <h3 className="mt-1 truncate text-xl font-black leading-tight text-stone-950">
               {item.title}
             </h3>
           </div>
@@ -74,16 +68,16 @@ const GameCard = ({ game, index = 0, orderId = "", onBattle }) => {
           <button
             type="button"
             onClick={() => onBattle?.(item)}
-            className="mt-5 inline-flex w-full items-center justify-center rounded-[16px] bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-black text-white shadow-[0_18px_45px_-28px_rgba(34,211,238,0.85)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110"
+            className="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-stone-950 px-4 text-sm font-black text-white transition hover:bg-stone-800"
           >
-            Find Live Match
+            Battle
           </button>
         ) : (
           <Link
             to={playTo}
-            className="mt-5 inline-flex w-full items-center justify-center rounded-[16px] bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-orange-400 px-4 py-3 text-sm font-black text-white no-underline shadow-[0_18px_45px_-28px_rgba(34,211,238,0.85)] transition duration-200 hover:-translate-y-0.5 hover:brightness-110"
+            className="mt-4 inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-stone-950 px-4 text-sm font-black text-white no-underline transition hover:bg-stone-800"
           >
-            Play Now
+            Play
           </Link>
         )}
       </div>

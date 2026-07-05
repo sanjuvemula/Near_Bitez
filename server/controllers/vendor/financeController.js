@@ -3,6 +3,7 @@ import PayoutRequest from "../../models/PayoutRequest.js";
 import TiffinSubscription, { TIFFIN_SUBSCRIPTION_STATUSES } from "../../models/TiffinSubscription.js";
 import { getBusinessSettings } from "../../models/BusinessSettings.js";
 import { getVendorNetAmount } from "../../services/pricingService.js";
+import { getVendorRevenueBase } from "../../services/vendorPlanService.js";
 import {
   getVendorRestaurant,
   parseBoolean,
@@ -15,14 +16,6 @@ const safeAmount = (value) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
 };
-
-const getVendorRevenueBase = (order) =>
-  Math.max(
-    0,
-    safeAmount(order.itemTotal) -
-      safeAmount(order.promoDiscount) -
-      safeAmount(order.loyaltyDiscount)
-  );
 
 const serializePayout = (payout) => ({
   _id: payout._id,
@@ -60,8 +53,14 @@ export const getVendorWallet = async (req, res) => {
   ]);
 
   const credits = orders.map((order) => {
-    const gross = getVendorRevenueBase(order);
-    const amount = getVendorNetAmount(gross, settings.commissionPercent);
+    const gross = safeAmount(order.commissionBase ?? getVendorRevenueBase(order));
+    const hasOrderSnapshot =
+      order.vendorNetAmount !== undefined ||
+      order.commissionAmount !== undefined ||
+      order.commissionPercent !== undefined;
+    const amount = hasOrderSnapshot
+      ? safeAmount(order.vendorNetAmount)
+      : getVendorNetAmount(gross, settings.commissionPercent);
     const settledAt = order.updatedAt || order.createdAt;
     return {
       _id: order._id,
@@ -70,6 +69,11 @@ export const getVendorWallet = async (req, res) => {
       description: `Order #${String(order._id).slice(-6)} settlement`,
       date: settledAt,
       orderId: order._id,
+      gross,
+      commissionAmount: hasOrderSnapshot ? safeAmount(order.commissionAmount) : Math.max(0, gross - amount),
+      commissionPercent: hasOrderSnapshot ? safeAmount(order.commissionPercent) : settings.commissionPercent,
+      planName: order.vendorPlanName || "Legacy plan",
+      freeOrderApplied: Boolean(order.freeOrderApplied),
       pending: settledAt > releaseBefore,
     };
   });
@@ -96,7 +100,6 @@ export const getVendorWallet = async (req, res) => {
       pendingSettlement,
       minPayoutAmount: settings.minPayoutAmount,
       payoutHoldHours: settings.payoutHoldHours,
-      commissionPercent: settings.commissionPercent,
       history,
     },
   });

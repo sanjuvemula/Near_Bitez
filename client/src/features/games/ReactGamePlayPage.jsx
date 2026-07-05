@@ -2507,8 +2507,13 @@ const GameModeStyles = () => (
   <style>{`
     .nb-game-mode {
       background: #f6f3ee;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .nb-game-arena {
+      contain: layout paint;
     }
     .nb-game-arena button {
+      touch-action: manipulation;
       transform-origin: center;
     }
     .nb-game-arena button:active {
@@ -2559,6 +2564,21 @@ const GameModeStyles = () => (
       0% { transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
       52% { transform: rotateX(238deg) rotateY(204deg) rotateZ(18deg); }
       100% { transform: rotateX(360deg) rotateY(360deg) rotateZ(0deg); }
+    }
+    @media (max-width: 640px) {
+      .nb-game-arena {
+        border-radius: 20px;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .nb-game-mode *,
+      .nb-game-mode *::before,
+      .nb-game-mode *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   `}</style>
 );
