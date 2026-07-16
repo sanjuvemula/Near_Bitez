@@ -1471,7 +1471,7 @@ const OrdersTab = () => {
                             <div className="rounded-lg border border-gray-100 bg-white p-4">
                               <SectionTitle title="Delivery and payment" />
                               <DetailGrid>
-                                <DetailItem label="Customer phone" value={order.customer?.phone} />
+                                <DetailItem label="Customer phone" value={order.deliveryPhone || order.customer?.phone} />
                                 <DetailItem label="Payment method" value={order.paymentMethod} />
                                 <DetailItem label="Payment status" value={formatStatusLabel(order.paymentStatus)} />
                                 <DetailItem label="Scheduled for" value={order.scheduledFor ? displayDate(order.scheduledFor) : "ASAP"} />

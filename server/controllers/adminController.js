@@ -930,7 +930,9 @@ export const getAllOrders = async (req, res) => {
           order._id,
           order.customer?.name,
           order.customer?.email,
+          order.customer?.phone,
           order.restaurant?.name,
+          order.deliveryPhone,
           order.deliveryAddress,
           order.promoCode,
         ]

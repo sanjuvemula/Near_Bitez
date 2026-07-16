@@ -256,7 +256,13 @@ export const useVendorDashboard = () => {
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       const matchesStatus = orderStatusFilter === "ALL" || order.status === orderStatusFilter;
-      const searchPool = [order._id, order.customer?.name, order.customer?.phone, order.deliveryAddress]
+      const searchPool = [
+        order._id,
+        order.customer?.name,
+        order.customer?.phone,
+        order.deliveryPhone,
+        order.deliveryAddress,
+      ]
         .filter(Boolean).join(" ").toLowerCase();
       return matchesStatus && searchPool.includes(deferredOrderSearch.toLowerCase());
     });

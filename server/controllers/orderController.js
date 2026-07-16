@@ -38,6 +38,7 @@ const serializeOrder = (order) => ({
   promoCode: order.promoCode || null,
   pointsRedeemed: order.pointsRedeemed || 0,
   deliveryAddress: order.deliveryAddress,
+  deliveryPhone: order.deliveryPhone || order.customer?.phone || "",
   deliveryInstructions: order.deliveryInstructions,
   paymentMethod: order.paymentMethod,
   paymentStatus: order.paymentStatus,
@@ -110,6 +111,7 @@ export const createOrder = async (req, res) => {
   try {
     const {
       deliveryAddress,
+      deliveryPhone,
       deliveryInstructions = "",
       promoCode,
       pointsToRedeem = 0,
@@ -155,6 +157,12 @@ export const createOrder = async (req, res) => {
     const finalAddress = deliveryAddress?.trim() || req.user.address || "";
     if (!finalAddress) {
       return res.status(400).json({ success: false, message: "Delivery address is required" });
+    }
+
+    const finalPhone = deliveryPhone?.trim() || req.user.phone || "";
+    const phoneDigits = finalPhone.replace(/\D/g, "");
+    if (phoneDigits.length < 10) {
+      return res.status(400).json({ success: false, message: "Delivery phone number is required" });
     }
 
     // ── Scheduled order validation ─────────────────────────────────────────────
@@ -241,6 +249,21 @@ export const createOrder = async (req, res) => {
     let actualPointsRedeemed = 0;
     const customer = await User.findById(req.user._id);
 
+    if (customer) {
+      let profileNeedsSave = false;
+      if (finalAddress && customer.address !== finalAddress) {
+        customer.address = finalAddress;
+        profileNeedsSave = true;
+      }
+      if (finalPhone && customer.phone !== finalPhone) {
+        customer.phone = finalPhone;
+        profileNeedsSave = true;
+      }
+      if (profileNeedsSave) {
+        await customer.save();
+      }
+    }
+
     if (pointsToRedeem > 0 && customer) {
       const safePoints = Math.min(pointsToRedeem, customer.loyaltyPoints);
       const maxLoyaltyDiscount = Math.floor(safePoints / 10);
@@ -264,6 +287,7 @@ export const createOrder = async (req, res) => {
       restaurant: restaurant._id,
       items: orderItems,
       deliveryAddress: finalAddress,
+      deliveryPhone: finalPhone,
       deliveryInstructions: deliveryInstructions.trim(),
       paymentMethod: "COD",
       // Scheduled orders start as SCHEDULED, instant ones as PLACED

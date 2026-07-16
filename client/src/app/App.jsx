@@ -21,7 +21,6 @@ const Home            = lazy(() => import("../features/home/Home.jsx"));
 const CustomerHome    = lazy(() => import("../features/home/CustomerHome.jsx"));
 const RestaurantMenu  = lazy(() => import("../features/home/RestaurantMenu.jsx"));
 const Cart            = lazy(() => import("../features/cart/Cart.jsx"));
-const CheckoutPage    = lazy(() => import("../features/cart/CheckoutPage.jsx"));
 const SearchPage      = lazy(() => import("../features/search/SearchPage.jsx"));
 const CustomerLogin   = lazy(() => import("../features/auth/CustomerLogin.jsx"));
 const CustomerRegister= lazy(() => import("../features/auth/CustomerRegister.jsx"));
@@ -124,7 +123,7 @@ function App() {
               <Route path="orders"                  element={<OrdersPage />} />
               <Route path="orders/:id"              element={<OrderTracking />} />
               <Route path="cart"                    element={<Cart />} />
-              <Route path="checkout"                element={<CheckoutPage />} />
+              <Route path="checkout"                element={<Navigate to={appRoutes.customerCart} replace />} />
               <Route path="search"                  element={<SearchPage />} />
               <Route path="profile"                 element={<UserProfile />} />
               <Route path="favorites"               element={<FavoritesPage />} />

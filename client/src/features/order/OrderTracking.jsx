@@ -680,6 +680,12 @@ const OrderTracking = () => {
                   {order.deliveryAddress}
                 </span>
               </div>
+              <div className="mt-3 flex items-start justify-between gap-4">
+                <span>Phone</span>
+                <span className="max-w-[190px] text-right font-black text-stone-950">
+                  {order.deliveryPhone || "Not provided"}
+                </span>
+              </div>
             </div>
           </Card>
 

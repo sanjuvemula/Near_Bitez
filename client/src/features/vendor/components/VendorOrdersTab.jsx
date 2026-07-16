@@ -67,9 +67,12 @@ const VendorOrdersTab = ({
                     <h3 className="mb-2 text-2xl font-black text-stone-950">
                       {order.customer?.name}
                     </h3>
-                    <p className="rounded-xl border border-[#eee7dc] bg-[#fffaf5] p-3 text-sm font-medium text-stone-600">
-                      {order.deliveryAddress}
-                    </p>
+                    <div className="space-y-2 rounded-xl border border-[#eee7dc] bg-[#fffaf5] p-3 text-sm font-medium text-stone-600">
+                      <p>{order.deliveryAddress}</p>
+                      <p className="font-black text-stone-950">
+                        Phone: {order.deliveryPhone || order.customer?.phone || "Not provided"}
+                      </p>
+                    </div>
                     <p className="mt-3 text-xs font-black text-orange-600">
                       {formatRelativeTime(order.createdAt)}
                     </p>

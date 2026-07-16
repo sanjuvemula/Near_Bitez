@@ -132,6 +132,12 @@ const orderSchema = new mongoose.Schema(
       required: [true, "Delivery address is required"],
       trim: true,
     },
+    deliveryPhone: {
+      type: String,
+      required: [true, "Delivery phone number is required"],
+      trim: true,
+      maxlength: 24,
+    },
     deliveryInstructions: {
       type: String,
       trim: true,
@@ -173,4 +179,3 @@ const orderSchema = new mongoose.Schema(
 );
 
 export default mongoose.model("Order", orderSchema);
-

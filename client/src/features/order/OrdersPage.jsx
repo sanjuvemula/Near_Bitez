@@ -306,7 +306,7 @@ const OrdersPage = () => {
 
       const matchesSearch =
         !query ||
-        [order._id, order.restaurant?.name, order.deliveryAddress]
+        [order._id, order.restaurant?.name, order.deliveryAddress, order.deliveryPhone]
           .filter(Boolean)
           .join(" ")
           .toLowerCase()

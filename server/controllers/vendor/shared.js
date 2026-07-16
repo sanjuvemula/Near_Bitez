@@ -124,6 +124,7 @@ export const serializeOrder = (order) => ({
   freeOrderSequence: order.freeOrderSequence || null,
   freeOrdersRemainingAfter: order.freeOrdersRemainingAfter || 0,
   deliveryAddress: order.deliveryAddress,
+  deliveryPhone: order.deliveryPhone || order.customer?.phone || "",
   deliveryInstructions: order.deliveryInstructions,
   paymentMethod: order.paymentMethod,
   paymentStatus: order.paymentStatus,
