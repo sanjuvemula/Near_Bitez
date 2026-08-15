@@ -41,8 +41,29 @@ export const favoriteApi = {
 // The Phase 1 `gameApi` stub lived here. Phase 6 replaced it with the typed
 // module in ./games.ts, which covers the whole /games route table.
 
+/**
+ * Public platform settings.
+ *
+ * The route is `/settings/public` — `/settings` alone does not exist and 404s.
+ * Only the non-sensitive subset is served here: fees, the scheduling window,
+ * maintenance mode and active banners. Admin-only settings live behind
+ * `/admin/settings`.
+ */
+export interface PublicSettings {
+  maintenanceMode: boolean;
+  customerSupportEnabled: boolean;
+  allowScheduledOrders: boolean;
+  maxScheduleDays: number;
+  freeDeliveryAbove: number;
+  deliveryBaseFee: number;
+  platformFee: number;
+  gstPercent: number;
+  banners: { title: string; message: string; route: string; priority: number }[];
+}
+
 export const settingsApi = {
-  get: () => apiClient.get("/settings").then((r) => r.data),
+  get: () =>
+    apiClient.get<{ data: PublicSettings }>("/settings/public").then((r) => r.data.data),
 };
 
 export const feedbackApi = {

@@ -7,35 +7,13 @@ Everything here was reproduced against the real backend, not inferred.
 
 ## Blockers — fix before real users
 
-### 0. The deployed backend cannot log the mobile app in — **redeploy required**
-**Where:** the running deployment at `https://near-bitez.onrender.com`, not the code.
-**Effect:** the mobile app cannot sign in against production **at all**. Login
-returns 200 and then every authenticated request fails with
-`Session expired. Please log in again.`
-
-Production login responds with `{ success, message, user }` — **no `token`**.
-React Native has no cookie jar, so the JWT must come back in the body; the app
-sends it as `Authorization: Bearer <token>`.
-
-The fix is already in this repository (`server/controllers/auth.js`,
-`sendAuthResponse` returns `token` alongside the unchanged cookie) but the
-deployment predates it.
-
-**Fix:** redeploy the backend from current `main`. Nothing else is needed — the
-cookie behaviour is untouched, so the website is unaffected.
-
-**Verify afterwards:**
-```bash
-curl -s -X POST https://near-bitez.onrender.com/api/v1/auth/customer/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"...","password":"..."}' | grep -o '"token"'
-```
-A `"token"` match means mobile login will work.
-
-Everything else on production is healthy — all 15 endpoints the app uses were
-verified working via cookie auth: discover, cart, orders, notifications,
-tiffins, games feed/leaderboard/wheel, vendor overview/orders, admin
-stats/restaurants/plans/payouts/chats.
+### ~~0. The deployed backend cannot log the mobile app in~~ — **RESOLVED**
+The backend was redeployed. Production login now returns `token` in the body,
+and all 27 endpoints the app uses were re-verified over Bearer auth: auth/me,
+discover, restaurants, cart, orders, notifications, tiffins, settings/public,
+games (feed / leaderboard / my-score / wheel), the full vendor surface, and the
+full admin surface. Socket.IO connects over websocket and accepts `join` and
+`game:join`. Cloudinary images serve correctly.
 
 ### 1. Game score submission is broken for every client
 **Where:** database, not application code.
