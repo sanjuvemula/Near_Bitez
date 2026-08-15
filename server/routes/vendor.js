@@ -10,6 +10,13 @@ import { getVendorReviews } from "../controllers/reviewController.js";
 import { getVendorPromos, createPromo, togglePromoStatus, deletePromo } from "../controllers/vendor/promoController.js";
 import { getVendorPlan, updateVendorPlan } from "../controllers/vendor/planController.js";
 import {
+  getAvailablePlans,
+  getCommissionSummary,
+  getMySubscription,
+  getSubscriptionHistory,
+  subscribeToPlan,
+} from "../controllers/vendor/subscriptionPlanController.js";
+import {
   getVendorLogistics,
   getVendorSubscriptions,
   getVendorWallet,
@@ -33,6 +40,15 @@ router.put("/restaurant", withOptionalImageUpload("image"), upsertVendorProfile)
 // Monetization plan
 router.get("/plan", getVendorPlan);
 router.patch("/plan", updateVendorPlan);
+
+// Restaurant subscription, quota and commission.
+// Note: these sit under /my-subscription because /subscriptions already serves
+// the tiffin subscriptions a restaurant sells to its customers.
+router.get("/my-subscription", getMySubscription);
+router.get("/my-subscription/plans", getAvailablePlans);
+router.post("/my-subscription/subscribe", subscribeToPlan);
+router.get("/my-subscription/history", getSubscriptionHistory);
+router.get("/my-subscription/commission", getCommissionSummary);
 
 // Menu
 router.get("/menu", getMenuItems);

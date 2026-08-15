@@ -21,6 +21,7 @@ const VendorOverviewTab = ({
   onRefresh,
   updateOrderStatus,
   pendingOrderId,
+  lowStockCount = 0,
 }) => {
   const liveOrders = orders
     .filter((order) => LIVE_ORDER_STATUSES.includes(order.status))
@@ -151,7 +152,16 @@ const VendorOverviewTab = ({
           <p className="mb-4 text-[10px] font-bold uppercase tracking-widest text-stone-500">
             Quick Actions
           </p>
+          {/* Shortcuts to sections that now sit inside collapsed nav groups,
+              so common tasks stay one click away. */}
           <div className="space-y-2">
+            <ActionTile
+              title="Live Orders"
+              description={`${stats.liveOrders || 0} in progress`}
+              icon="L"
+              tone="urgent"
+              onClick={() => onTabChange("orders")}
+            />
             <ActionTile
               title="Menu Editor"
               description={`${stats.activeMenuItems || 0} active items`}
@@ -160,11 +170,27 @@ const VendorOverviewTab = ({
               onClick={() => onTabChange("menu")}
             />
             <ActionTile
-              title="Order History"
-              description="View all orders"
-              icon="O"
-              tone="urgent"
-              onClick={() => onTabChange("orders")}
+              title="Inventory & Stock"
+              description={
+                lowStockCount > 0 ? `${lowStockCount} out of stock` : "All items in stock"
+              }
+              icon="I"
+              tone={lowStockCount > 0 ? "urgent" : "info"}
+              onClick={() => onTabChange("inventory")}
+            />
+            <ActionTile
+              title="Tiffin Services"
+              description="Plans and subscribers"
+              icon="T"
+              tone="positive"
+              onClick={() => onTabChange("tiffin")}
+            />
+            <ActionTile
+              title="Wallet & Payouts"
+              description="Earnings and settlements"
+              icon="W"
+              tone="info"
+              onClick={() => onTabChange("wallet")}
             />
             <ActionTile
               title="Store Profile"

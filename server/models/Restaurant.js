@@ -101,15 +101,38 @@ const restaurantSchema = new mongoose.Schema(
       ],
       default: [],
     },
+    // ── Subscription mirror ────────────────────────────────────────────────
+    // RestaurantSubscription is the source of truth. These denormalised fields
+    // are kept in sync so list views can filter and sort without a join.
+    activeSubscription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "RestaurantSubscription",
+      default: null,
+      index: true,
+    },
+    // Plan slug. Free-form because plans are admin-created.
     subscriptionPlan: {
       type: String,
-      enum: ["STARTER", "GROWTH", "PREMIUM", "PRO"],
-      default: "GROWTH",
+      default: "FREE_BASIC",
+      trim: true,
       index: true,
+    },
+    subscriptionPlanName: {
+      type: String,
+      default: "Free Basic",
+      trim: true,
     },
     planStatus: {
       type: String,
-      enum: ["ACTIVE", "PAST_DUE", "CANCELLED"],
+      enum: [
+        "ACTIVE",
+        "PAUSED",
+        "PAST_DUE",
+        "CANCELLED",
+        "EXPIRED",
+        "PENDING_PAYMENT",
+        "SUPERSEDED",
+      ],
       default: "ACTIVE",
       index: true,
     },

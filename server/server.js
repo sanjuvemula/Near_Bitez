@@ -29,6 +29,11 @@ import tiffinRoutes from "./routes/tiffinRoutes.js";
 import gameRoutes from "./routes/gameRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
 import feedbackRoutes from "./routes/feedbackRoutes.js";
+import subscriptionPlanRoutes from "./routes/subscriptionPlanRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import { seedDefaultPlans } from "./services/subscriptionService.js";
+import { runSubscriptionMaintenance } from "./services/subscriptionAdminService.js";
+import { registerNotificationSocket } from "./services/notificationService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -84,6 +89,8 @@ app.use("/api/v1/tiffins", tiffinRoutes);
 app.use("/api/v1/games", gameRoutes);
 app.use("/api/v1/settings", settingsRoutes);
 app.use("/api/v1/feedback", feedbackRoutes);
+app.use("/api/v1/admin/subscriptions", subscriptionPlanRoutes);
+app.use("/api/v1/notifications", notificationRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.originalUrl} not found` });
@@ -94,6 +101,35 @@ const startServer = async () => {
     await connectDB();
     const io = initSocket(httpServer);
     app.set("io", io);
+
+    // Services outside the request cycle push notifications through this.
+    registerNotificationSocket(io);
+
+    // Creates the starter plan set on a fresh database only. Once any plan
+    // exists, plans are entirely admin-managed.
+    try {
+      await seedDefaultPlans();
+    } catch (error) {
+      console.error("Subscription plan seed failed:", error.message);
+    }
+
+    // Daily subscription maintenance: expiry warnings and lapsed-plan rollover.
+    cron.schedule(
+      "30 0 * * *",
+      async () => {
+        try {
+          const result = await runSubscriptionMaintenance();
+          if (result.warned || result.expired) {
+            console.log(
+              `Subscription maintenance: ${result.warned} warned, ${result.expired} expired`
+            );
+          }
+        } catch (error) {
+          console.error("Subscription maintenance failed:", error.message);
+        }
+      },
+      { timezone: "Asia/Kolkata" }
+    );
 
     cron.schedule(
       "0 0 * * *",

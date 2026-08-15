@@ -13,6 +13,8 @@ import VendorMessagesTab from "./components/VendorMessagesTab.jsx";
 import VendorWalletTab from "./components/VendorWalletTab.jsx";
 import VendorMarketingTab from "./components/VendorMarketingTab.jsx";
 import VendorInventoryTab from "./components/VendorInventoryTab.jsx";
+import VendorPlanTab from "./components/VendorPlanTab.jsx";
+import VendorSubscriptionSummary from "./components/VendorSubscriptionSummary.jsx";
 import { Panel } from "./components/VendorUi.jsx";
 import { useVendorDashboard } from "./useVendorDashboard.js";
 import VendorLogisticsTab from "./components/VendorLogisticsTab.jsx";
@@ -29,9 +31,16 @@ const VendorDashboard = () => {
       activeTab={dashboard.tab}
       onTabChange={dashboard.setTab}
       onLogout={dashboard.handleLogout}
-      overview={dashboard.overview}
       restaurant={dashboard.restaurant}
-      chats={dashboard.chats}
+      badges={dashboard.navBadges}
+      orderFilter={dashboard.orderStatusFilter}
+      onOrderFilterChange={dashboard.setOrderStatusFilter}
+      onToggleStatus={
+        dashboard.restaurant
+          ? () => dashboard.updateRestaurantLiveState(!dashboard.restaurant.isActive)
+          : undefined
+      }
+      updatingStatus={dashboard.updatingStoreStatus}
     >
       {dashboard.tab === "overview" ? (
         <VendorCommandCenter
@@ -54,6 +63,24 @@ const VendorDashboard = () => {
       ) : null}
 
       {dashboard.tab === "overview" ? (
+        <VendorSubscriptionSummary
+          vendorPlan={dashboard.vendorPlan}
+          onOpenPlans={() => dashboard.setTab("plan")}
+        />
+      ) : null}
+
+      {dashboard.tab === "plan" ? (
+        <VendorPlanTab
+          restaurant={dashboard.restaurant}
+          vendorPlan={dashboard.vendorPlan}
+          availablePlans={dashboard.availablePlans}
+          subscribeToPlan={dashboard.subscribeToPlan}
+          onRefresh={() => dashboard.refreshDashboard({ silent: true })}
+          refreshing={dashboard.refreshing}
+        />
+      ) : null}
+
+      {dashboard.tab === "overview" ? (
         <VendorOverviewTab
           overview={dashboard.overview}
           restaurant={dashboard.restaurant}
@@ -63,6 +90,7 @@ const VendorDashboard = () => {
           refreshing={dashboard.refreshing}
           updateOrderStatus={dashboard.updateOrderStatus}
           pendingOrderId={dashboard.pendingOrderId}
+          lowStockCount={dashboard.navBadges?.lowStock || 0}
         />
       ) : null}
 

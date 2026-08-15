@@ -31,6 +31,7 @@ export const useVendorDashboard = () => {
   const [chats, setChats] = useState([]);
   const [wallet, setWallet] = useState(null);
   const [vendorPlan, setVendorPlan] = useState(null);
+  const [availablePlans, setAvailablePlans] = useState([]);
   const [promos, setPromos] = useState([]);
   const [restaurantOptions, setRestaurantOptions] = useState([]);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState("");
@@ -177,7 +178,7 @@ export const useVendorDashboard = () => {
       try {
         const [
           overviewRes, restaurantRes, menuRes, orderRes, subRes, reviewsRes,
-          chatsRes, walletRes, planRes, promoRes, logisticsRes,
+          chatsRes, walletRes, planRes, promoRes, logisticsRes, availablePlansRes,
         ] = await Promise.all([
           api.get(getVendorPath("/vendor/overview")),
           api.get(getVendorPath("/vendor/restaurant")).catch(() => ({ data: null })),
@@ -190,6 +191,7 @@ export const useVendorDashboard = () => {
           api.get(getVendorPath("/vendor/plan")).catch(() => ({ data: null })),
           api.get(getVendorPath("/vendor/promos")).catch(() => ({ data: [] })),
           api.get(getVendorPath("/vendor/logistics")).catch(() => ({ data: null })),
+          api.get(getVendorPath("/vendor/my-subscription/plans")).catch(() => ({ data: [] })),
         ]);
 
         const nextOverview = overviewRes.data || initialOverview;
@@ -204,6 +206,7 @@ export const useVendorDashboard = () => {
         setChats(chatsRes.data || []);
         setWallet(walletRes.data || { balance: 0, totalEarnings: 0, pendingSettlement: 0, history: [] });
         setVendorPlan(planRes.data || null);
+        setAvailablePlans(availablePlansRes.data || []);
         setPromos(promoRes.data || []);
 
         if (logisticsRes.data) setLogistics(logisticsRes.data);
@@ -255,7 +258,12 @@ export const useVendorDashboard = () => {
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      const matchesStatus = orderStatusFilter === "ALL" || order.status === orderStatusFilter;
+      const matchesStatus =
+        orderStatusFilter === "ALL"
+          ? true
+          : orderStatusFilter === "LIVE"
+          ? LIVE_ORDER_STATUSES.includes(order.status)
+          : order.status === orderStatusFilter;
       const searchPool = [
         order._id,
         order.customer?.name,
@@ -279,10 +287,40 @@ export const useVendorDashboard = () => {
   const orderFilterOptions = useMemo(
     () => ORDER_FILTERS.map((item) => ({
       ...item,
-      count: item.id === "ALL" ? orders.length : overview.statusBreakdown[item.id] || 0,
+      count:
+        item.id === "ALL"
+          ? orders.length
+          : item.id === "LIVE"
+          ? LIVE_ORDER_STATUSES.reduce(
+              (total, status) => total + (overview.statusBreakdown[status] || 0),
+              0
+            )
+          : overview.statusBreakdown[item.id] || 0,
     })),
     [orders.length, overview.statusBreakdown]
   );
+
+  /**
+   * Counts surfaced as sidebar badges. Only signals that need the vendor's
+   * attention get a badge, so they stay meaningful.
+   */
+  const navBadges = useMemo(() => {
+    const outOfStock = menuItems.filter((item) => item.isAvailable === false).length;
+    const expiry = vendorPlan?.state?.expiry;
+
+    return {
+      liveOrders: overview?.stats?.liveOrders || 0,
+      messages: chats.reduce((sum, chat) => sum + (chat.unreadCount || 0), 0),
+      lowStock: outOfStock,
+      subscription: expiry?.expired
+        ? "Expired"
+        : expiry?.expiringSoon
+        ? "Expiring"
+        : vendorPlan?.state?.subscription?.status === "PENDING_PAYMENT"
+        ? "Unpaid"
+        : 0,
+    };
+  }, [chats, menuItems, overview?.stats?.liveOrders, vendorPlan]);
 
   const handleRestaurantImageChange = useCallback((event) => {
     const file = event.target.files?.[0];
@@ -517,6 +555,31 @@ export const useVendorDashboard = () => {
     }
   }, [getVendorPath, refreshDashboard]);
 
+  /**
+   * Subscribe to, upgrade, or downgrade the restaurant's own plan.
+   * Only the plan id is sent — pricing, quota and commission are resolved
+   * server-side.
+   */
+  const subscribeToPlan = useCallback(async (planId) => {
+    try {
+      const response = await api.post(getVendorPath("/vendor/my-subscription/subscribe"), {
+        planId,
+      });
+
+      if (response.requiresPayment) {
+        toast(response.message, { icon: "💳", duration: 6000 });
+      } else {
+        toast.success(response.message || "Plan updated");
+      }
+
+      await refreshDashboard({ silent: true });
+      return true;
+    } catch (apiError) {
+      toast.error(apiError?.message || "Unable to update plan");
+      return false;
+    }
+  }, [getVendorPath, refreshDashboard]);
+
   const saveLogistics = useCallback(async (data) => {
     setSavingLogistics(true);
     try {
@@ -553,13 +616,13 @@ export const useVendorDashboard = () => {
     menuSearch, setMenuSearch, menuCategoryFilter, setMenuCategoryFilter, menuCategories,
 
     filteredOrders, orderSearch, setOrderSearch, orderStatusFilter, setOrderStatusFilter,
-    orderFilterOptions, updateOrderStatus, pendingOrderId,
+    orderFilterOptions, updateOrderStatus, pendingOrderId, navBadges,
 
     updateSubscriptionStatus, pendingSubId,
     sendMessage, pendingMessageId,
 
     createPromoCode, togglePromoStatus, deletePromo, pendingPromoId,
-    updateVendorPlan,
+    updateVendorPlan, availablePlans, subscribeToPlan,
     requestPayout, requestingPayout,
     saveLogistics, savingLogistics,
     isAdminWorkspace, restaurantOptions, selectedRestaurantId, setSelectedRestaurantId,

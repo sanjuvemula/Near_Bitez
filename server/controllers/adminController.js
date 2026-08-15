@@ -13,17 +13,26 @@ import {
   getEffectiveRole,
   isAdminEmail,
 } from "../utils/adminAccess.js";
+import SubscriptionPlan from "../models/SubscriptionPlan.js";
+import { buildVendorPlanPayload } from "../services/vendorPlanService.js";
+import { releaseOrderQuota } from "../services/subscriptionService.js";
 import {
-  applyVendorPlan,
-  buildVendorPlanPayload,
-  getVendorPlanConfig,
-  VENDOR_PLAN_KEYS,
-} from "../services/vendorPlanService.js";
+  assignPlanToRestaurant,
+  extendSubscription,
+  setSubscriptionStatus,
+} from "../services/subscriptionAdminService.js";
 
 const USER_ROLES = ["customer", "vendor", "admin"];
 const PROMO_TYPES = ["PERCENTAGE", "FLAT"];
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const RESTAURANT_PLAN_STATUSES = ["ACTIVE", "PAST_DUE", "CANCELLED"];
+const RESTAURANT_PLAN_STATUSES = [
+  "ACTIVE",
+  "PAUSED",
+  "PAST_DUE",
+  "CANCELLED",
+  "EXPIRED",
+  "PENDING_PAYMENT",
+];
 
 const asBoolean = (value, defaultValue = false) => {
   if (value === undefined || value === null || value === "") return defaultValue;
@@ -733,11 +742,17 @@ export const getRestaurantSubscriptions = async (req, res) => {
     const query = {};
 
     if (plan !== "all") {
-      const normalizedPlan = String(plan || "").trim().toUpperCase();
-      if (!VENDOR_PLAN_KEYS.includes(normalizedPlan)) {
+      // Plans are admin-created, so the filter is validated against the
+      // collection rather than a fixed list. Accepts a slug or an id.
+      const rawPlan = String(plan || "").trim();
+      const planDoc = /^[a-f\d]{24}$/i.test(rawPlan)
+        ? await SubscriptionPlan.findById(rawPlan)
+        : await SubscriptionPlan.findOne({ slug: rawPlan.toUpperCase() });
+
+      if (!planDoc) {
         return res.status(400).json({ success: false, message: "Invalid plan filter" });
       }
-      query.subscriptionPlan = normalizedPlan;
+      query.subscriptionPlan = planDoc.slug;
     }
 
     if (status !== "all") {
@@ -769,9 +784,20 @@ export const getRestaurantSubscriptions = async (req, res) => {
       }))
     );
 
-    const summary = VENDOR_PLAN_KEYS.map((key) => ({
-      ...getVendorPlanConfig(key),
-      count: rows.filter((row) => row.subscription?.current?.key === key).length,
+    const plans = await SubscriptionPlan.find({ isArchived: false }).sort({
+      displayOrder: 1,
+      price: 1,
+    });
+
+    const summary = plans.map((planDoc) => ({
+      _id: planDoc._id,
+      key: planDoc.slug,
+      name: planDoc.name,
+      monthlyFee: planDoc.price,
+      commissionPercent: planDoc.commissionRate,
+      freeOrderQuota: planDoc.freeOrderQuota,
+      isActive: planDoc.isActive,
+      count: rows.filter((row) => row.subscription?.current?.key === planDoc.slug).length,
     }));
 
     res.json({ success: true, data: rows, summary });
@@ -785,29 +811,53 @@ export const updateRestaurantSubscription = async (req, res) => {
     const restaurant = await Restaurant.findById(req.params.restaurantId);
     if (!restaurant) return res.status(404).json({ success: false, message: "Restaurant not found" });
 
-    const planKey = req.body.plan || restaurant.subscriptionPlan;
-    const status = req.body.status
-      ? asCleanString(req.body.status, 20).toUpperCase()
-      : restaurant.planStatus || "ACTIVE";
+    // Assign the plan first so a combined plan+status change lands on the new
+    // subscription rather than the one it replaced.
+    if (req.body.plan) {
+      const planDoc = /^[a-f\d]{24}$/i.test(String(req.body.plan))
+        ? await SubscriptionPlan.findById(req.body.plan)
+        : await SubscriptionPlan.findOne({ slug: String(req.body.plan).toUpperCase() });
 
-    if (!RESTAURANT_PLAN_STATUSES.includes(status)) {
-      return res.status(400).json({ success: false, message: "Invalid plan status" });
+      if (!planDoc) {
+        return res.status(400).json({ success: false, message: "Invalid restaurant plan" });
+      }
+
+      if (String(planDoc._id) !== String(restaurant.activeSubscription?.plan || "")) {
+        await assignPlanToRestaurant({
+          restaurantId: restaurant._id,
+          planId: planDoc._id,
+          actor: req.user,
+          source: "ADMIN",
+        });
+      }
     }
 
-    const renewalDate =
-      req.body.renewalDate === ""
-        ? null
-        : req.body.renewalDate !== undefined
-        ? asDateOrNull(req.body.renewalDate)
-        : undefined;
+    if (req.body.status) {
+      const status = asCleanString(req.body.status, 20).toUpperCase();
+      if (!["ACTIVE", "PAUSED", "CANCELLED"].includes(status)) {
+        return res.status(400).json({ success: false, message: "Invalid plan status" });
+      }
+      await setSubscriptionStatus({ restaurantId: restaurant._id, status, actor: req.user });
+    }
 
-    const payload = await applyVendorPlan(restaurant, planKey, { status, renewalDate });
-    await restaurant.populate("vendor", "name email phone");
+    if (req.body.extendDays) {
+      await extendSubscription({
+        restaurantId: restaurant._id,
+        days: req.body.extendDays,
+        actor: req.user,
+      });
+    }
+
+    const refreshed = await Restaurant.findById(restaurant._id).populate(
+      "vendor",
+      "name email phone"
+    );
+    const payload = await buildVendorPlanPayload(refreshed);
 
     res.json({
       success: true,
       data: {
-        restaurant: restaurant.toObject(),
+        restaurant: refreshed.toObject(),
         subscription: payload,
       },
     });
@@ -961,9 +1011,20 @@ export const updateOrderStatus = async (req, res) => {
     if (!order) return res.status(404).json({ success: false, message: "Order not found" });
 
     if (order.status !== status) {
+      const wasRejected = status === "REJECTED" && order.status !== "REJECTED";
+
       order.status = status;
       order.statusTimeline.push({ status, changedAt: new Date() });
       await order.save();
+
+      // Rejected orders are not commissionable, so return the free-order slot.
+      if (wasRejected) {
+        try {
+          await releaseOrderQuota(order);
+        } catch (releaseError) {
+          console.error("Free order quota release failed:", releaseError.message);
+        }
+      }
     }
 
     res.json({ success: true, data: order });

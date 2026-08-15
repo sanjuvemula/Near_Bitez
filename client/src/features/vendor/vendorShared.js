@@ -13,6 +13,9 @@ export const LIVE_ORDER_STATUSES = ORDER_STAGES.filter(
 
 export const ORDER_FILTERS = [
   { id: "ALL", label: "All orders" },
+  // Matches any in-progress status rather than a single one. Backs the
+  // "Live Orders" nav entry, which shares the orders tab with "All Orders".
+  { id: "LIVE", label: "Live" },
   { id: "PLACED", label: "New" },
   { id: "ACCEPTED", label: "Accepted" },
   { id: "PREPARING", label: "Preparing" },

@@ -1,97 +1,31 @@
-import Order from "../models/Order.js";
+import SubscriptionPlan from "../models/SubscriptionPlan.js";
+import {
+  getActivePlans,
+  getEffectiveCommissionRate,
+  getSubscriptionState,
+  reserveOrderCommission,
+  resolveSubscription,
+} from "./subscriptionService.js";
+import { assignPlanToRestaurant } from "./subscriptionAdminService.js";
 
-export const FREE_ORDER_LIMIT = 20;
-export const VENDOR_PLAN_KEYS = ["GROWTH", "PREMIUM", "PRO"];
-export const LEGACY_VENDOR_PLAN_KEYS = ["STARTER"];
-export const ALL_VENDOR_PLAN_KEYS = [...LEGACY_VENDOR_PLAN_KEYS, ...VENDOR_PLAN_KEYS];
+/**
+ * Compatibility layer over the subscription system.
+ *
+ * Plans used to be hardcoded here. They now live in the SubscriptionPlan
+ * collection and are managed by admins, but the exported shapes are unchanged
+ * so existing order, vendor and admin callers keep working untouched.
+ */
 
-export const VENDOR_PLAN_CONFIGS = {
-  GROWTH: {
-    key: "GROWTH",
-    name: "Growth Plan",
-    monthlyFee: 0,
-    commissionPercent: 6,
-    orderLimit: null,
-    recommendedFor: "Restaurants starting online orders with no fixed monthly fee",
-    shortPitch: "First 20 orders free, then 6% commission per order.",
-    features: [
-      "First 20 orders free",
-      "No monthly fee",
-      "6% commission after free orders",
-      "Menu, order, wallet, promo, and chat tools",
-    ],
-  },
-  PREMIUM: {
-    key: "PREMIUM",
-    name: "Premium Plan",
-    monthlyFee: 399,
-    commissionPercent: 3,
-    orderLimit: null,
-    recommendedFor: "Restaurants with steady repeat orders",
-    shortPitch: "Lower commission with a small monthly subscription.",
-    features: [
-      "First 20 orders free",
-      "Rs 399 monthly subscription",
-      "3% commission after free orders",
-      "Better margins for growing order volume",
-    ],
-  },
-  PRO: {
-    key: "PRO",
-    name: "Pro Plan",
-    monthlyFee: 999,
-    commissionPercent: 0,
-    orderLimit: null,
-    recommendedFor: "High-volume restaurants that want predictable costs",
-    shortPitch: "Unlimited orders with zero commission.",
-    features: [
-      "Unlimited orders",
-      "Rs 999 monthly subscription",
-      "0% commission",
-      "Best for high-volume restaurants and cloud kitchens",
-    ],
-  },
-};
-
+// Commission a typical aggregator charges, used only to show comparative
+// savings on plan cards.
 const AGGREGATOR_COMMISSION_PERCENT = 25;
-const BILLABLE_ORDER_STATUSES = ["SCHEDULED", "PLACED", "ACCEPTED", "PREPARING", "READY", "OUT_FOR_DELIVERY", "DELIVERED"];
-
-const addOneMonth = (date = new Date()) => {
-  const next = new Date(date);
-  next.setMonth(next.getMonth() + 1);
-  return next;
-};
-
-const getMonthPeriod = (date = new Date()) => {
-  const start = new Date(date.getFullYear(), date.getMonth(), 1);
-  const end = new Date(date.getFullYear(), date.getMonth() + 1, 1);
-  return { start, end };
-};
 
 const safeAmount = (value) => {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
 };
 
-export const normalizeVendorPlanKey = (value) => {
-  const key = String(value || "").trim().toUpperCase();
-  if (key === "STARTER") return "GROWTH";
-  return VENDOR_PLAN_KEYS.includes(key) ? key : "";
-};
-
-export const getVendorPlanConfig = (value) => {
-  const key = normalizeVendorPlanKey(value) || "GROWTH";
-  return VENDOR_PLAN_CONFIGS[key];
-};
-
-export const getEffectivePlanConfig = (restaurant) => {
-  if (!restaurant || restaurant.planStatus === "CANCELLED") {
-    return VENDOR_PLAN_CONFIGS.GROWTH;
-  }
-
-  return getVendorPlanConfig(restaurant.subscriptionPlan);
-};
-
+/** Revenue the commission is charged on: items minus any discounts. */
 export const getVendorRevenueBase = (orderOrTotals = {}) =>
   Math.max(
     0,
@@ -100,188 +34,216 @@ export const getVendorRevenueBase = (orderOrTotals = {}) =>
       safeAmount(orderOrTotals.loyaltyDiscount)
   );
 
-export const getRestaurantPlanUsage = async (restaurantId, date = new Date()) => {
-  if (!restaurantId) {
-    return {
-      periodStart: null,
-      periodEnd: null,
-      orderCount: 0,
-      deliveredCount: 0,
-      grossOrderValue: 0,
-      commissionBase: 0,
-      commissionCollected: 0,
-      freeOrdersTotal: FREE_ORDER_LIMIT,
-      freeOrdersUsed: 0,
-      remainingFreeOrders: FREE_ORDER_LIMIT,
-    };
-  }
+const toPlanOption = (plan, state) => {
+  const quota = safeAmount(plan.freeOrderQuota);
+  const orders = safeAmount(state?.usage?.orders);
+  const grossOrderValue = safeAmount(state?.usage?.grossRevenue);
+  const averageOrderValue = orders ? grossOrderValue / orders : 0;
 
-  const { start, end } = getMonthPeriod(date);
-  const [monthly, lifetimeFreeUsage] = await Promise.all([
-    Order.aggregate([
-      {
-        $match: {
-          restaurant: restaurantId,
-          createdAt: { $gte: start, $lt: end },
-          status: { $ne: "REJECTED" },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          orderCount: { $sum: 1 },
-          deliveredCount: {
-            $sum: { $cond: [{ $eq: ["$status", "DELIVERED"] }, 1, 0] },
-          },
-          grossOrderValue: { $sum: "$grandTotal" },
-          commissionBase: { $sum: "$commissionBase" },
-          commissionCollected: { $sum: "$commissionAmount" },
-        },
-      },
-    ]),
-    Order.countDocuments({
-      restaurant: restaurantId,
-      status: { $in: BILLABLE_ORDER_STATUSES },
-    }),
-  ]);
-
-  const snapshot = monthly[0] || {};
-  const freeOrdersUsed = Math.min(FREE_ORDER_LIMIT, lifetimeFreeUsage || 0);
+  const commissionableOrders = Math.max(0, orders - quota);
+  const projectedCost = Math.round(
+    safeAmount(plan.price) + (commissionableOrders * averageOrderValue * safeAmount(plan.commissionRate)) / 100
+  );
+  const aggregatorCost = Math.round((grossOrderValue * AGGREGATOR_COMMISSION_PERCENT) / 100);
 
   return {
-    periodStart: start,
-    periodEnd: end,
-    orderCount: snapshot.orderCount || 0,
-    deliveredCount: snapshot.deliveredCount || 0,
-    grossOrderValue: Math.round(snapshot.grossOrderValue || 0),
-    commissionBase: Math.round(snapshot.commissionBase || 0),
-    commissionCollected: Math.round(snapshot.commissionCollected || 0),
-    freeOrdersTotal: FREE_ORDER_LIMIT,
-    freeOrdersUsed,
-    remainingFreeOrders: Math.max(0, FREE_ORDER_LIMIT - freeOrdersUsed),
-  };
-};
-
-const getRecommendationKey = (usage) => {
-  const value = safeAmount(usage.commissionBase || usage.grossOrderValue);
-  if (usage.orderCount >= 250 || value >= 180000) return "PRO";
-  if (usage.orderCount >= 40 || value >= 30000) return "PREMIUM";
-  return "GROWTH";
-};
-
-const estimateMonthlyCost = (plan, grossOrderValue, remainingFreeOrders = 0, averageOrderValue = 0) => {
-  const estimatedFreeValue = safeAmount(remainingFreeOrders) * safeAmount(averageOrderValue);
-  const commissionableValue = Math.max(0, safeAmount(grossOrderValue) - estimatedFreeValue);
-  return Math.round(plan.monthlyFee + (commissionableValue * plan.commissionPercent) / 100);
-};
-
-const buildPlanOption = (plan, usage) => {
-  const averageOrderValue = usage.orderCount ? usage.grossOrderValue / usage.orderCount : 0;
-  const projectedCost = estimateMonthlyCost(plan, usage.grossOrderValue, usage.remainingFreeOrders, averageOrderValue);
-  const aggregatorCost = Math.round((safeAmount(usage.grossOrderValue) * AGGREGATOR_COMMISSION_PERCENT) / 100);
-
-  return {
-    ...plan,
+    _id: plan._id,
+    key: plan.slug,
+    slug: plan.slug,
+    name: plan.name,
+    monthlyFee: safeAmount(plan.price),
+    price: safeAmount(plan.price),
+    commissionPercent: safeAmount(plan.commissionRate),
+    commissionRate: safeAmount(plan.commissionRate),
+    freeOrderQuota: quota,
+    orderLimit: null,
+    badge: plan.badge || "",
+    description: plan.description || "",
+    features: plan.features || [],
+    isActive: plan.isActive,
+    displayOrder: plan.displayOrder || 0,
+    billingCycleDays: plan.billingCycleDays || 30,
+    shortPitch: plan.description || "",
+    recommendedFor: plan.description || "",
     projectedMonthlyCost: projectedCost,
     estimatedAggregatorCost: aggregatorCost,
     estimatedSavingsVsAggregator: Math.max(0, aggregatorCost - projectedCost),
   };
 };
 
+const pickRecommendation = (plans, state) => {
+  const orders = safeAmount(state?.usage?.projectedOrders || state?.usage?.orders);
+  const grossOrderValue = safeAmount(state?.usage?.grossRevenue);
+  const averageOrderValue = orders ? grossOrderValue / orders : 0;
+
+  if (plans.length === 0) return null;
+
+  // Recommend whichever plan costs the restaurant least at its current volume.
+  const scored = plans
+    .map((plan) => {
+      const commissionable = Math.max(0, orders - safeAmount(plan.freeOrderQuota));
+      const cost =
+        safeAmount(plan.price) +
+        (commissionable * averageOrderValue * safeAmount(plan.commissionRate)) / 100;
+      return { plan, cost };
+    })
+    .sort((a, b) => a.cost - b.cost);
+
+  const winner = scored[0];
+  return {
+    planId: winner.plan._id,
+    planKey: winner.plan.slug,
+    title: `${winner.plan.name} fits your current order volume best.`,
+    reason: `At about ${Math.round(orders)} orders a cycle, ${winner.plan.name} works out cheapest once the ${winner.plan.freeOrderQuota} free orders and ${winner.plan.commissionRate}% commission are applied.`,
+    estimatedMonthlyCost: Math.round(winner.cost),
+  };
+};
+
+/**
+ * Full plan payload for the vendor plan tab and the admin subscription views.
+ *
+ * `current`, `usage` and `options` keep their historical shape; `state` carries
+ * the richer subscription detail (cycle, expiry, payment, history).
+ */
 export const buildVendorPlanPayload = async (restaurant) => {
   if (!restaurant) return null;
 
-  const usage = await getRestaurantPlanUsage(restaurant._id);
-  const currentPlan = getEffectivePlanConfig(restaurant);
-  const recommendationKey = getRecommendationKey(usage);
+  const [state, plans] = await Promise.all([
+    getSubscriptionState(restaurant),
+    getActivePlans(),
+  ]);
+
+  if (!state) return null;
+
+  const options = plans.map((plan) => toPlanOption(plan, state));
+  const quota = state.quota;
 
   return {
     current: {
-      ...currentPlan,
-      status: restaurant.planStatus || "ACTIVE",
-      activatedAt: restaurant.planActivatedAt || restaurant.createdAt,
-      changedAt: restaurant.planChangedAt || restaurant.updatedAt,
-      renewalDate: restaurant.planRenewalDate || null,
+      _id: state.plan._id,
+      key: state.plan.slug,
+      slug: state.plan.slug,
+      name: state.plan.name,
+      monthlyFee: state.plan.price,
+      price: state.plan.price,
+      commissionPercent: state.plan.commissionRate,
+      commissionRate: state.plan.commissionRate,
+      freeOrderQuota: quota.base,
+      badge: state.plan.badge,
+      features: state.plan.features,
+      billingCycleDays: state.plan.billingCycleDays,
+      status: state.subscription.status,
+      paymentStatus: state.subscription.paymentStatus,
+      activatedAt: state.subscription.startDate,
+      changedAt: state.subscription.startDate,
+      renewalDate: state.subscription.endDate,
+      hasCustomCommission: state.subscription.commissionRateOverride !== null,
     },
     usage: {
-      ...usage,
-      usagePercent: Math.min(100, Math.round((usage.freeOrdersUsed / FREE_ORDER_LIMIT) * 100)),
-      overLimit: false,
+      periodStart: state.cycle.start,
+      periodEnd: state.cycle.end,
+      orderCount: state.usage.orders,
+      deliveredCount: state.usage.orders,
+      grossOrderValue: state.usage.grossRevenue,
+      commissionBase: state.usage.commissionBase,
+      commissionCollected: state.usage.commissionCharged,
+      estimatedCommission: state.usage.estimatedCommission,
+      savedThisCycle: state.usage.savedThisCycle,
+      freeOrdersTotal: quota.total,
+      freeOrdersUsed: quota.used,
+      remainingFreeOrders: quota.remaining,
+      bonusFreeOrders: quota.bonus,
+      usagePercent: quota.percent,
+      quotaState: quota.state,
+      overLimit: quota.remaining === 0 && quota.total > 0,
     },
-    options: VENDOR_PLAN_KEYS.map((key) => buildPlanOption(VENDOR_PLAN_CONFIGS[key], usage)),
-    recommendation: {
-      planKey: recommendationKey,
-      title:
-        recommendationKey === "PRO"
-          ? "Pro is the best fit for high order volume."
-          : recommendationKey === "PREMIUM"
-          ? "Premium can protect your margins as orders grow."
-          : "Growth keeps fixed costs at zero while you validate demand.",
-      reason:
-        recommendationKey === "PRO"
-          ? "Your projected commission can exceed the fixed Pro fee, so 0% commission is more predictable."
-          : recommendationKey === "PREMIUM"
-          ? "Your order volume is high enough that 3% commission can beat the free Growth plan."
-          : "You still have room to use the first free orders and avoid monthly fees.",
-    },
-    positioning: {
-      headline: "Start free, then choose the margin model that fits your restaurant.",
-      subheadline:
-        "NearBites tracks free orders automatically and applies the active plan to each new order.",
-      pillars: [
-        "First 20 orders are commission-free",
-        "Growth has no monthly fee",
-        "Premium lowers commission to 3%",
-        "Pro gives unlimited orders at 0% commission",
-      ],
-    },
+    options,
+    recommendation: pickRecommendation(plans, state),
+    state,
   };
 };
 
-export const buildOrderMonetizationSnapshot = async (restaurant, commissionBase = 0) => {
-  const plan = getEffectivePlanConfig(restaurant);
-  const usage = await getRestaurantPlanUsage(restaurant?._id);
-  const nextOrderSequence = usage.freeOrdersUsed + 1;
-  const freeOrderApplied = nextOrderSequence <= FREE_ORDER_LIMIT;
-  const commissionPercent = freeOrderApplied ? 0 : plan.commissionPercent;
-  const base = Math.round(safeAmount(commissionBase));
-  const commissionAmount = Math.round((base * commissionPercent) / 100);
+/**
+ * Commission snapshot stored on a new order.
+ *
+ * Delegates to the subscription engine, which atomically reserves a free-order
+ * slot when quota remains.
+ */
+export const buildOrderMonetizationSnapshot = async (restaurant, commissionBase = 0) =>
+  reserveOrderCommission(restaurant, commissionBase);
+
+/** Resolves a plan by ObjectId or slug. */
+export const findPlanByKeyOrId = async (value) => {
+  const raw = String(value || "").trim();
+  if (!raw) return null;
+
+  if (/^[a-f\d]{24}$/i.test(raw)) {
+    const byId = await SubscriptionPlan.findById(raw);
+    if (byId) return byId;
+  }
+
+  return SubscriptionPlan.findOne({
+    slug: raw.toUpperCase().replace(/[^A-Z0-9]+/g, "_"),
+    isArchived: false,
+  });
+};
+
+export const getVendorPlanConfig = async (value) => {
+  const plan = await findPlanByKeyOrId(value);
+  if (!plan) return null;
+  return toPlanOption(plan, null);
+};
+
+export const getEffectivePlanConfig = async (restaurant) => {
+  const subscription = await resolveSubscription(restaurant);
+  if (!subscription) return null;
 
   return {
-    vendorPlan: plan.key,
-    vendorPlanName: plan.name,
-    vendorPlanMonthlyFee: plan.monthlyFee,
-    commissionBase: base,
-    commissionPercent,
-    commissionAmount,
-    vendorNetAmount: Math.max(0, base - commissionAmount),
-    freeOrderApplied,
-    freeOrderSequence: nextOrderSequence,
-    freeOrdersRemainingAfter: Math.max(0, FREE_ORDER_LIMIT - nextOrderSequence),
+    key: subscription.planSnapshot?.slug,
+    name: subscription.planSnapshot?.name,
+    monthlyFee: subscription.planSnapshot?.price || 0,
+    commissionPercent: getEffectiveCommissionRate(subscription),
+    features: subscription.planSnapshot?.features || [],
   };
 };
 
-export const applyVendorPlan = async (restaurant, planKey, overrides = {}) => {
-  const normalizedPlanKey = normalizeVendorPlanKey(planKey);
-  if (!normalizedPlanKey) {
+/**
+ * Assigns a plan by key or id. Kept for the existing vendor and admin plan
+ * endpoints; the heavy lifting lives in subscriptionAdminService.
+ */
+export const applyVendorPlan = async (restaurant, planKeyOrId, overrides = {}) => {
+  const plan = await findPlanByKeyOrId(planKeyOrId);
+
+  if (!plan) {
     const error = new Error("Invalid restaurant plan");
     error.statusCode = 400;
     throw error;
   }
 
-  const now = new Date();
-  const plan = getVendorPlanConfig(normalizedPlanKey);
-  restaurant.subscriptionPlan = normalizedPlanKey;
-  restaurant.planStatus = overrides.status || "ACTIVE";
-  restaurant.planActivatedAt = restaurant.planActivatedAt || now;
-  restaurant.planChangedAt = now;
-  restaurant.planRenewalDate =
-    overrides.renewalDate !== undefined
-      ? overrides.renewalDate
-      : plan.monthlyFee > 0
-      ? addOneMonth(now)
-      : null;
-  await restaurant.save();
+  await assignPlanToRestaurant({
+    restaurantId: restaurant._id,
+    planId: plan._id,
+    actor: overrides.actor || null,
+    source: overrides.source || "ADMIN",
+    notes: overrides.notes || "",
+  });
 
   return buildVendorPlanPayload(restaurant);
+};
+
+export const getRestaurantPlanUsage = async (restaurant) => {
+  const state = await getSubscriptionState(restaurant);
+  if (!state) return null;
+
+  return {
+    periodStart: state.cycle.start,
+    periodEnd: state.cycle.end,
+    orderCount: state.usage.orders,
+    grossOrderValue: state.usage.grossRevenue,
+    commissionBase: state.usage.commissionBase,
+    commissionCollected: state.usage.commissionCharged,
+    freeOrdersTotal: state.quota.total,
+    freeOrdersUsed: state.quota.used,
+    remainingFreeOrders: state.quota.remaining,
+  };
 };

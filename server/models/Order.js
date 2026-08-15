@@ -74,16 +74,47 @@ const orderSchema = new mongoose.Schema(
 
     grandTotal: { type: Number, required: true, min: 0 },
 
-    // Vendor monetization snapshot captured when the order is placed.
+    // ── Vendor monetization snapshot ───────────────────────────────────────────
+    // Frozen at order creation so later plan edits, upgrades, or quota changes
+    // can never rewrite the commission this order was actually charged.
+    // Plan slug. Free-form because admins create their own plans.
     vendorPlan: {
       type: String,
-      enum: ["STARTER", "GROWTH", "PREMIUM", "PRO"],
-      default: "GROWTH",
+      default: "FREE_BASIC",
+      trim: true,
     },
     vendorPlanName: {
       type: String,
-      default: "Growth Plan",
+      default: "Free Basic",
       trim: true,
+    },
+    subscriptionPlan: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SubscriptionPlan",
+      default: null,
+      index: true,
+    },
+    subscription: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "RestaurantSubscription",
+      default: null,
+    },
+    // Billing cycle the order was billed against. Quota refunds on rejection
+    // are scoped to this cycle.
+    subscriptionCycleId: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    quotaUsedAtOrder: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    quotaTotalAtOrder: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
     vendorPlanMonthlyFee: {
       type: Number,

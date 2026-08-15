@@ -1,4 +1,5 @@
 import Order, { ORDER_STATUSES } from "../../models/Order.js";
+import { releaseOrderQuota } from "../../services/subscriptionService.js";
 import {
   buildFallbackStatusTimeline,
   getVendorRestaurant,
@@ -116,9 +117,21 @@ export const updateVendorOrderStatus = async (req, res) => {
     existingTimeline.push({ status: nextStatus, changedAt: new Date() });
   }
 
+  const wasRejected = nextStatus === "REJECTED" && order.status !== "REJECTED";
+
   order.status = nextStatus;
   order.statusTimeline = existingTimeline;
   await order.save();
+
+  // A rejected order is not commissionable, so give its free-order slot back to
+  // the current billing cycle.
+  if (wasRejected) {
+    try {
+      await releaseOrderQuota(order);
+    } catch (error) {
+      console.error("Free order quota release failed:", error.message);
+    }
+  }
 
   const io = req.app.get("io");
   if (io && order.customer?._id) {
