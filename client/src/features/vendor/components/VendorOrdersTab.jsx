@@ -56,24 +56,24 @@ const VendorOrdersTab = ({
             >
               <div className="flex h-full flex-col justify-between gap-6">
                 <div className="space-y-5">
-                  <div className="flex items-center justify-between border-b border-[#eee7dc] pb-4">
+                  <div className="flex items-center justify-between border-b border-line pb-4">
                     <StatusBadge status={order.status} />
-                    <span className="rounded-lg bg-stone-100 px-3 py-1.5 text-xs font-black text-stone-500">
+                    <span className="rounded-lg bg-sunken px-3 py-1.5 text-xs font-black text-muted">
                       ID #{order._id.slice(-6)}
                     </span>
                   </div>
 
                   <div>
-                    <h3 className="mb-2 text-2xl font-black text-stone-950">
+                    <h3 className="mb-2 text-2xl font-black text-heading">
                       {order.customer?.name}
                     </h3>
-                    <div className="space-y-2 rounded-xl border border-[#eee7dc] bg-[#fffaf5] p-3 text-sm font-medium text-stone-600">
+                    <div className="space-y-2 rounded-xl border border-line bg-sunken p-3 text-sm font-medium text-body">
                       <p>{order.deliveryAddress}</p>
-                      <p className="font-black text-stone-950">
+                      <p className="font-black text-heading">
                         Phone: {order.deliveryPhone || order.customer?.phone || "Not provided"}
                       </p>
                     </div>
-                    <p className="mt-3 text-xs font-black text-orange-600">
+                    <p className="mt-3 text-xs font-black text-accent">
                       {formatRelativeTime(order.createdAt)}
                     </p>
                   </div>
@@ -82,9 +82,9 @@ const VendorOrdersTab = ({
                     {order.items.map((item) => (
                       <span
                         key={`${order._id}-${item.menuItem}`}
-                        className="rounded-lg border border-[#eee7dc] bg-white px-3 py-1.5 text-xs font-bold text-stone-600"
+                        className="rounded-lg border border-line bg-card px-3 py-1.5 text-xs font-bold text-body"
                       >
-                        <span className="mr-1 text-orange-600">
+                        <span className="mr-1 text-accent">
                           {item.quantity}x
                         </span>
                         {item.name}
@@ -95,12 +95,12 @@ const VendorOrdersTab = ({
                   <OrderProgress status={order.status} />
                 </div>
 
-                <div className="mt-2 flex items-center justify-between border-t border-[#eee7dc] pt-5">
+                <div className="mt-2 flex items-center justify-between border-t border-line pt-5">
                   <div>
-                    <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-stone-500">
+                    <p className="mb-1 text-[10px] font-black uppercase tracking-widest text-muted">
                       Grand Total
                     </p>
-                    <p className="text-3xl font-black text-stone-950">
+                    <p className="text-3xl font-black text-heading">
                       {formatCurrency(order.grandTotal)}
                     </p>
                   </div>

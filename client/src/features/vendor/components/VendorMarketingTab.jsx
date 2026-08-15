@@ -39,34 +39,34 @@ const PromoCard = ({ promo, onToggle, onDelete, pending }) => {
       exit={{ opacity: 0, scale: 0.95 }}
       className={`relative overflow-hidden rounded-2xl border transition-all duration-200 ${
         !promo.isActive || expired
-          ? "border-zinc-200 bg-zinc-50 opacity-60"
-          : "border-orange-200 bg-white shadow-[0_8px_32px_-8px_rgba(234,88,12,0.15)]"
+          ? "border-line bg-sunken opacity-60"
+          : "border-accent/25 bg-card shadow-[0_8px_32px_-8px_rgba(234,88,12,0.15)]"
       }`}
     >
       {/* Top accent bar */}
-      <div className={`h-1.5 w-full ${promo.isActive && !expired ? "bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400" : "bg-zinc-300"}`} />
+      <div className={`h-1.5 w-full ${promo.isActive && !expired ? "bg-gradient-to-r from-orange-400 via-amber-400 to-yellow-400" : "bg-faint"}`} />
 
       <div className="p-5">
         {/* Header row */}
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-2.5">
-            <div className={`rounded-xl px-3 py-1.5 border ${promo.isActive && !expired ? "bg-orange-50 border-orange-200" : "bg-zinc-100 border-zinc-200"}`}>
-              <span className={`text-lg font-black tracking-widest ${promo.isActive && !expired ? "text-orange-600" : "text-zinc-400"}`}>
+            <div className={`rounded-xl px-3 py-1.5 border ${promo.isActive && !expired ? "bg-accent-soft border-accent/25" : "bg-sunken border-line"}`}>
+              <span className={`text-lg font-black tracking-widest ${promo.isActive && !expired ? "text-accent" : "text-muted"}`}>
                 {promo.code}
               </span>
             </div>
             {expired ? (
-              <span className="text-[10px] font-black uppercase tracking-widest bg-red-100 text-red-500 px-2 py-1 rounded-lg">Expired</span>
+              <span className="text-[10px] font-black uppercase tracking-widest bg-red-100 dark:bg-red-500/15 text-red-500 px-2 py-1 rounded-lg">Expired</span>
             ) : promo.isActive ? (
-              <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-100 text-emerald-600 px-2 py-1 rounded-lg flex items-center gap-1">
+              <span className="text-[10px] font-black uppercase tracking-widest bg-emerald-100 dark:bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 px-2 py-1 rounded-lg flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
                 Live
               </span>
             ) : (
-              <span className="text-[10px] font-black uppercase tracking-widest bg-zinc-100 text-zinc-400 px-2 py-1 rounded-lg">Paused</span>
+              <span className="text-[10px] font-black uppercase tracking-widest bg-sunken text-muted px-2 py-1 rounded-lg">Paused</span>
             )}
             {promo.isGameReward ? (
-              <span className="text-[10px] font-black uppercase tracking-widest bg-violet-100 text-violet-600 px-2 py-1 rounded-lg">
+              <span className="text-[10px] font-black uppercase tracking-widest bg-violet-100 dark:bg-violet-500/15 text-violet-600 dark:text-violet-300 px-2 py-1 rounded-lg">
                 Game
               </span>
             ) : null}
@@ -74,27 +74,27 @@ const PromoCard = ({ promo, onToggle, onDelete, pending }) => {
 
           <button
             onClick={() => onDelete?.(promo._id)}
-            className="text-zinc-300 hover:text-red-400 transition-colors text-lg leading-none"
+            className="text-faint hover:text-red-400 transition-colors text-lg leading-none"
             title="Delete promo"
           >×</button>
         </div>
 
         {/* Discount value */}
-        <p className={`text-3xl font-black mb-1 ${promo.isActive && !expired ? "text-zinc-900" : "text-zinc-400"}`}>
+        <p className={`text-3xl font-black mb-1 ${promo.isActive && !expired ? "text-heading" : "text-muted"}`}>
           {promo.discountType === "PERCENTAGE" ? `${promo.value}% OFF` : `₹${promo.value} OFF`}
         </p>
-        <p className="text-xs font-semibold text-zinc-400 mb-4">
+        <p className="text-xs font-semibold text-muted mb-4">
           on orders above ₹{promo.minOrderValue}
           {promo.maxDiscount ? ` · max ₹${promo.maxDiscount} off` : ""}
           {promo.usageLimit ? ` · ${promo.usedCount}/${promo.usageLimit} used` : ""}
         </p>
 
         {promo.isGameReward ? (
-          <div className="mb-4 rounded-xl border border-violet-200 bg-violet-50 px-3 py-2">
+          <div className="mb-4 rounded-xl border border-violet-200 dark:border-violet-500/25 bg-violet-50 dark:bg-violet-500/10 px-3 py-2">
             <p className="text-[10px] font-black uppercase tracking-widest text-violet-500">
               {promo.gameRewardTier === "TOP" ? "Area top reward" : "Score reward"}
             </p>
-            <p className="mt-1 text-xs font-bold text-violet-700">
+            <p className="mt-1 text-xs font-bold text-violet-700 dark:text-violet-300">
               {promo.gameKey === "any" ? "Any game" : promo.gameKey} · min score {promo.gameMinScore || 0}
               {promo.gameRewardTier === "TOP" ? ` · hold ${promo.gameHoldMinutes || 1} min` : ""}
             </p>
@@ -102,9 +102,9 @@ const PromoCard = ({ promo, onToggle, onDelete, pending }) => {
         ) : null}
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-3 border-t border-zinc-100">
+        <div className="flex items-center justify-between pt-3 border-t border-line">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted">
               {expired ? "Expired" : `${daysLeft}d left`} · {new Date(promo.validUntil).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
             </p>
           </div>
@@ -115,8 +115,8 @@ const PromoCard = ({ promo, onToggle, onDelete, pending }) => {
               onClick={() => onToggle(promo._id, !promo.isActive)}
               className={`text-xs font-black px-4 py-1.5 rounded-xl border transition-colors ${
                 promo.isActive
-                  ? "border-zinc-200 text-zinc-500 hover:bg-zinc-100"
-                  : "border-emerald-200 text-emerald-600 bg-emerald-50 hover:bg-emerald-100"
+                  ? "border-line text-muted hover:bg-sunken"
+                  : "border-emerald-200 dark:border-emerald-500/25 text-emerald-600 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:bg-emerald-500/15"
               } disabled:opacity-40`}
             >
               {pending === promo._id ? "..." : promo.isActive ? "Pause" : "Resume"}
@@ -132,11 +132,11 @@ const PromoCard = ({ promo, onToggle, onDelete, pending }) => {
 const LightInput = ({ label, hint, ...props }) => (
   <label className="block">
     <div className="flex items-center justify-between mb-1.5">
-      <span className="text-[11px] font-black uppercase tracking-widest text-zinc-500">{label}</span>
-      {hint && <span className="text-[10px] text-zinc-400">{hint}</span>}
+      <span className="text-[11px] font-black uppercase tracking-widest text-muted">{label}</span>
+      {hint && <span className="text-[10px] text-muted">{hint}</span>}
     </div>
     <input
-      className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 outline-none transition focus:border-orange-400 focus:ring-3 focus:ring-orange-100 placeholder:text-zinc-300"
+      className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold text-heading outline-none transition focus:border-orange-400 focus:ring-3 focus:ring-accent/15 placeholder:text-faint"
       {...props}
     />
   </label>
@@ -144,9 +144,9 @@ const LightInput = ({ label, hint, ...props }) => (
 
 const LightSelect = ({ label, children, ...props }) => (
   <label className="block">
-    <span className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-zinc-500">{label}</span>
+    <span className="mb-1.5 block text-[11px] font-black uppercase tracking-widest text-muted">{label}</span>
     <select
-      className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 outline-none transition focus:border-orange-400 focus:ring-3 focus:ring-orange-100 cursor-pointer appearance-none"
+      className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm font-semibold text-heading outline-none transition focus:border-orange-400 focus:ring-3 focus:ring-accent/15 cursor-pointer appearance-none"
       {...props}
     >
       {children}
@@ -188,27 +188,26 @@ const VendorMarketingTab = ({ restaurant, promos = [], createPromoCode, togglePr
 
   return (
     <div
-      className="min-h-screen rounded-3xl p-6 md:p-8"
-      style={{ background: "linear-gradient(135deg, #fff7ed 0%, #fffbf5 40%, #fef3c7 100%)" }}
+      className="min-h-screen rounded-3xl bg-[linear-gradient(135deg,#fff7ed_0%,#fffbf5_40%,#fef3c7_100%)] p-6 dark:bg-none dark:bg-page md:p-8"
     >
       {/* ── Header ── */}
       <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-2xl">📢</span>
-            <h1 className="text-3xl font-black text-zinc-900 tracking-tight">Marketing</h1>
+            <h1 className="text-3xl font-black text-heading tracking-tight">Marketing</h1>
           </div>
-          <p className="text-sm font-semibold text-zinc-400">
+          <p className="text-sm font-semibold text-muted">
             Create promo codes · Attract more customers · Grow revenue
           </p>
         </div>
 
         {/* Stats strip */}
         <div className="flex gap-3 flex-wrap">
-          <StatPill label="Active" value={activePromos.length} accent="border-emerald-200 bg-emerald-50 text-emerald-700" />
-          <StatPill label="Total Codes" value={promos.length} accent="border-orange-200 bg-orange-50 text-orange-700" />
-          <StatPill label="Game Rewards" value={gamePromos.length} accent="border-violet-200 bg-violet-50 text-violet-700" />
-          <StatPill label="Times Used" value={totalSaved} accent="border-amber-200 bg-amber-50 text-amber-700" />
+          <StatPill label="Active" value={activePromos.length} accent="border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" />
+          <StatPill label="Total Codes" value={promos.length} accent="border-accent/25 bg-accent-soft text-accent-text" />
+          <StatPill label="Game Rewards" value={gamePromos.length} accent="border-violet-200 dark:border-violet-500/25 bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300" />
+          <StatPill label="Times Used" value={totalSaved} accent="border-amber-200 dark:border-amber-500/25 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300" />
         </div>
       </div>
 
@@ -217,11 +216,11 @@ const VendorMarketingTab = ({ restaurant, promos = [], createPromoCode, togglePr
         {/* ── Create Promo Form ── */}
         <div className="space-y-4">
           <div
-            className="rounded-2xl border border-orange-200 bg-white shadow-[0_12px_40px_-12px_rgba(234,88,12,0.18)] overflow-hidden"
+            className="rounded-2xl border border-accent/25 bg-card shadow-[0_12px_40px_-12px_rgba(234,88,12,0.18)] overflow-hidden"
           >
             {/* Form header */}
             <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-6 py-5">
-              <h2 className="text-xl font-black text-white">New Promo Code</h2>
+              <h2 className="text-xl font-black text-heading">New Promo Code</h2>
               <p className="text-sm text-orange-100 mt-0.5">Launch a campaign to boost your sales</p>
             </div>
 
@@ -239,7 +238,7 @@ const VendorMarketingTab = ({ restaurant, promos = [], createPromoCode, togglePr
                     <button
                       key={s}
                       onClick={() => setForm({ ...form, code: s })}
-                      className="text-[10px] font-black px-2 py-1 rounded-lg border border-orange-200 text-orange-500 bg-orange-50 hover:bg-orange-100 transition-colors"
+                      className="text-[10px] font-black px-2 py-1 rounded-lg border border-accent/25 text-orange-500 bg-accent-soft hover:bg-orange-100 dark:bg-orange-500/15 transition-colors"
                     >
                       {s}
                     </button>
@@ -307,14 +306,14 @@ const VendorMarketingTab = ({ restaurant, promos = [], createPromoCode, togglePr
               </div>
 
               {/* Game reward controls */}
-              <div className="rounded-2xl border border-violet-100 bg-violet-50/70 p-4">
+              <div className="rounded-2xl border border-violet-100 dark:border-violet-500/25 bg-violet-50/70 p-4">
                 <button
                   type="button"
                   onClick={() => setForm({ ...form, isGameReward: !form.isGameReward })}
                   className="flex w-full items-center justify-between gap-3 text-left"
                 >
                   <span>
-                    <span className="block text-[11px] font-black uppercase tracking-widest text-violet-600">
+                    <span className="block text-[11px] font-black uppercase tracking-widest text-violet-600 dark:text-violet-300">
                       Game reward
                     </span>
                     <span className="mt-1 block text-xs font-semibold leading-5 text-violet-500">
@@ -323,11 +322,11 @@ const VendorMarketingTab = ({ restaurant, promos = [], createPromoCode, togglePr
                   </span>
                   <span
                     className={`relative h-7 w-12 rounded-full border transition ${
-                      form.isGameReward ? "border-violet-500 bg-violet-500" : "border-zinc-300 bg-white"
+                      form.isGameReward ? "border-violet-500 bg-violet-500" : "border-line-strong bg-card"
                     }`}
                   >
                     <span
-                      className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition ${
+                      className={`absolute top-1 h-5 w-5 rounded-full bg-card shadow transition ${
                         form.isGameReward ? "right-1" : "left-1"
                       }`}
                     />
@@ -386,10 +385,10 @@ const VendorMarketingTab = ({ restaurant, promos = [], createPromoCode, togglePr
                 <Motion.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="rounded-xl border border-dashed border-orange-300 bg-orange-50 px-4 py-3"
+                  className="rounded-xl border border-dashed border-orange-300 bg-accent-soft px-4 py-3"
                 >
                   <p className="text-[10px] font-black uppercase tracking-widest text-orange-400 mb-1">Preview</p>
-                  <p className="text-lg font-black text-orange-600">
+                  <p className="text-lg font-black text-accent">
                     {form.code} — {form.discountType === "PERCENTAGE" ? `${form.value}% OFF` : `₹${form.value} OFF`}
                   </p>
                   {form.minOrderValue && (
@@ -417,8 +416,8 @@ const VendorMarketingTab = ({ restaurant, promos = [], createPromoCode, togglePr
           </div>
 
           {/* Tips box */}
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
-            <p className="text-sm font-black text-amber-700 mb-3">💡 Tips for better results</p>
+          <div className="rounded-2xl border border-amber-200 dark:border-amber-500/25 bg-amber-50 dark:bg-amber-500/10 p-5">
+            <p className="text-sm font-black text-amber-700 dark:text-amber-300 mb-3">💡 Tips for better results</p>
             <ul className="space-y-1.5">
               {[
                 "15–20% off works best for first orders",
@@ -426,7 +425,7 @@ const VendorMarketingTab = ({ restaurant, promos = [], createPromoCode, togglePr
                 "Weekend promos drive 2× more orders",
                 "Limit usage to create urgency",
               ].map(tip => (
-                <li key={tip} className="text-xs font-semibold text-amber-600 flex items-start gap-2">
+                <li key={tip} className="text-xs font-semibold text-amber-600 dark:text-amber-300 flex items-start gap-2">
                   <span className="mt-0.5 text-amber-400">✓</span> {tip}
                 </li>
               ))}
@@ -437,10 +436,10 @@ const VendorMarketingTab = ({ restaurant, promos = [], createPromoCode, togglePr
         {/* ── Active Campaigns ── */}
         <div>
           <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-black text-zinc-900">
+            <h2 className="text-xl font-black text-heading">
               Active Campaigns
               {activePromos.length > 0 && (
-                <span className="ml-2 text-sm font-black text-orange-500 bg-orange-100 rounded-full px-2.5 py-0.5">
+                <span className="ml-2 text-sm font-black text-orange-500 bg-orange-100 dark:bg-orange-500/15 rounded-full px-2.5 py-0.5">
                   {activePromos.length}
                 </span>
               )}
@@ -448,10 +447,10 @@ const VendorMarketingTab = ({ restaurant, promos = [], createPromoCode, togglePr
           </div>
 
           {promos.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-orange-200 bg-white/60 py-16 text-center">
+            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-accent/25 bg-card/60 py-16 text-center">
               <div className="text-5xl mb-4">🎁</div>
-              <h3 className="text-lg font-black text-zinc-700">No campaigns yet</h3>
-              <p className="text-sm font-semibold text-zinc-400 mt-1 max-w-xs">
+              <h3 className="text-lg font-black text-body">No campaigns yet</h3>
+              <p className="text-sm font-semibold text-muted mt-1 max-w-xs">
                 Create your first promo code to attract customers and boost your orders.
               </p>
             </div>
@@ -460,7 +459,7 @@ const VendorMarketingTab = ({ restaurant, promos = [], createPromoCode, togglePr
               {/* Active */}
               {activePromos.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-3 flex items-center gap-2">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-3 flex items-center gap-2">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
                     Live Now
                   </p>
@@ -483,7 +482,7 @@ const VendorMarketingTab = ({ restaurant, promos = [], createPromoCode, togglePr
               {/* Paused / Expired */}
               {expiredPromos.length > 0 && (
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-300 mb-3">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-faint mb-3">
                     Paused / Expired
                   </p>
                   <div className="grid gap-4 sm:grid-cols-2">

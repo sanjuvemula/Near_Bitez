@@ -208,13 +208,13 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
       style={{ height: "calc(100vh - 120px)", minHeight: 600 }}
     >
       {/* ── LEFT: Conversation list ───────────────────────────────────── */}
-      <div className="flex flex-col overflow-hidden rounded-2xl border border-zinc-800/60 bg-[#0c0c0e]">
+      <div className="flex flex-col overflow-hidden rounded-2xl border border-line bg-card">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-zinc-800/60 shrink-0">
+        <div className="px-5 py-4 border-b border-line shrink-0">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <span className="text-lg">💬</span>
-              <h2 className="text-sm font-black text-white tracking-tight">
+              <h2 className="text-sm font-black text-heading tracking-tight">
                 Messages
               </h2>
             </div>
@@ -230,12 +230,12 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
           </div>
           {/* Search */}
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600 text-sm">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-body text-sm">
               🔍
             </span>
             <input
               placeholder="Search customers..."
-              className="w-full rounded-xl border border-zinc-800 bg-red-300 pl-9 pr-4 py-2.5 text-xs text-zinc-300 placeholder:text-zinc-600 outline-none focus:border-zinc-600 transition-all"
+              className="w-full rounded-xl border border-line bg-raised pl-9 pr-4 py-2.5 text-xs text-faint placeholder:text-body outline-none focus:border-line-strong transition-all"
             />
           </div>
         </div>
@@ -244,11 +244,11 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
         <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
           {localChats.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center px-6 py-16">
-              <div className="h-14 w-14 rounded-2xl bg-blue-400 border border-red-800 flex items-center justify-center text-2xl mb-3">
+              <div className="h-14 w-14 rounded-2xl bg-accent-soft border border-line flex items-center justify-center text-2xl mb-3">
                 📭
               </div>
-              <p className="text-sm font-bold text-zinc-400">No conversations</p>
-              <p className="text-xs text-zinc-600 mt-1 leading-relaxed">
+              <p className="text-sm font-bold text-muted">No conversations</p>
+              <p className="text-xs text-body mt-1 leading-relaxed">
                 Customer messages will appear here.
               </p>
             </div>
@@ -271,14 +271,14 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
                   className={`w-full text-left px-3 py-3 rounded-xl border transition-all duration-150 ${
                     isSelected
                       ? "bg-indigo-500/10 border-indigo-500/30"
-                      : "border-transparent hover:bg-zinc-900/80 hover:border-zinc-800/60"
+                      : "border-transparent hover:bg-card hover:border-line"
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     {/* Avatar with gradient */}
                     <div className="relative shrink-0">
                       <div
-                        className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black text-white ${
+                        className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-black text-heading ${
                           isSelected
                             ? "bg-gradient-to-br from-indigo-500 to-purple-600"
                             : "bg-gradient-to-br from-zinc-700 to-zinc-800"
@@ -287,7 +287,7 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
                         {initial}
                       </div>
                       {unread > 0 && (
-                        <span className="absolute -top-0.5 -right-0.5 h-4 w-4 flex items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white border-2 border-[#0c0c0e]">
+                        <span className="absolute -top-0.5 -right-0.5 h-4 w-4 flex items-center justify-center rounded-full bg-rose-500 text-[9px] font-black text-white border-2 border-line">
                           {unread > 9 ? "9+" : unread}
                         </span>
                       )}
@@ -297,20 +297,20 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
                       <div className="flex items-center justify-between gap-1 mb-0.5">
                         <p
                           className={`text-xs font-bold truncate ${
-                            unread > 0 ? "text-white" : "text-zinc-300"
+                            unread > 0 ? "text-heading" : "text-faint"
                           }`}
                         >
                           {name}
                         </p>
-                        <p className="text-[10px] text-zinc-600 shrink-0">
+                        <p className="text-[10px] text-body shrink-0">
                           {lastTime}
                         </p>
                       </div>
                       <p
                         className={`text-[11px] truncate ${
                           unread > 0
-                            ? "text-zinc-400 font-semibold"
-                            : "text-zinc-600"
+                            ? "text-muted font-semibold"
+                            : "text-body"
                         }`}
                       >
                         {chat.lastMessage || "No messages yet"}
@@ -325,7 +325,7 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
       </div>
 
       {/* ── RIGHT: Chat window ───────────────────────────────────────── */}
-      <div className="flex flex-col overflow-hidden rounded-2xl border border-zinc-800/60 bg-[#08080a]">
+      <div className="flex flex-col overflow-hidden rounded-2xl border border-line bg-page">
         <AnimatePresence mode="wait">
           {!currentChat ? (
             <motion.div
@@ -336,17 +336,17 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
               className="flex flex-col items-center justify-center h-full text-center select-none"
             >
               <div className="relative mb-6">
-                <div className="h-20 w-20 rounded-3xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-3xl">
+                <div className="h-20 w-20 rounded-3xl bg-card border border-line flex items-center justify-center text-3xl">
                   📨
                 </div>
                 <div className="absolute -bottom-1 -right-1 h-7 w-7 rounded-xl bg-indigo-600 flex items-center justify-center text-sm">
                   💬
                 </div>
               </div>
-              <h3 className="text-base font-black text-zinc-300 tracking-tight">
+              <h3 className="text-base font-black text-faint tracking-tight">
                 No chat selected
               </h3>
-              <p className="text-xs text-zinc-600 mt-2 max-w-[200px] leading-relaxed">
+              <p className="text-xs text-body mt-2 max-w-[200px] leading-relaxed">
                 Select a conversation from the left to start replying
               </p>
             </motion.div>
@@ -360,15 +360,15 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
               className="flex flex-col h-full"
             >
               {/* Chat header */}
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-zinc-800/60 shrink-0">
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-line shrink-0">
                 <div className="h-9 w-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-black text-white shrink-0">
                   {(currentChat.customer?.name || "C")[0].toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-black text-white truncate">
+                  <p className="text-sm font-black text-heading truncate">
                     {currentChat.customer?.name || "Customer"}
                   </p>
-                  <p className="text-[10px] text-zinc-600 truncate">
+                  <p className="text-[10px] text-body truncate">
                     {currentChat.customer?.email || ""}
                   </p>
                 </div>
@@ -386,7 +386,7 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
                 {(currentChat.messages || []).length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full opacity-40 text-center">
                     <span className="text-3xl mb-2">💬</span>
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-muted">
                       Customer will start the conversation
                     </p>
                   </div>
@@ -412,7 +412,7 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
                         >
                           {/* Sender name — only on first in group */}
                           {isFirst && (
-                            <span className="text-[10px] font-bold text-zinc-600 mb-1 px-1">
+                            <span className="text-[10px] font-bold text-body mb-1 px-1">
                               {isAdmin
                                 ? "🛡️ Admin"
                                 : isMe
@@ -427,7 +427,7 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
                                 ? "bg-purple-600 text-white"
                                 : isMe
                                 ? `bg-indigo-600 text-white ${isSending ? "opacity-50" : ""}`
-                                : "bg-zinc-800/80 text-zinc-100 border border-zinc-700/40"
+                                : "bg-raised text-heading border border-line-strong/40"
                             } ${
                               isMe
                                 ? isFirst && isLast
@@ -454,11 +454,11 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
                             <div
                               className={`flex items-center gap-1 mt-1 px-1 ${isMe ? "flex-row-reverse" : ""}`}
                             >
-                              <span className="text-[9px] text-zinc-700">
+                              <span className="text-[9px] text-body">
                                 {formatTime(msg.createdAt)}
                               </span>
                               {isSending && (
-                                <span className="text-[9px] text-zinc-700 animate-pulse">
+                                <span className="text-[9px] text-body animate-pulse">
                                   Sending...
                                 </span>
                               )}
@@ -478,7 +478,7 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
               </div>
 
               {/* Input */}
-              <div className="px-4 py-3 border-t border-zinc-800/60 shrink-0 bg-[#0c0c0e]">
+              <div className="px-4 py-3 border-t border-line shrink-0 bg-card">
                 <div className="flex gap-2 items-center">
                   <div className="flex-1 relative">
                     <input
@@ -493,7 +493,7 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
                         }
                       }}
                       placeholder="Type a reply..."
-                      className="w-full rounded-xl border border-zinc-800 bg-zinc-900/80 px-4 py-3 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-indigo-500/40 focus:bg-zinc-800/80 transition-all"
+                      className="w-full rounded-xl border border-line bg-card px-4 py-3 text-sm text-heading placeholder:text-body outline-none focus:border-indigo-500/40 focus:bg-raised transition-all"
                     />
                   </div>
                   <motion.button
@@ -510,9 +510,9 @@ const VendorMessagesTab = ({ restaurant, chats = [] }) => {
                     )}
                   </motion.button>
                 </div>
-                <p className="text-[10px] text-zinc-700 mt-1.5 text-right">
+                <p className="text-[10px] text-body mt-1.5 text-right">
                   🏪 Replying as{" "}
-                  <span className="text-zinc-600">
+                  <span className="text-body">
                     {restaurant?.name || "your restaurant"}
                   </span>{" "}
                   · Enter to send

@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       fontFamily: {
@@ -20,6 +21,29 @@ export default {
           900: '#7a230c',
         },
         surface: '#fcfbfa', // A very warm, expensive-looking off-white
+
+        /**
+         * Semantic theme tokens.
+         *
+         * Backed by CSS variables defined in index.css, so a single `dark`
+         * class on <html> re-themes every surface without each component
+         * carrying a parallel set of `dark:` classes.
+         *
+         * Depth order: page -> surface -> card -> raised
+         */
+        page: 'rgb(var(--nb-page) / <alpha-value>)',
+        card: 'rgb(var(--nb-card) / <alpha-value>)',
+        raised: 'rgb(var(--nb-raised) / <alpha-value>)',
+        sunken: 'rgb(var(--nb-sunken) / <alpha-value>)',
+        line: 'rgb(var(--nb-line) / <alpha-value>)',
+        'line-strong': 'rgb(var(--nb-line-strong) / <alpha-value>)',
+        heading: 'rgb(var(--nb-heading) / <alpha-value>)',
+        body: 'rgb(var(--nb-body) / <alpha-value>)',
+        muted: 'rgb(var(--nb-muted) / <alpha-value>)',
+        faint: 'rgb(var(--nb-faint) / <alpha-value>)',
+        accent: 'rgb(var(--nb-accent) / <alpha-value>)',
+        'accent-soft': 'rgb(var(--nb-accent-soft) / <alpha-value>)',
+        'accent-text': 'rgb(var(--nb-accent-text) / <alpha-value>)',
       },
       boxShadow: {
         'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.05)',

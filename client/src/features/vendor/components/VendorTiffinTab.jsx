@@ -64,14 +64,14 @@ const EMPTY_FORM = {
 
 // ─── Input class strings (plain CSS — no wrapper component) ───────────────────
 const INPUT =
-  "w-full rounded-2xl border-2 border-slate-100 bg-white/80 px-4 py-3.5 " +
-  "text-sm font-semibold text-slate-800 outline-none transition-all " +
-  "placeholder:text-slate-400 " +
-  "focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100/70 " +
-  "hover:border-orange-200 backdrop-blur-sm";
+  "w-full rounded-2xl border-2 border-slate-100 dark:border-slate-500/25 bg-card/80 px-4 py-3.5 " +
+  "text-sm font-semibold text-slate-800 dark:text-body outline-none transition-all " +
+  "placeholder:text-muted " +
+  "focus:border-orange-400 focus:bg-card focus:ring-4 focus:ring-accent/15 " +
+  "hover:border-accent/25 backdrop-blur-sm";
 
 const SELECT = INPUT + " cursor-pointer appearance-none";
-const LABEL  = "mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-slate-500";
+const LABEL  = "mb-2 block text-[10px] font-black uppercase tracking-[0.14em] text-muted";
 
 // ─── Small helpers ────────────────────────────────────────────────────────────
 const Spinner = () => (
@@ -82,11 +82,11 @@ const Spinner = () => (
 );
 
 const SectionHeader = ({ n, label, gradient }) => (
-  <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+  <div className="flex items-center gap-3 pb-3 border-b border-slate-100 dark:border-slate-500/25">
     <span className={`flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br ${gradient} text-[11px] font-black text-white shadow-sm`}>
       {n}
     </span>
-    <span className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-500">{label}</span>
+    <span className="text-[11px] font-black uppercase tracking-[0.14em] text-muted">{label}</span>
   </div>
 );
 
@@ -103,10 +103,10 @@ const DurationBadge = ({ value }) => {
 // ─── Meal badge ───────────────────────────────────────────────────────────────
 const MealBadge = ({ type }) => {
   const cfg = {
-    veg:      { text: "🌿 Pure Veg",       cls: "bg-emerald-50 border-emerald-200 text-emerald-700" },
-    "non-veg":{ text: "🍗 Non-Veg",        cls: "bg-rose-50    border-rose-200    text-rose-700"    },
-    both:     { text: "🍽️ Veg & Non-Veg", cls: "bg-amber-50   border-amber-200   text-amber-700"   },
-  }[type] ?? { text: "Veg", cls: "bg-emerald-50 border-emerald-200 text-emerald-700" };
+    veg:      { text: "🌿 Pure Veg",       cls: "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/25 text-emerald-700 dark:text-emerald-300" },
+    "non-veg":{ text: "🍗 Non-Veg",        cls: "bg-rose-50 dark:bg-rose-500/10    border-rose-200 dark:border-rose-500/25    text-rose-700 dark:text-rose-300"    },
+    both:     { text: "🍽️ Veg & Non-Veg", cls: "bg-amber-50 dark:bg-amber-500/10   border-amber-200 dark:border-amber-500/25   text-amber-700 dark:text-amber-300"   },
+  }[type] ?? { text: "Veg", cls: "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/25 text-emerald-700 dark:text-emerald-300" };
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-black ${cfg.cls}`}>
       {cfg.text}
@@ -117,7 +117,7 @@ const MealBadge = ({ type }) => {
 const DeliveryBadge = ({ type }) => {
   const label = { delivery:"🛵 Delivery", pickup:"🏪 Pickup", both:"🛵 + 🏪" }[type] ?? "🛵 Delivery";
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-black text-sky-700">
+    <span className="inline-flex items-center gap-1 rounded-full border border-sky-200 dark:border-sky-500/25 bg-sky-50 dark:bg-sky-500/10 px-3 py-1 text-[11px] font-black text-sky-700 dark:text-sky-300">
       {label}
     </span>
   );
@@ -125,13 +125,13 @@ const DeliveryBadge = ({ type }) => {
 
 // ─── Day colour cycling ───────────────────────────────────────────────────────
 const DAY_COLORS = [
-  "border-rose-200    focus:border-rose-400    focus:ring-rose-100/60    bg-rose-50/30",
-  "border-orange-200  focus:border-orange-400  focus:ring-orange-100/60  bg-orange-50/30",
-  "border-amber-200   focus:border-amber-400   focus:ring-amber-100/60   bg-amber-50/30",
-  "border-lime-200    focus:border-lime-400    focus:ring-lime-100/60    bg-lime-50/30",
-  "border-teal-200    focus:border-teal-400    focus:ring-teal-100/60    bg-teal-50/30",
-  "border-sky-200     focus:border-sky-400     focus:ring-sky-100/60     bg-sky-50/30",
-  "border-violet-200  focus:border-violet-400  focus:ring-violet-100/60  bg-violet-50/30",
+  "border-rose-200 dark:border-rose-500/25    focus:border-rose-400    focus:ring-rose-100/60    bg-rose-50/30",
+  "border-accent/25  focus:border-orange-400  focus:ring-accent/15  bg-accent-soft/30",
+  "border-amber-200 dark:border-amber-500/25   focus:border-amber-400   focus:ring-amber-100/60   bg-amber-50/30",
+  "border-lime-200 dark:border-lime-500/25    focus:border-lime-400    focus:ring-lime-100/60    bg-lime-50/30 dark:bg-lime-500/10",
+  "border-teal-200 dark:border-teal-500/25    focus:border-teal-400    focus:ring-teal-100/60    bg-teal-50/30 dark:bg-teal-500/10",
+  "border-sky-200 dark:border-sky-500/25     focus:border-sky-400     focus:ring-sky-100/60     bg-sky-50/30",
+  "border-violet-200 dark:border-violet-500/25  focus:border-violet-400  focus:ring-violet-100/60  bg-violet-50/30 dark:bg-violet-500/10",
 ];
 
 // ─── Preview Card ─────────────────────────────────────────────────────────────
@@ -140,9 +140,9 @@ const PreviewCard = ({ form, restaurant }) => {
   const durOpt  = DURATION_OPTIONS.find(d => d.value === form.tiffinDuration) || DURATION_OPTIONS[3];
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-white/60 bg-white shadow-[0_24px_64px_-20px_rgba(234,88,12,0.22)] ring-1 ring-orange-100/50">
+    <div className="overflow-hidden rounded-3xl border border-line bg-card shadow-[0_24px_64px_-20px_rgba(234,88,12,0.22)] ring-1 ring-orange-100/50">
       {/* Banner */}
-      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-orange-100 via-amber-50 to-rose-50">
+      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-orange-100 via-amber-50 to-rose-50 dark:bg-none dark:bg-raised">
         {restaurant?.imageUrl ? (
           <img src={restaurant.imageUrl} alt={restaurant?.name}
             className="h-full w-full object-cover" />
@@ -156,7 +156,7 @@ const PreviewCard = ({ form, restaurant }) => {
 
         {/* Vendor name */}
         <div className="absolute bottom-0 inset-x-0 p-5">
-          <p className="text-lg font-black text-white drop-shadow-lg">
+          <p className="text-lg font-black text-heading drop-shadow-lg">
             {restaurant?.name ?? "Your Restaurant"}
           </p>
         </div>
@@ -165,7 +165,7 @@ const PreviewCard = ({ form, restaurant }) => {
         <div className="absolute right-3 top-3">
           <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-black backdrop-blur-sm
             ${form.tiffinAvailable
-              ? "border-emerald-200/60 bg-emerald-500/80 text-white"
+              ? "border-emerald-200 dark:border-emerald-500/25/60 bg-emerald-500/80 text-white"
               : "border-white/20 bg-black/40 text-white/70"}`}>
             <span className={`h-2 w-2 rounded-full ${form.tiffinAvailable ? "bg-white animate-pulse" : "bg-white/50"}`} />
             {form.tiffinAvailable ? "LIVE" : "PAUSED"}
@@ -184,14 +184,14 @@ const PreviewCard = ({ form, restaurant }) => {
       <div className="p-5 space-y-4">
         {/* Price + desc */}
         <div className="flex items-start justify-between gap-3">
-          <p className="flex-1 text-sm font-medium leading-relaxed text-slate-500 line-clamp-2">
+          <p className="flex-1 text-sm font-medium leading-relaxed text-muted line-clamp-2">
             {form.tiffinDescription || "Your tiffin description will appear here…"}
           </p>
           <div className="shrink-0 text-right">
             <p className="text-2xl font-black text-orange-500">
               {form.tiffinPrice ? formatCurrency(Number(form.tiffinPrice)) : "₹ —"}
             </p>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            <p className="text-[10px] font-bold text-muted uppercase tracking-widest">
               per {durOpt.label.toLowerCase()}
             </p>
           </div>
@@ -201,7 +201,7 @@ const PreviewCard = ({ form, restaurant }) => {
         <div className="flex flex-wrap gap-2">
           <MealBadge type={form.tiffinMealType} />
           <DeliveryBadge type={form.tiffinDeliveryType} />
-          <span className="rounded-full border border-indigo-200 bg-indigo-50 px-3 py-1 text-[11px] font-black text-indigo-700">
+          <span className="rounded-full border border-indigo-200 dark:border-indigo-500/25 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1 text-[11px] font-black text-indigo-700 dark:text-indigo-300">
             {form.tiffinMealsPerDay} meal{Number(form.tiffinMealsPerDay) > 1 ? "s" : ""}/day
           </span>
           <DurationBadge value={form.tiffinDuration} />
@@ -214,17 +214,17 @@ const PreviewCard = ({ form, restaurant }) => {
             { label: "Duration",   value: durOpt.days },
             { label: "Plan",       value: durOpt.label },
           ].map(({ label, value }) => (
-            <div key={label} className="rounded-2xl bg-gradient-to-br from-slate-50 to-orange-50/30 border border-slate-100 p-3">
-              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">{label}</p>
-              <p className="mt-1 text-sm font-black text-slate-800">{value}</p>
+            <div key={label} className="rounded-2xl bg-gradient-to-br from-slate-50 to-orange-50/30 border border-slate-100 dark:border-slate-500/25 p-3 dark:bg-none dark:bg-raised">
+              <p className="text-[9px] font-black uppercase tracking-widest text-muted">{label}</p>
+              <p className="mt-1 text-sm font-black text-slate-800 dark:text-body">{value}</p>
             </div>
           ))}
         </div>
 
         {/* Weekly menu preview */}
         {hasMenu && (
-          <div className="rounded-2xl border border-orange-100 bg-gradient-to-br from-orange-50/50 to-amber-50/30 p-4">
-            <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-accent/20 bg-gradient-to-br from-orange-50/50 to-amber-50/30 p-4 dark:bg-none dark:bg-raised">
+            <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-muted">
               This Week's Menu
             </p>
             <div className="space-y-1.5">
@@ -233,7 +233,7 @@ const PreviewCard = ({ form, restaurant }) => {
                   <span className="mt-0.5 w-8 shrink-0 text-[10px] font-black uppercase text-orange-400">
                     {day.slice(0, 3)}
                   </span>
-                  <span className="text-xs font-semibold leading-5 text-slate-600">
+                  <span className="text-xs font-semibold leading-5 text-muted dark:text-body">
                     {form.tiffinWeeklyMenu[day]}
                   </span>
                 </div>
@@ -243,9 +243,9 @@ const PreviewCard = ({ form, restaurant }) => {
         )}
 
         {/* Realtime sync badge */}
-        <div className="flex items-center gap-2.5 rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 px-4 py-3">
+        <div className="flex items-center gap-2.5 rounded-2xl border border-emerald-200 dark:border-emerald-500/25 bg-gradient-to-r from-emerald-50 to-teal-50 px-4 py-3 dark:bg-none dark:bg-raised">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-          <p className="text-xs font-bold text-emerald-700">
+          <p className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
             Customers see your changes instantly — real-time sync enabled
           </p>
         </div>
@@ -377,7 +377,7 @@ const VendorTiffinTab = ({ restaurant }) => {
       <div className="space-y-5">
 
         {/* Header card */}
-        <div className="relative overflow-hidden rounded-3xl border border-orange-200/60 bg-gradient-to-br from-orange-500 via-orange-600 to-rose-600 p-6 shadow-lg shadow-orange-200">
+        <div className="relative overflow-hidden rounded-3xl border border-accent/25 bg-gradient-to-br from-orange-500 via-orange-600 to-rose-600 p-6 shadow-lg shadow-orange-200">
           {/* Decorative circles */}
           <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
           <div className="absolute -right-2 -top-2 h-16 w-16 rounded-full bg-white/10" />
@@ -389,7 +389,7 @@ const VendorTiffinTab = ({ restaurant }) => {
                 <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/20 backdrop-blur text-xl">
                   🍱
                 </div>
-                <h2 className="text-2xl font-black tracking-tight text-white">
+                <h2 className="text-2xl font-black tracking-tight text-heading">
                   Tiffin Service
                 </h2>
               </div>
@@ -407,7 +407,7 @@ const VendorTiffinTab = ({ restaurant }) => {
                   disabled={toggling}
                   className={`flex items-center gap-2 rounded-2xl border-2 px-4 py-2.5 text-xs font-black backdrop-blur-sm transition-all
                     ${form.tiffinAvailable
-                      ? "border-white/30 bg-white/20 text-white hover:bg-white/30"
+                      ? "border-white/30 bg-white/20 text-heading hover:bg-white/30"
                       : "border-white/20 bg-black/20 text-white/70 hover:bg-black/30"}`}
                 >
                   {toggling
@@ -418,7 +418,7 @@ const VendorTiffinTab = ({ restaurant }) => {
               )}
               <button
                 onClick={() => setIsEditing(v => !v)}
-                className="flex items-center gap-2 rounded-2xl bg-white px-5 py-2.5 text-sm font-black text-orange-600 shadow-md transition hover:bg-orange-50 active:scale-95"
+                className="flex items-center gap-2 rounded-2xl bg-card px-5 py-2.5 text-sm font-black text-accent shadow-md transition hover:bg-accent-soft active:scale-95"
               >
                 {isEditing ? "✕ Close" : hasTiffinData ? "✏️ Edit Plan" : "+ Create Plan"}
               </button>
@@ -428,12 +428,12 @@ const VendorTiffinTab = ({ restaurant }) => {
 
         {/* Empty state */}
         {!hasTiffinData ? (
-          <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-orange-200 bg-gradient-to-br from-orange-50/50 to-amber-50/30 p-16 text-center">
-            <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-orange-100 to-amber-100 text-4xl shadow-inner">
+          <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-accent/25 bg-gradient-to-br from-orange-50/50 to-amber-50/30 p-16 text-center dark:bg-none dark:bg-raised">
+            <div className="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-orange-100 to-amber-100 text-4xl shadow-inner dark:bg-none dark:bg-raised">
               🍱
             </div>
-            <h3 className="text-xl font-black text-slate-800">No Tiffin Plan Yet</h3>
-            <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-500">
+            <h3 className="text-xl font-black text-slate-800 dark:text-body">No Tiffin Plan Yet</h3>
+            <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted">
               Create a subscription plan and get steady recurring orders from students and professionals near you.
             </p>
             <button
@@ -446,7 +446,7 @@ const VendorTiffinTab = ({ restaurant }) => {
         ) : (
           /* Live preview */
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-            <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-muted">
               Live Preview — exactly what customers see
             </p>
             <PreviewCard form={form} restaurant={restaurant} />
@@ -470,22 +470,22 @@ const VendorTiffinTab = ({ restaurant }) => {
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
           >
             {/* ↓ Plain div — no motion inside here */}
-            <div className="sticky top-6 flex max-h-[calc(100vh-120px)] flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_32px_80px_-20px_rgba(15,23,42,0.18)]">
+            <div className="sticky top-6 flex max-h-[calc(100vh-120px)] flex-col overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-500/25/80 bg-card shadow-[0_32px_80px_-20px_rgba(15,23,42,0.18)]">
 
               {/* Form header */}
-              <div className="flex items-center justify-between border-b border-slate-100 bg-gradient-to-r from-slate-50 to-orange-50/40 px-6 py-4">
+              <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-500/25 bg-gradient-to-r from-slate-50 to-orange-50/40 px-6 py-4 dark:bg-none dark:bg-raised">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-rose-500 text-lg shadow">
                     🗓️
                   </div>
                   <div>
                     <h2 className="text-base font-black text-slate-900">Configure Tiffin</h2>
-                    <p className="text-[10px] font-bold text-slate-400">All changes go live on save</p>
+                    <p className="text-[10px] font-bold text-muted">All changes go live on save</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setIsEditing(false)}
-                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-500"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-500/25 bg-card text-muted transition hover:border-rose-200 dark:border-rose-500/25 hover:bg-rose-50 dark:bg-rose-500/10 hover:text-rose-500"
                 >
                   ✕
                 </button>
@@ -494,7 +494,7 @@ const VendorTiffinTab = ({ restaurant }) => {
               {/* Scrollable form body */}
               <div
                 className="flex-1 overflow-y-auto px-6 py-6 space-y-7"
-                style={{ scrollbarWidth: "thin", scrollbarColor: "#f1f5f9 transparent" }}
+                style={{ scrollbarWidth: "thin" }}
               >
 
                 {/* ── SECTION 1: Visibility ── */}
@@ -503,11 +503,11 @@ const VendorTiffinTab = ({ restaurant }) => {
 
                   <label className={`flex cursor-pointer items-center justify-between gap-4 rounded-2xl border-2 p-4 transition-all
                     ${form.tiffinAvailable
-                      ? "border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50"
-                      : "border-slate-100 bg-slate-50/50 hover:border-orange-200"}`}>
+                      ? "border-emerald-200 dark:border-emerald-500/25 bg-gradient-to-r from-emerald-50 to-teal-50"
+                      : "border-slate-100 dark:border-slate-500/25 bg-slate-50/50 hover:border-accent/25"} dark:bg-none dark:bg-raised`}>
                     <div>
-                      <p className="text-sm font-black text-slate-800">Show on customer app</p>
-                      <p className="mt-0.5 text-xs font-medium text-slate-500">
+                      <p className="text-sm font-black text-slate-800 dark:text-body">Show on customer app</p>
+                      <p className="mt-0.5 text-xs font-medium text-muted">
                         When off, your tiffin plan is hidden from all customers
                       </p>
                     </div>
@@ -515,12 +515,12 @@ const VendorTiffinTab = ({ restaurant }) => {
                       className={`relative flex h-7 w-12 shrink-0 items-center rounded-full border-2 transition-colors
                         ${form.tiffinAvailable
                           ? "border-emerald-400 bg-emerald-500"
-                          : "border-slate-200 bg-slate-200"}`}
+                          : "border-slate-200 dark:border-slate-500/25 bg-slate-200"}`}
                     >
                       <motion.div
                         layout
                         transition={{ type: "spring", stiffness: 600, damping: 35 }}
-                        className={`absolute h-5 w-5 rounded-full bg-white shadow ${form.tiffinAvailable ? "right-1" : "left-1"}`}
+                        className={`absolute h-5 w-5 rounded-full bg-card shadow ${form.tiffinAvailable ? "right-1" : "left-1"}`}
                       />
                       <input
                         type="checkbox"
@@ -564,7 +564,7 @@ const VendorTiffinTab = ({ restaurant }) => {
                           className={`relative overflow-hidden rounded-2xl border-2 p-3 text-left transition-all
                             ${form.tiffinDuration === opt.value
                               ? "border-transparent shadow-md"
-                              : "border-slate-100 bg-slate-50/50 hover:border-orange-200"}`}
+                              : "border-slate-100 dark:border-slate-500/25 bg-slate-50/50 hover:border-accent/25"}`}
                           style={form.tiffinDuration === opt.value ? {} : {}}
                         >
                           {form.tiffinDuration === opt.value && (
@@ -573,7 +573,7 @@ const VendorTiffinTab = ({ restaurant }) => {
                           <div className={`relative inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r ${opt.color} px-2 py-0.5 text-[10px] font-black text-white mb-1.5`}>
                             📅 {opt.label}
                           </div>
-                          <p className="relative text-[11px] font-bold text-slate-500">{opt.days}</p>
+                          <p className="relative text-[11px] font-bold text-muted">{opt.days}</p>
                           {form.tiffinDuration === opt.value && (
                             <span className="absolute right-2 top-2 text-xs">✓</span>
                           )}
@@ -622,7 +622,7 @@ const VendorTiffinTab = ({ restaurant }) => {
                           className={`relative overflow-hidden rounded-2xl border-2 px-3 py-3 text-[11px] font-black transition-all
                             ${form.tiffinMealType === o.value
                               ? "border-transparent shadow-md"
-                              : "border-slate-100 bg-slate-50/50 text-slate-600 hover:border-orange-200"}`}
+                              : "border-slate-100 dark:border-slate-500/25 bg-slate-50/50 text-muted dark:text-body hover:border-accent/25"}`}
                         >
                           {form.tiffinMealType === o.value && (
                             <div className={`absolute inset-0 bg-gradient-to-br ${o.bg} opacity-10`} />
@@ -640,9 +640,9 @@ const VendorTiffinTab = ({ restaurant }) => {
                       rows={3}
                       placeholder="e.g. Fresh North Indian home-style meals — dal, sabzi, roti & rice, made with love daily"
                       className={
-                        "w-full resize-none rounded-2xl border-2 border-slate-100 bg-white/80 px-4 py-3.5 " +
-                        "text-sm font-semibold text-slate-800 outline-none transition-all placeholder:text-slate-400 " +
-                        "focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100/70 hover:border-orange-200"
+                        "w-full resize-none rounded-2xl border-2 border-slate-100 dark:border-slate-500/25 bg-card/80 px-4 py-3.5 " +
+                        "text-sm font-semibold text-slate-800 dark:text-body outline-none transition-all placeholder:text-muted " +
+                        "focus:border-orange-400 focus:bg-card focus:ring-4 focus:ring-accent/15 hover:border-accent/25"
                       }
                       value={form.tiffinDescription}
                       onChange={e => setField("tiffinDescription", e.target.value)}
@@ -653,14 +653,14 @@ const VendorTiffinTab = ({ restaurant }) => {
                 {/* ── SECTION 3: Weekly Menu ── */}
                 <div className="space-y-4">
                   <SectionHeader n="3" label="Weekly Menu" gradient="from-violet-500 to-purple-500" />
-                  <p className="text-xs font-medium leading-relaxed text-slate-500">
+                  <p className="text-xs font-medium leading-relaxed text-muted">
                     Customers see this on their tiffin card. Leave blank for flexible / surprise days.
                   </p>
 
                   <div className="space-y-2.5">
                     {DAYS.map((day, i) => (
                       <div key={day} className="flex items-center gap-3">
-                        <span className="w-8 shrink-0 text-[10px] font-black uppercase text-slate-400">
+                        <span className="w-8 shrink-0 text-[10px] font-black uppercase text-muted">
                           {day.slice(0, 3)}
                         </span>
                         <input
@@ -668,7 +668,7 @@ const VendorTiffinTab = ({ restaurant }) => {
                           placeholder="e.g. Dal Makhani, Rice, Roti"
                           className={
                             "flex-1 rounded-2xl border-2 px-4 py-2.5 text-sm font-semibold " +
-                            "text-slate-800 outline-none transition-all placeholder:text-slate-400 focus:ring-4 " +
+                            "text-slate-800 dark:text-body outline-none transition-all placeholder:text-muted focus:ring-4 " +
                             DAY_COLORS[i % DAY_COLORS.length]
                           }
                           value={form.tiffinWeeklyMenu?.[day] || ""}
@@ -682,11 +682,11 @@ const VendorTiffinTab = ({ restaurant }) => {
               </div>
 
               {/* Sticky save footer */}
-              <div className="border-t border-slate-100 bg-gradient-to-r from-slate-50 to-orange-50/40 px-6 py-4">
+              <div className="border-t border-slate-100 dark:border-slate-500/25 bg-gradient-to-r from-slate-50 to-orange-50/40 px-6 py-4 dark:bg-none dark:bg-raised">
                 <button
                   onClick={handleSave}
                   disabled={saving}
-                  className={`flex w-full items-center justify-center gap-2.5 rounded-2xl py-3.5 text-sm font-black text-white shadow-lg transition-all
+                  className={`flex w-full items-center justify-center gap-2.5 rounded-2xl py-3.5 text-sm font-black text-heading shadow-lg transition-all
                     ${saving
                       ? "cursor-not-allowed bg-slate-300 shadow-none"
                       : "bg-gradient-to-r from-orange-500 via-orange-600 to-rose-500 shadow-orange-200 hover:shadow-xl hover:shadow-orange-200/50 active:scale-[0.98]"}`}
@@ -695,7 +695,7 @@ const VendorTiffinTab = ({ restaurant }) => {
                     ? <><Spinner /> Saving & syncing to customers…</>
                     : <>Save & Go Live 🚀</>}
                 </button>
-                <p className="mt-2.5 text-center text-[10px] font-bold text-slate-400">
+                <p className="mt-2.5 text-center text-[10px] font-bold text-muted">
                   Saves to your profile · Customers see changes instantly via real-time sync
                 </p>
               </div>

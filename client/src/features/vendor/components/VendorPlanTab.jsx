@@ -16,12 +16,12 @@ const formatDate = (value) =>
 
 // Quota meter colours escalate as the free-order allowance runs down.
 const QUOTA_TONES = {
-  HEALTHY: { bar: "bg-emerald-500", text: "text-emerald-700", ring: "border-emerald-200", label: "On track" },
-  MODERATE: { bar: "bg-sky-500", text: "text-sky-700", ring: "border-sky-200", label: "Halfway" },
-  WARNING: { bar: "bg-amber-500", text: "text-amber-700", ring: "border-amber-200", label: "Running low" },
-  CRITICAL: { bar: "bg-orange-500", text: "text-orange-700", ring: "border-orange-200", label: "Almost finished" },
-  EXHAUSTED: { bar: "bg-rose-500", text: "text-rose-700", ring: "border-rose-200", label: "Quota finished" },
-  NONE: { bar: "bg-stone-300", text: "text-stone-500", ring: "border-stone-200", label: "No free orders" },
+  HEALTHY: { bar: "bg-emerald-500", text: "text-emerald-700 dark:text-emerald-300", ring: "border-emerald-200 dark:border-emerald-500/25", label: "On track" },
+  MODERATE: { bar: "bg-sky-500", text: "text-sky-700 dark:text-sky-300", ring: "border-sky-200 dark:border-sky-500/25", label: "Halfway" },
+  WARNING: { bar: "bg-amber-500", text: "text-amber-700 dark:text-amber-300", ring: "border-amber-200 dark:border-amber-500/25", label: "Running low" },
+  CRITICAL: { bar: "bg-orange-500", text: "text-accent-text", ring: "border-accent/25", label: "Almost finished" },
+  EXHAUSTED: { bar: "bg-rose-500", text: "text-rose-700 dark:text-rose-300", ring: "border-rose-200 dark:border-rose-500/25", label: "Quota finished" },
+  NONE: { bar: "bg-faint", text: "text-muted", ring: "border-line", label: "No free orders" },
 };
 
 const BADGE_STYLES = {
@@ -32,11 +32,11 @@ const BADGE_STYLES = {
 };
 
 const STATUS_TONES = {
-  ACTIVE: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  PENDING_PAYMENT: "border-amber-200 bg-amber-50 text-amber-700",
-  PAUSED: "border-sky-200 bg-sky-50 text-sky-700",
-  EXPIRED: "border-rose-200 bg-rose-50 text-rose-700",
-  CANCELLED: "border-stone-200 bg-stone-100 text-stone-600",
+  ACTIVE: "border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+  PENDING_PAYMENT: "border-amber-200 dark:border-amber-500/25 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  PAUSED: "border-sky-200 dark:border-sky-500/25 bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-300",
+  EXPIRED: "border-rose-200 dark:border-rose-500/25 bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300",
+  CANCELLED: "border-line bg-sunken text-body",
 };
 
 /** Horizontal quota meter used on the hero card. */
@@ -46,7 +46,7 @@ const QuotaMeter = ({ used, total, percent, state }) => {
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <p className="text-[11px] font-black uppercase tracking-widest text-stone-400">
+        <p className="text-[11px] font-black uppercase tracking-widest text-muted">
           Free commission quota
         </p>
         <p className={`text-[11px] font-black uppercase tracking-widest ${tone.text}`}>
@@ -54,7 +54,7 @@ const QuotaMeter = ({ used, total, percent, state }) => {
         </p>
       </div>
 
-      <div className="h-3 w-full overflow-hidden rounded-full bg-stone-100">
+      <div className="h-3 w-full overflow-hidden rounded-full bg-sunken">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(100, percent)}%` }}
@@ -63,7 +63,7 @@ const QuotaMeter = ({ used, total, percent, state }) => {
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-stone-600">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-body">
         <span>
           {used} / {total} orders used
         </span>
@@ -75,9 +75,9 @@ const QuotaMeter = ({ used, total, percent, state }) => {
 
 const StatTile = ({ label, value, hint, tone = "" }) => (
   <Panel className="p-4 sm:p-5">
-    <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">{label}</p>
-    <p className={`mt-2 text-xl font-black sm:text-2xl ${tone || "text-stone-950"}`}>{value}</p>
-    {hint ? <p className="mt-1 text-[11px] font-semibold text-stone-400">{hint}</p> : null}
+    <p className="text-[10px] font-black uppercase tracking-widest text-muted">{label}</p>
+    <p className={`mt-2 text-xl font-black sm:text-2xl ${tone || "text-heading"}`}>{value}</p>
+    {hint ? <p className="mt-1 text-[11px] font-semibold text-muted">{hint}</p> : null}
   </Panel>
 );
 
@@ -92,11 +92,11 @@ const PlanCard = ({ plan, isCurrent, onSelect, saving, disabled }) => {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="truncate text-lg font-black text-stone-950">{plan.name}</h3>
-          <p className="mt-1 text-2xl font-black text-stone-950">
+          <h3 className="truncate text-lg font-black text-heading">{plan.name}</h3>
+          <p className="mt-1 text-2xl font-black text-heading">
             {plan.price > 0 ? money(plan.price) : "Free"}
             {plan.price > 0 ? (
-              <span className="text-sm font-bold text-stone-400"> /month</span>
+              <span className="text-sm font-bold text-muted"> /month</span>
             ) : null}
           </p>
         </div>
@@ -109,30 +109,30 @@ const PlanCard = ({ plan, isCurrent, onSelect, saving, disabled }) => {
 
       {/* The two numbers that matter most, stated plainly. */}
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-3">
-          <p className="text-[9px] font-black uppercase tracking-widest text-emerald-700">
+        <div className="rounded-xl border border-emerald-100 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/10 p-3">
+          <p className="text-[9px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
             0% commission
           </p>
-          <p className="mt-1 text-lg font-black text-emerald-800">{plan.freeOrderQuota}</p>
-          <p className="text-[10px] font-bold text-emerald-600">orders / month</p>
+          <p className="mt-1 text-lg font-black text-emerald-800 dark:text-emerald-300">{plan.freeOrderQuota}</p>
+          <p className="text-[10px] font-bold text-emerald-600 dark:text-emerald-300">orders / month</p>
         </div>
-        <div className="rounded-xl border border-stone-200 bg-stone-50 p-3">
-          <p className="text-[9px] font-black uppercase tracking-widest text-stone-500">
+        <div className="rounded-xl border border-line bg-sunken p-3">
+          <p className="text-[9px] font-black uppercase tracking-widest text-muted">
             After that
           </p>
-          <p className="mt-1 text-lg font-black text-stone-900">{plan.commissionRate}%</p>
-          <p className="text-[10px] font-bold text-stone-400">commission</p>
+          <p className="mt-1 text-lg font-black text-heading">{plan.commissionRate}%</p>
+          <p className="text-[10px] font-bold text-muted">commission</p>
         </div>
       </div>
 
       {plan.description ? (
-        <p className="mt-4 text-sm font-semibold leading-snug text-stone-500">{plan.description}</p>
+        <p className="mt-4 text-sm font-semibold leading-snug text-muted">{plan.description}</p>
       ) : null}
 
-      <ul className="my-4 space-y-2 text-sm font-semibold text-stone-600">
+      <ul className="my-4 space-y-2 text-sm font-semibold text-body">
         {(plan.features || []).slice(0, 5).map((feature) => (
           <li key={feature} className="flex gap-2">
-            <span className="mt-0.5 flex-shrink-0 text-emerald-600">✓</span>
+            <span className="mt-0.5 flex-shrink-0 text-emerald-600 dark:text-emerald-300">✓</span>
             <span className="min-w-0">{feature}</span>
           </li>
         ))}
@@ -186,10 +186,10 @@ const VendorPlanTab = ({
   if (!state) {
     return (
       <div className="space-y-4">
-        <div className="h-40 animate-pulse rounded-2xl bg-stone-100" />
+        <div className="h-40 animate-pulse rounded-2xl bg-sunken" />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[0, 1, 2, 3].map((key) => (
-            <div key={key} className="h-28 animate-pulse rounded-2xl bg-stone-100" />
+            <div key={key} className="h-28 animate-pulse rounded-2xl bg-sunken" />
           ))}
         </div>
       </div>
@@ -213,8 +213,8 @@ const VendorPlanTab = ({
         <Panel tone="warning" className="p-4 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-sm font-black text-rose-800">Payment pending</p>
-              <p className="mt-1 text-sm font-semibold text-rose-700">
+              <p className="text-sm font-black text-rose-800 dark:text-rose-300">Payment pending</p>
+              <p className="mt-1 text-sm font-semibold text-rose-700 dark:text-rose-300">
                 Your {plan.name} activates once the payment of {money(plan.price)} is confirmed.
                 Until then the default commission applies.
               </p>
@@ -225,11 +225,11 @@ const VendorPlanTab = ({
 
       {expiry.expiringSoon && expiry.daysUntilExpiry !== null ? (
         <Panel tone="warning" className="p-4 sm:p-5">
-          <p className="text-sm font-black text-rose-800">
+          <p className="text-sm font-black text-rose-800 dark:text-rose-300">
             Your {plan.name} expires in {expiry.daysUntilExpiry} day
             {expiry.daysUntilExpiry === 1 ? "" : "s"}
           </p>
-          <p className="mt-1 text-sm font-semibold text-rose-700">
+          <p className="mt-1 text-sm font-semibold text-rose-700 dark:text-rose-300">
             Renew now to continue receiving 0% commission orders.
           </p>
         </Panel>
@@ -240,13 +240,13 @@ const VendorPlanTab = ({
         <Panel tone="urgent" className="p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-[11px] font-black uppercase tracking-widest text-orange-600">
+              <p className="text-[11px] font-black uppercase tracking-widest text-accent">
                 Current plan
               </p>
-              <h2 className="mt-2 break-words text-2xl font-black text-stone-950 sm:text-3xl">
+              <h2 className="mt-2 break-words text-2xl font-black text-heading sm:text-3xl">
                 {plan.name}
               </h2>
-              <p className="mt-1 text-lg font-black text-stone-700">
+              <p className="mt-1 text-lg font-black text-body">
                 {plan.price > 0 ? `${money(plan.price)} / month` : "No monthly fee"}
               </p>
             </div>
@@ -263,15 +263,15 @@ const VendorPlanTab = ({
             >
               {formatStatusLabel(subscription.status)}
             </span>
-            <span className="rounded-xl border border-orange-200 bg-white px-3 py-2 text-xs font-black text-stone-700">
+            <span className="rounded-xl border border-accent/25 bg-card px-3 py-2 text-xs font-black text-body">
               {plan.commissionRate}% after quota
             </span>
             {subscription.commissionRateOverride !== null ? (
-              <span className="rounded-xl border border-violet-200 bg-violet-50 px-3 py-2 text-xs font-black text-violet-700">
+              <span className="rounded-xl border border-violet-200 dark:border-violet-500/25 bg-violet-50 dark:bg-violet-500/10 px-3 py-2 text-xs font-black text-violet-700 dark:text-violet-300">
                 Custom rate
               </span>
             ) : null}
-            <span className="rounded-xl border border-orange-200 bg-white px-3 py-2 text-xs font-black text-stone-500">
+            <span className="rounded-xl border border-accent/25 bg-card px-3 py-2 text-xs font-black text-muted">
               Renews {formatDate(expiry.expiresAt)}
             </span>
           </div>
@@ -289,28 +289,28 @@ const VendorPlanTab = ({
         {/* Remaining-orders focal card */}
         <Panel tone="positive" className="flex flex-col justify-between p-5 sm:p-6">
           <div>
-            <p className="text-[11px] font-black uppercase tracking-widest text-emerald-700">
+            <p className="text-[11px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-300">
               Orders left at 0% commission
             </p>
-            <p className="mt-2 text-5xl font-black text-stone-950 sm:text-6xl">{quota.remaining}</p>
-            <p className="mt-1 text-sm font-bold text-stone-500">
+            <p className="mt-2 text-5xl font-black text-heading sm:text-6xl">{quota.remaining}</p>
+            <p className="mt-1 text-sm font-bold text-muted">
               of {quota.total} this cycle
               {quota.bonus > 0 ? ` (includes ${quota.bonus} bonus)` : ""}
             </p>
           </div>
 
-          <div className="mt-5 grid grid-cols-2 gap-3 border-t border-emerald-200 pt-4">
+          <div className="mt-5 grid grid-cols-2 gap-3 border-t border-emerald-200 dark:border-emerald-500/25 pt-4">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted">
                 Cycle ends
               </p>
-              <p className="mt-1 text-sm font-black text-stone-800">{formatDate(cycle.end)}</p>
+              <p className="mt-1 text-sm font-black text-heading">{formatDate(cycle.end)}</p>
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted">
                 Days left
               </p>
-              <p className="mt-1 text-sm font-black text-stone-800">{cycle.daysRemaining ?? "—"}</p>
+              <p className="mt-1 text-sm font-black text-heading">{cycle.daysRemaining ?? "—"}</p>
             </div>
           </div>
         </Panel>
@@ -333,7 +333,7 @@ const VendorPlanTab = ({
           label="Saved by your plan"
           value={money(usage.savedThisCycle)}
           hint="Commission avoided on free orders"
-          tone="text-emerald-600"
+          tone="text-emerald-600 dark:text-emerald-300"
         />
       </div>
 
@@ -346,8 +346,8 @@ const VendorPlanTab = ({
       {/* ── Plan cards ─────────────────────────────────────────────────────── */}
       <div>
         <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-          <h3 className="text-lg font-black text-stone-950">Available plans</h3>
-          <p className="text-xs font-bold text-stone-400">
+          <h3 className="text-lg font-black text-heading">Available plans</h3>
+          <p className="text-xs font-bold text-muted">
             Pay monthly → get 0% commission orders → pay commission only after that
           </p>
         </div>
@@ -377,26 +377,26 @@ const VendorPlanTab = ({
       {/* ── Comparison table: scrolls inside its own container on small screens ── */}
       {sortedPlans.length > 1 ? (
         <Panel className="p-0">
-          <div className="border-b border-[#eee7dc] px-5 py-4">
-            <h3 className="text-base font-black text-stone-950">Compare plans</h3>
+          <div className="border-b border-line px-5 py-4">
+            <h3 className="text-base font-black text-heading">Compare plans</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[560px] text-left text-sm">
               <thead>
-                <tr className="border-b border-[#eee7dc] bg-stone-50/60">
-                  <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-stone-400">
+                <tr className="border-b border-line bg-sunken/60">
+                  <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-muted">
                     Plan
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-stone-400">
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted">
                     Monthly
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-stone-400">
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted">
                     0% orders
                   </th>
-                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-stone-400">
+                  <th className="px-4 py-3 text-[10px] font-black uppercase tracking-widest text-muted">
                     After quota
                   </th>
-                  <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-stone-400">
+                  <th className="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-muted">
                     Status
                   </th>
                 </tr>
@@ -407,18 +407,18 @@ const VendorPlanTab = ({
                   return (
                     <tr
                       key={option._id}
-                      className={`border-b border-[#f5f1ea] last:border-0 ${
-                        isCurrent ? "bg-orange-50/60" : ""
+                      className={`border-b border-line last:border-0 ${
+                        isCurrent ? "bg-accent-soft/60" : ""
                       }`}
                     >
-                      <td className="px-5 py-3 font-black text-stone-900">{option.name}</td>
-                      <td className="px-4 py-3 font-bold text-stone-700">
+                      <td className="px-5 py-3 font-black text-heading">{option.name}</td>
+                      <td className="px-4 py-3 font-bold text-body">
                         {option.price > 0 ? money(option.price) : "Free"}
                       </td>
-                      <td className="px-4 py-3 font-bold text-emerald-700">
+                      <td className="px-4 py-3 font-bold text-emerald-700 dark:text-emerald-300">
                         {option.freeOrderQuota}
                       </td>
-                      <td className="px-4 py-3 font-bold text-stone-700">
+                      <td className="px-4 py-3 font-bold text-body">
                         {option.commissionRate}%
                       </td>
                       <td className="px-5 py-3">
@@ -427,7 +427,7 @@ const VendorPlanTab = ({
                             Current
                           </span>
                         ) : (
-                          <span className="text-[10px] font-black uppercase tracking-widest text-stone-400">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-muted">
                             {option.changeType === "UPGRADE" ? "Upgrade" : "Downgrade"}
                           </span>
                         )}
@@ -448,28 +448,28 @@ const VendorPlanTab = ({
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.18 }}
-            className="w-full max-w-md rounded-t-3xl border border-[#eee7dc] bg-white p-6 shadow-2xl sm:rounded-3xl"
+            className="w-full max-w-md rounded-t-3xl border border-line bg-card p-6 shadow-2xl sm:rounded-3xl"
           >
-            <h3 className="text-xl font-black text-stone-950">Switch to {confirmPlan.name}?</h3>
+            <h3 className="text-xl font-black text-heading">Switch to {confirmPlan.name}?</h3>
 
-            <div className="mt-4 space-y-2 rounded-2xl bg-stone-50 p-4 text-sm font-semibold text-stone-600">
+            <div className="mt-4 space-y-2 rounded-2xl bg-sunken p-4 text-sm font-semibold text-body">
               <div className="flex justify-between gap-3">
                 <span>Monthly fee</span>
-                <span className="font-black text-stone-900">
+                <span className="font-black text-heading">
                   {confirmPlan.price > 0 ? money(confirmPlan.price) : "Free"}
                 </span>
               </div>
               <div className="flex justify-between gap-3">
                 <span>Orders at 0% commission</span>
-                <span className="font-black text-emerald-700">{confirmPlan.freeOrderQuota}</span>
+                <span className="font-black text-emerald-700 dark:text-emerald-300">{confirmPlan.freeOrderQuota}</span>
               </div>
               <div className="flex justify-between gap-3">
                 <span>Commission after quota</span>
-                <span className="font-black text-stone-900">{confirmPlan.commissionRate}%</span>
+                <span className="font-black text-heading">{confirmPlan.commissionRate}%</span>
               </div>
             </div>
 
-            <p className="mt-3 text-xs font-semibold leading-relaxed text-stone-500">
+            <p className="mt-3 text-xs font-semibold leading-relaxed text-muted">
               {confirmPlan.price > 0
                 ? "A new billing cycle starts once your payment is confirmed. Orders already placed keep their original commission."
                 : "This starts a new billing cycle immediately. Orders already placed keep their original commission."}

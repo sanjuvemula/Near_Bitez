@@ -5,17 +5,100 @@
 @tailwind utilities;
 
 @layer base {
+  /**
+   * Theme tokens. Light is the default; `.dark` on <html> swaps the palette.
+   * Values are space-separated RGB channels so Tailwind can apply opacity.
+   */
+  /**
+   * Light: a warm sand base rather than white, so large surfaces don't glare.
+   * Cards stay near-white to keep the page/card separation readable.
+   */
+  :root {
+    --nb-page: 248 245 240;
+    --nb-card: 255 253 251;
+    --nb-raised: 255 255 255;
+    --nb-sunken: 243 239 233;
+    --nb-line: 234 228 219;
+    --nb-line-strong: 216 208 196;
+    --nb-heading: 35 31 28;
+    --nb-body: 84 78 72;
+    --nb-muted: 132 124 116;
+    --nb-faint: 176 168 159;
+    --nb-accent: 234 88 12;
+    --nb-accent-soft: 254 243 232;
+    --nb-accent-text: 180 60 10;
+
+    /* Ambient mesh: four low-opacity hues that tint the page without
+       competing with content. Warm on top, cool along the bottom. */
+    --nb-glow-a: rgba(251, 146, 60, 0.28);
+    --nb-glow-b: rgba(236, 72, 153, 0.20);
+    --nb-glow-c: rgba(56, 189, 248, 0.19);
+    --nb-glow-d: rgba(52, 211, 153, 0.17);
+    --nb-glow-e: rgba(139, 92, 246, 0.14);
+    --nb-page-gradient: linear-gradient(165deg, #fffcf8 0%, #f9f4ed 45%, #f2eee7 100%);
+  }
+
+  /**
+   * Dark: warm-tinted charcoal, lifted well off pure black. Each step up the
+   * depth ladder is a clear ~6 RGB points so surfaces separate without borders.
+   */
+  .dark {
+    --nb-page: 24 22 27;
+    --nb-card: 33 30 37;
+    --nb-raised: 42 38 47;
+    --nb-sunken: 29 27 33;
+    --nb-line: 56 51 62;
+    --nb-line-strong: 76 70 84;
+    --nb-heading: 250 249 250;
+    --nb-body: 209 204 213;
+    --nb-muted: 158 152 165;
+    --nb-faint: 116 110 124;
+    --nb-accent: 251 133 46;
+    --nb-accent-soft: 58 38 25;
+    --nb-accent-text: 253 195 133;
+
+    /* Same mesh, pushed brighter so the hues survive on a dark base — this is
+       what keeps the page from reading as flat black. */
+    --nb-glow-a: rgba(251, 146, 60, 0.24);
+    --nb-glow-b: rgba(168, 85, 247, 0.26);
+    --nb-glow-c: rgba(56, 189, 248, 0.20);
+    --nb-glow-d: rgba(16, 185, 129, 0.16);
+    --nb-glow-e: rgba(244, 63, 94, 0.15);
+    --nb-page-gradient: linear-gradient(165deg, #221e2a 0%, #1b1822 55%, #16141a 100%);
+  }
+
   html {
     scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-surface font-sans text-gray-900 antialiased selection:bg-brand-100 selection:text-brand-900;
-    background-image:
-      radial-gradient(circle at top left, rgba(251, 146, 60, 0.1), transparent 22%),
-      radial-gradient(circle at top right, rgba(244, 63, 94, 0.06), transparent 18%),
-      linear-gradient(180deg, #fffaf5 0%, #f8f5f2 100%);
+    @apply bg-page font-sans text-body antialiased selection:bg-brand-100 selection:text-brand-900;
     min-height: 100vh;
+    /* Decorative gradients must never widen the page */
+    overflow-x: hidden;
+    /**
+     * Ambient colour mesh: four soft hue pools over the base gradient.
+     *
+     * Layered directly on the background rather than a pseudo-element — a
+     * negative z-index child would paint behind body's own background and
+     * never show. `fixed` attachment keeps the composition still while the
+     * page scrolls, and vmax sizing keeps it proportional from phone to
+     * ultrawide without ever adding scroll.
+     */
+    background-image:
+      radial-gradient(70vmax 55vmax at 8% -8%, var(--nb-glow-a), transparent 60%),
+      radial-gradient(60vmax 50vmax at 95% 0%, var(--nb-glow-b), transparent 58%),
+      radial-gradient(65vmax 55vmax at 100% 92%, var(--nb-glow-c), transparent 60%),
+      radial-gradient(55vmax 45vmax at -5% 100%, var(--nb-glow-d), transparent 58%),
+      radial-gradient(50vmax 40vmax at 50% 45%, var(--nb-glow-e), transparent 62%),
+      var(--nb-page-gradient);
+    background-attachment: fixed, fixed, fixed, fixed, fixed, fixed;
+    background-repeat: no-repeat;
+    transition: background-color 0.2s ease;
+  }
+
+  .dark body {
+    @apply selection:bg-brand-900 selection:text-brand-100;
   }
 
   ::view-transition-group(*),
@@ -44,6 +127,34 @@
     border-radius: 999px;
     background: linear-gradient(180deg, rgba(251, 146, 60, 0.65), rgba(239, 68, 68, 0.55));
     background-clip: padding-box;
+  }
+
+  /* Native controls (date pickers, dropdown arrows) follow the theme */
+  .dark {
+    color-scheme: dark;
+  }
+
+  /**
+   * Strength of the per-section colour wash. Dark needs a touch more to read
+   * against charcoal; both stay low enough to never fight the content.
+   */
+  :root {
+    --nb-section-alpha: 0.18;
+  }
+
+  .dark {
+    --nb-section-alpha: 0.24;
+  }
+}
+
+@layer components {
+  /**
+   * Soft ambient glow used behind key surfaces. Positioned absolutely by the
+   * caller and always paired with overflow-hidden so it cannot cause scroll.
+   */
+  .nb-glow {
+    @apply pointer-events-none absolute rounded-full blur-3xl;
+    background: radial-gradient(circle, var(--nb-glow-a), transparent 70%);
   }
 }
 

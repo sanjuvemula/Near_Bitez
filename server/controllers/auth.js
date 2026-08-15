@@ -24,6 +24,11 @@ const sendAuthResponse = async (user, statusCode, req, res, message) => {
     success: true,
     message,
     user: user.toSafeObject(),
+    // Also returned in the body for native clients. React Native has no cookie
+    // jar, so the mobile app stores this and sends it as `Authorization:
+    // Bearer <token>`, which protect() already accepts. The cookie above is
+    // unchanged, so the web app keeps working exactly as before.
+    token,
   });
 };
 

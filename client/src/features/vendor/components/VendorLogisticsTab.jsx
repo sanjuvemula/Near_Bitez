@@ -58,13 +58,13 @@ const StatCard = ({ label, value, sub, accent }) => (
 const TealInput = ({ label, hint, prefix, ...props }) => (
   <label className="block">
     <div className="flex justify-between mb-1.5">
-      <span className="text-[11px] font-black uppercase tracking-widest text-teal-700">{label}</span>
+      <span className="text-[11px] font-black uppercase tracking-widest text-teal-700 dark:text-teal-300">{label}</span>
       {hint && <span className="text-[10px] text-teal-400">{hint}</span>}
     </div>
     <div className="relative">
       {prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-black text-teal-500">{prefix}</span>}
       <input
-        className={`w-full rounded-xl border border-teal-200 bg-white ${prefix ? "pl-8" : "pl-4"} pr-4 py-3 text-sm font-semibold text-zinc-800 outline-none transition focus:border-teal-400 focus:ring-3 focus:ring-teal-100 placeholder:text-zinc-300`}
+        className={`w-full rounded-xl border border-teal-200 dark:border-teal-500/25 bg-card ${prefix ? "pl-8" : "pl-4"} pr-4 py-3 text-sm font-semibold text-heading outline-none transition focus:border-teal-400 focus:ring-3 focus:ring-teal-100 placeholder:text-faint`}
         {...props}
       />
     </div>
@@ -134,8 +134,7 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
 
   return (
     <div
-      className="min-h-screen rounded-3xl p-6 md:p-8"
-      style={{ background: "linear-gradient(135deg, #f0fdfa 0%, #e6fffa 40%, #ccfbf1 100%)" }}
+      className="min-h-screen rounded-3xl bg-[linear-gradient(135deg,#f0fdfa_0%,#e6fffa_40%,#ccfbf1_100%)] p-6 dark:bg-none dark:bg-page md:p-8"
     >
       {/* ── Header ── */}
       <div className="mb-8 flex items-start justify-between gap-4 flex-wrap">
@@ -144,14 +143,14 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
             <span className="text-2xl">🛵</span>
             <h1 className="text-3xl font-black text-teal-900 tracking-tight">Delivery Zones</h1>
           </div>
-          <p className="text-sm font-semibold text-teal-600">
+          <p className="text-sm font-semibold text-teal-600 dark:text-teal-300">
             Set your coverage area · Define delivery fees · Distance-based pricing
           </p>
         </div>
         <div className="flex gap-3 flex-wrap">
-          <StatCard label="Radius" value={`${totalRadius} km`} accent="border-teal-200 bg-teal-50 text-teal-800" />
-          <StatCard label="Base Fee" value={`₹${form.baseDeliveryFee}`} sub={`Free >${form.freeDeliveryAbove}`} accent="border-emerald-200 bg-emerald-50 text-emerald-800" />
-          <StatCard label="Tiers" value={form.extraTiers?.length || 0} sub="extra zones" accent="border-cyan-200 bg-cyan-50 text-cyan-800" />
+          <StatCard label="Radius" value={`${totalRadius} km`} accent="border-teal-200 dark:border-teal-500/25 bg-teal-50 dark:bg-teal-500/10 text-teal-800 dark:text-teal-300" />
+          <StatCard label="Base Fee" value={`₹${form.baseDeliveryFee}`} sub={`Free >${form.freeDeliveryAbove}`} accent="border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300" />
+          <StatCard label="Tiers" value={form.extraTiers?.length || 0} sub="extra zones" accent="border-cyan-200 dark:border-cyan-500/25 bg-cyan-50 dark:bg-cyan-500/10 text-cyan-800 dark:text-cyan-300" />
         </div>
       </div>
 
@@ -161,9 +160,9 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
         <div className="space-y-5">
 
           {/* Location */}
-          <div className="rounded-2xl border border-teal-200 bg-white shadow-[0_8px_32px_-8px_rgba(20,184,166,0.2)] overflow-hidden">
+          <div className="rounded-2xl border border-teal-200 dark:border-teal-500/25 bg-card shadow-[0_8px_32px_-8px_rgba(20,184,166,0.2)] overflow-hidden">
             <div className="bg-gradient-to-r from-teal-500 to-emerald-500 px-6 py-4">
-              <h2 className="text-lg font-black text-white">📍 Restaurant Location</h2>
+              <h2 className="text-lg font-black text-heading">📍 Restaurant Location</h2>
               <p className="text-sm text-teal-100 mt-0.5">Pin your exact location on the map</p>
             </div>
             <div className="p-5 space-y-3">
@@ -176,7 +175,7 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
                 whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }}
                 onClick={getMyLocation}
                 disabled={locating}
-                className="w-full rounded-xl border-2 border-dashed border-teal-300 bg-teal-50 py-3 text-sm font-black text-teal-600 hover:bg-teal-100 transition-colors disabled:opacity-50"
+                className="w-full rounded-xl border-2 border-dashed border-teal-300 bg-teal-50 dark:bg-teal-500/10 py-3 text-sm font-black text-teal-600 dark:text-teal-300 hover:bg-teal-100 dark:bg-teal-500/15 transition-colors disabled:opacity-50"
               >
                 {locating ? (
                   <span className="flex items-center justify-center gap-2">
@@ -192,20 +191,20 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
           </div>
 
           {/* Coverage & Fees */}
-          <div className="rounded-2xl border border-teal-200 bg-white shadow-[0_8px_32px_-8px_rgba(20,184,166,0.15)] p-5 space-y-5">
-            <h2 className="text-sm font-black uppercase tracking-widest text-teal-700">Coverage & Fees</h2>
+          <div className="rounded-2xl border border-teal-200 dark:border-teal-500/25 bg-card shadow-[0_8px_32px_-8px_rgba(20,184,166,0.15)] p-5 space-y-5">
+            <h2 className="text-sm font-black uppercase tracking-widest text-teal-700 dark:text-teal-300">Coverage & Fees</h2>
 
             <div>
               <div className="flex justify-between items-center mb-2">
-                <span className="text-[11px] font-black uppercase tracking-widest text-teal-700">Coverage Radius</span>
-                <span className="text-lg font-black text-teal-600">{form.deliveryRadiusKm} km</span>
+                <span className="text-[11px] font-black uppercase tracking-widest text-teal-700 dark:text-teal-300">Coverage Radius</span>
+                <span className="text-lg font-black text-teal-600 dark:text-teal-300">{form.deliveryRadiusKm} km</span>
               </div>
               <input
                 type="range" min="1" max="25" step="0.5"
                 value={form.deliveryRadiusKm}
                 onChange={e => setForm(f => ({ ...f, deliveryRadiusKm: parseFloat(e.target.value) }))}
                 className="w-full h-2 rounded-lg appearance-none cursor-pointer accent-teal-500"
-                style={{ background: `linear-gradient(to right, #14b8a6 0%, #14b8a6 ${(form.deliveryRadiusKm / 25) * 100}%, #d1fae5 ${(form.deliveryRadiusKm / 25) * 100}%, #d1fae5 100%)` }}
+                style={{ background: `linear-gradient(to right, #14b8a6 0%, #14b8a6 ${(form.deliveryRadiusKm / 25) * 100}%, rgb(var(--nb-line)) ${(form.deliveryRadiusKm / 25) * 100}%, rgb(var(--nb-line)) 100%)` }}
               />
               <div className="flex justify-between text-[10px] font-bold text-teal-300 mt-1">
                 <span>1 km</span><span>25 km</span>
@@ -218,29 +217,29 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
             </div>
 
             {/* Self delivery toggle */}
-            <label className="flex items-center justify-between rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 cursor-pointer">
+            <label className="flex items-center justify-between rounded-xl border border-teal-200 dark:border-teal-500/25 bg-teal-50 dark:bg-teal-500/10 px-4 py-3 cursor-pointer">
               <div>
-                <p className="text-sm font-black text-teal-800">Self Delivery</p>
+                <p className="text-sm font-black text-teal-800 dark:text-teal-300">Self Delivery</p>
                 <p className="text-xs font-semibold text-teal-500">Your own delivery team</p>
               </div>
               <div
                 onClick={() => setForm(f => ({ ...f, isSelfDelivery: !f.isSelfDelivery }))}
-                className={`relative h-7 w-12 rounded-full border transition-colors duration-200 cursor-pointer ${form.isSelfDelivery ? "bg-teal-500 border-teal-400" : "bg-zinc-200 border-zinc-300"}`}
+                className={`relative h-7 w-12 rounded-full border transition-colors duration-200 cursor-pointer ${form.isSelfDelivery ? "bg-teal-500 border-teal-400" : "bg-sunken border-line-strong"}`}
               >
                 <motion.div
                   layout
                   transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow ${form.isSelfDelivery ? "right-1" : "left-1"}`}
+                  className={`absolute top-1 h-5 w-5 rounded-full bg-card shadow ${form.isSelfDelivery ? "right-1" : "left-1"}`}
                 />
               </div>
             </label>
           </div>
 
           {/* Distance Tiers */}
-          <div className="rounded-2xl border border-teal-200 bg-white shadow-[0_8px_32px_-8px_rgba(20,184,166,0.15)] overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-teal-100">
+          <div className="rounded-2xl border border-teal-200 dark:border-teal-500/25 bg-card shadow-[0_8px_32px_-8px_rgba(20,184,166,0.15)] overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-teal-100 dark:border-teal-500/25">
               <div>
-                <h2 className="text-sm font-black uppercase tracking-widest text-teal-700">Extra Distance Charges</h2>
+                <h2 className="text-sm font-black uppercase tracking-widest text-teal-700 dark:text-teal-300">Extra Distance Charges</h2>
                 <p className="text-xs font-semibold text-teal-400 mt-0.5">Charge more for farther deliveries</p>
               </div>
               <motion.button
@@ -257,7 +256,7 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
                 {showTierForm && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}
-                    className="rounded-xl border border-dashed border-teal-300 bg-teal-50 p-4 space-y-3 mb-3"
+                    className="rounded-xl border border-dashed border-teal-300 bg-teal-50 dark:bg-teal-500/10 p-4 space-y-3 mb-3"
                   >
                     <p className="text-[10px] font-black uppercase tracking-widest text-teal-500">New Tier</p>
                     <div className="grid grid-cols-3 gap-2">
@@ -281,12 +280,12 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
                   <motion.div
                     key={idx} layout
                     initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center justify-between rounded-xl border border-teal-100 bg-teal-50 px-4 py-3"
+                    className="flex items-center justify-between rounded-xl border border-teal-100 dark:border-teal-500/25 bg-teal-50 dark:bg-teal-500/10 px-4 py-3"
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-lg">📍</span>
                       <div>
-                        <p className="text-sm font-black text-teal-800">{tier.fromKm}–{tier.toKm} km</p>
+                        <p className="text-sm font-black text-teal-800 dark:text-teal-300">{tier.fromKm}–{tier.toKm} km</p>
                         <p className="text-xs font-semibold text-teal-500">+₹{tier.extraCharge} extra</p>
                       </div>
                     </div>
@@ -313,8 +312,8 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
           </motion.button>
 
           {/* Info box */}
-          <div className="rounded-2xl border border-teal-200 bg-teal-50 p-4">
-            <p className="text-xs font-black text-teal-700 mb-2">ℹ️ How it works</p>
+          <div className="rounded-2xl border border-teal-200 dark:border-teal-500/25 bg-teal-50 dark:bg-teal-500/10 p-4">
+            <p className="text-xs font-black text-teal-700 dark:text-teal-300 mb-2">ℹ️ How it works</p>
             <ul className="space-y-1">
               {[
                 `Customers beyond ${form.deliveryRadiusKm} km won't see your restaurant`,
@@ -322,7 +321,7 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
                 "Distance tiers add extra charges based on delivery distance",
                 `Orders above ₹${form.freeDeliveryAbove} get free delivery`,
               ].map(tip => (
-                <li key={tip} className="text-[11px] font-semibold text-teal-600 flex items-start gap-1.5">
+                <li key={tip} className="text-[11px] font-semibold text-teal-600 dark:text-teal-300 flex items-start gap-1.5">
                   <span className="text-teal-400 mt-0.5">✓</span> {tip}
                 </li>
               ))}
@@ -331,18 +330,18 @@ const VendorLogisticsTab = ({ restaurant, logistics, saveLogistics, savingLogist
         </div>
 
         {/* ── RIGHT: MAP ── */}
-        <div className="rounded-2xl overflow-hidden border border-teal-200 shadow-[0_12px_40px_-8px_rgba(20,184,166,0.2)] relative" style={{ minHeight: "600px" }}>
+        <div className="rounded-2xl overflow-hidden border border-teal-200 dark:border-teal-500/25 shadow-[0_12px_40px_-8px_rgba(20,184,166,0.2)] relative" style={{ minHeight: "600px" }}>
           {/* Map overlay label */}
-          <div className="absolute top-4 left-4 z-[400] bg-white/90 backdrop-blur-md px-4 py-2 rounded-xl border border-teal-200 shadow pointer-events-none">
-            <p className="text-xs font-black text-teal-700 flex items-center gap-2">
+          <div className="absolute top-4 left-4 z-[400] bg-card/90 backdrop-blur-md px-4 py-2 rounded-xl border border-teal-200 dark:border-teal-500/25 shadow pointer-events-none">
+            <p className="text-xs font-black text-teal-700 dark:text-teal-300 flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-teal-500 animate-pulse inline-block" />
               Live Zone Mapping
             </p>
           </div>
 
           {/* Coordinate display */}
-          <div className="absolute bottom-4 left-4 z-[400] bg-white/90 backdrop-blur-md px-3 py-2 rounded-xl border border-teal-200 shadow pointer-events-none">
-            <p className="text-[10px] font-black text-teal-600">
+          <div className="absolute bottom-4 left-4 z-[400] bg-card/90 backdrop-blur-md px-3 py-2 rounded-xl border border-teal-200 dark:border-teal-500/25 shadow pointer-events-none">
+            <p className="text-[10px] font-black text-teal-600 dark:text-teal-300">
               {mapLocation.lat.toFixed(4)}, {mapLocation.lng.toFixed(4)}
             </p>
           </div>

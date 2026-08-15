@@ -3,19 +3,26 @@ import { ORDER_STAGES } from "../vendorShared.js";
 
 const fastSpring = { type: "spring", stiffness: 600, damping: 35 };
 
+/**
+ * Panel tones.
+ *
+ * Both themes carry the tone's hue. Dark mode uses a translucent colour wash
+ * layered over the card surface instead of the light pastel gradients, which
+ * would turn muddy on charcoal.
+ */
 const panelStyles = {
   neutral:
-    "border-[#eee7dc] bg-white/95 shadow-[0_26px_60px_-42px_rgba(15,23,42,0.28)]",
+    "border-line bg-card/95 shadow-[0_26px_60px_-42px_rgba(15,23,42,0.28)] dark:bg-card dark:shadow-[0_20px_50px_-40px_rgba(0,0,0,0.75)]",
   urgent:
-    "border-orange-200 bg-[linear-gradient(135deg,#fff7ed,#ffedd5_58%,#fffaf5)] shadow-[0_26px_60px_-42px_rgba(249,115,22,0.28)]",
+    "border-accent/25 bg-[linear-gradient(135deg,#fff7ed,#ffedd5_58%,#fffaf5)] shadow-[0_26px_60px_-42px_rgba(249,115,22,0.28)] dark:border-accent/30 dark:bg-[linear-gradient(135deg,rgba(249,115,22,0.16),rgba(236,72,153,0.08)_58%,rgba(42,38,47,0.6))]",
   positive:
-    "border-emerald-200 bg-[linear-gradient(135deg,#f0fdf4,#dcfce7_58%,#f7fee7)]",
+    "border-emerald-200 bg-[linear-gradient(135deg,#f0fdf4,#dcfce7_58%,#f7fee7)] dark:border-emerald-500/30 dark:bg-[linear-gradient(135deg,rgba(16,185,129,0.17),rgba(56,189,248,0.08)_58%,rgba(42,38,47,0.6))]",
   warning:
-    "border-rose-200 bg-[linear-gradient(135deg,#fff1f2,#ffe4e6_58%,#fff7ed)]",
+    "border-rose-200 bg-[linear-gradient(135deg,#fff1f2,#ffe4e6_58%,#fff7ed)] dark:border-rose-500/30 dark:bg-[linear-gradient(135deg,rgba(244,63,94,0.17),rgba(249,115,22,0.08)_58%,rgba(42,38,47,0.6))]",
   info:
-    "border-sky-200 bg-[linear-gradient(135deg,#eff6ff,#dbeafe_58%,#f8fafc)]",
+    "border-sky-200 bg-[linear-gradient(135deg,#eff6ff,#dbeafe_58%,#f8fafc)] dark:border-sky-500/30 dark:bg-[linear-gradient(135deg,rgba(56,189,248,0.17),rgba(168,85,247,0.08)_58%,rgba(42,38,47,0.6))]",
   dark:
-    "border-[#eee7dc] bg-[linear-gradient(180deg,#ffffff,#fffaf5)] shadow-[0_26px_60px_-42px_rgba(15,23,42,0.28)]",
+    "border-line bg-[linear-gradient(180deg,#ffffff,#fffaf5)] shadow-[0_26px_60px_-42px_rgba(15,23,42,0.28)] dark:bg-none dark:bg-card dark:shadow-[0_20px_50px_-40px_rgba(0,0,0,0.75)]",
 };
 
 export const Panel = ({
@@ -29,6 +36,8 @@ export const Panel = ({
     whileHover={interactive ? { y: -2 } : undefined}
     className={`relative overflow-hidden rounded-2xl border transition-colors duration-150 ${panelStyles[tone]} ${className}`}
   >
+    {/* Hairline highlight along the top edge reads as a lit surface */}
+    <span className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent dark:via-white/10" />
     <div className="relative z-10">{children}</div>
   </motion.section>
 );
@@ -41,8 +50,8 @@ export const VendorButton = ({
   ...props
 }) => {
   const tones = {
-    primary: "border-transparent bg-orange-600 text-white hover:bg-orange-700",
-    secondary: "border-[#e7ddd0] bg-white text-stone-700 hover:bg-orange-50",
+    primary: "border-transparent bg-accent text-white shadow-sm hover:brightness-110",
+    secondary: "border-line-strong bg-card text-body hover:bg-accent-soft hover:border-accent/30",
     success: "border-transparent bg-emerald-500 text-white hover:bg-emerald-600",
     danger: "border-transparent bg-rose-500 text-white hover:bg-rose-600",
     info: "border-transparent bg-sky-500 text-white hover:bg-sky-600",
@@ -72,19 +81,19 @@ export const VendorButton = ({
 export const LiveBadge = ({ label, accent = "orange" }) => {
   const colors = {
     orange: {
-      pill: "border-orange-200 bg-orange-50 text-orange-700",
+      pill: "border-accent/25 bg-accent-soft text-accent-text",
       dot: "bg-orange-500",
     },
     green: {
-      pill: "border-emerald-200 bg-emerald-50 text-emerald-700",
+      pill: "border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
       dot: "bg-emerald-500",
     },
     red: {
-      pill: "border-rose-200 bg-rose-50 text-rose-700",
+      pill: "border-rose-200 dark:border-rose-500/25 bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300",
       dot: "bg-rose-500",
     },
     cyan: {
-      pill: "border-cyan-200 bg-cyan-50 text-cyan-700",
+      pill: "border-cyan-200 dark:border-cyan-500/25 bg-cyan-50 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300",
       dot: "bg-cyan-500",
     },
   };
@@ -102,13 +111,13 @@ export const LiveBadge = ({ label, accent = "orange" }) => {
 
 export const StatusBadge = ({ status }) => {
   const colors = {
-    PLACED: "border-amber-200 bg-amber-50 text-amber-700",
-    ACCEPTED: "border-sky-200 bg-sky-50 text-sky-700",
-    PREPARING: "border-orange-200 bg-orange-50 text-orange-700",
-    READY: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    OUT_FOR_DELIVERY: "border-indigo-200 bg-indigo-50 text-indigo-700",
-    DELIVERED: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    REJECTED: "border-rose-200 bg-rose-50 text-rose-700",
+    PLACED: "border-amber-200 dark:border-amber-500/25 bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300",
+    ACCEPTED: "border-sky-200 dark:border-sky-500/25 bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-300",
+    PREPARING: "border-accent/25 bg-accent-soft text-accent-text",
+    READY: "border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    OUT_FOR_DELIVERY: "border-indigo-200 dark:border-indigo-500/25 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300",
+    DELIVERED: "border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    REJECTED: "border-rose-200 dark:border-rose-500/25 bg-rose-50 dark:bg-rose-500/10 text-rose-700 dark:text-rose-300",
   };
 
   return (
@@ -127,10 +136,10 @@ export const IconChip = ({
   iconClassName = "h-5 w-5",
 }) => {
   const bgColors = {
-    neutral: "border-[#eee7dc] bg-[#fffaf5] text-stone-600",
-    urgent: "border-orange-200 bg-orange-50 text-orange-600",
-    positive: "border-emerald-200 bg-emerald-50 text-emerald-600",
-    info: "border-sky-200 bg-sky-50 text-sky-600",
+    neutral: "border-line bg-sunken text-body",
+    urgent: "border-accent/25 bg-accent-soft text-accent",
+    positive: "border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-300",
+    info: "border-sky-200 dark:border-sky-500/25 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-300",
   };
 
   return (
@@ -143,12 +152,12 @@ export const IconChip = ({
 };
 
 const inputStyles =
-  "w-full rounded-xl border border-[#e7ddd0] bg-white px-4 py-3.5 text-sm font-semibold text-stone-900 outline-none transition-all duration-150 focus:border-orange-300 focus:ring-4 focus:ring-orange-100 placeholder:text-stone-400";
+  "w-full rounded-xl border border-line-strong bg-card px-4 py-3.5 text-sm font-semibold text-heading outline-none transition-all duration-150 focus:border-accent/60 focus:ring-4 focus:ring-accent/15 placeholder:text-muted dark:bg-raised";
 
 export const FieldInput = ({ label, className = "", ...props }) => (
   <label className={`block ${className}`}>
     {label ? (
-      <span className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-stone-500">
+      <span className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-muted">
         {label}
       </span>
     ) : null}
@@ -159,7 +168,7 @@ export const FieldInput = ({ label, className = "", ...props }) => (
 export const FieldSelect = ({ label, children, className = "", ...props }) => (
   <label className={`block ${className}`}>
     {label ? (
-      <span className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-stone-500">
+      <span className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-muted">
         {label}
       </span>
     ) : null}
@@ -177,7 +186,7 @@ export const FieldTextarea = ({
 }) => (
   <label className={`block ${className}`}>
     {label ? (
-      <span className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-stone-500">
+      <span className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-muted">
         {label}
       </span>
     ) : null}
@@ -197,15 +206,15 @@ export const ToggleTile = ({
 }) => {
   const activeStyles = {
     orange: {
-      tile: "border-orange-200 bg-orange-50",
+      tile: "border-accent/25 bg-accent-soft",
       track: "bg-orange-500",
     },
     green: {
-      tile: "border-emerald-200 bg-emerald-50",
+      tile: "border-emerald-200 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-500/10",
       track: "bg-emerald-500",
     },
     cyan: {
-      tile: "border-cyan-200 bg-cyan-50",
+      tile: "border-cyan-200 dark:border-cyan-500/25 bg-cyan-50 dark:bg-cyan-500/10",
       track: "bg-cyan-500",
     },
   };
@@ -214,26 +223,26 @@ export const ToggleTile = ({
   return (
     <label
       className={`flex cursor-pointer items-center justify-between gap-4 rounded-xl border px-5 py-4 transition-all duration-150 ${
-        checked ? active.tile : "border-[#e7ddd0] bg-white hover:bg-[#fffaf5]"
+        checked ? active.tile : "border-line-strong bg-card hover:bg-sunken"
       }`}
     >
       <div>
-        <p className="text-sm font-bold text-stone-950">{label}</p>
+        <p className="text-sm font-bold text-heading">{label}</p>
         {detail ? (
-          <p className="mt-1 text-xs font-medium text-stone-500">{detail}</p>
+          <p className="mt-1 text-xs font-medium text-muted">{detail}</p>
         ) : null}
       </div>
       <div
         className={`relative flex h-7 w-12 items-center rounded-full border transition-colors duration-200 ${
           checked
             ? `${active.track} border-transparent`
-            : "border-[#d6cfc3] bg-stone-200"
+            : "border-line-strong bg-stone-200"
         }`}
       >
         <motion.div
           layout
           transition={fastSpring}
-          className={`absolute h-5 w-5 rounded-full bg-white shadow-sm ${
+          className={`absolute h-5 w-5 rounded-full bg-card shadow-sm ${
             checked ? "right-1" : "left-1"
           }`}
         />
@@ -258,16 +267,16 @@ export const ActionTile = ({
   <button
     type="button"
     onClick={onClick}
-    className="group flex w-full items-center gap-4 rounded-xl border border-[#e7ddd0] bg-white px-4 py-3 text-left transition-colors duration-150 hover:border-orange-200 hover:bg-[#fffaf5]"
+    className="group flex w-full items-center gap-4 rounded-xl border border-line-strong bg-card px-4 py-3 text-left transition-colors duration-150 hover:border-accent/25 hover:bg-sunken"
   >
     <IconChip icon={icon} tone={tone} />
     <div className="min-w-0 flex-1">
-      <p className="text-sm font-bold text-stone-950 transition-colors">
+      <p className="text-sm font-bold text-heading transition-colors">
         {title}
       </p>
-      <p className="mt-1 text-xs font-medium text-stone-500">{description}</p>
+      <p className="mt-1 text-xs font-medium text-muted">{description}</p>
     </div>
-    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-orange-50 text-orange-600 transition-colors group-hover:bg-orange-100">
+    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent-soft text-accent transition-colors group-hover:bg-orange-100 dark:bg-orange-500/15">
       {">"}
     </span>
   </button>
@@ -276,7 +285,7 @@ export const ActionTile = ({
 export const OrderProgress = ({ status }) => {
   if (status === "REJECTED") {
     return (
-      <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-center text-[11px] font-bold text-rose-600">
+      <div className="mt-4 rounded-xl border border-rose-200 dark:border-rose-500/25 bg-rose-50 dark:bg-rose-500/10 p-3 text-center text-[11px] font-bold text-rose-600 dark:text-rose-300">
         ORDER REJECTED
       </div>
     );
@@ -291,8 +300,8 @@ export const OrderProgress = ({ status }) => {
           key={stage}
           className={`flex-1 rounded-lg border py-2 text-center transition-colors duration-200 ${
             activeIdx >= index
-              ? "border-orange-200 bg-orange-50 text-orange-700"
-              : "border-[#e7ddd0] bg-[#fffaf5] text-stone-400"
+              ? "border-accent/25 bg-accent-soft text-accent-text"
+              : "border-line-strong bg-sunken text-muted"
           }`}
         >
           <div className="text-[9px] font-bold uppercase tracking-widest">
@@ -314,11 +323,11 @@ export const EmptyState = ({
     tone={tone}
     className="flex flex-col items-center justify-center border-dashed p-12 text-center"
   >
-    <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-orange-200 bg-orange-50 text-2xl shadow-inner">
+    <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-accent/25 bg-accent-soft text-2xl shadow-inner">
       +
     </div>
-    <h3 className="text-lg font-bold tracking-tight text-stone-950">{title}</h3>
-    <p className="mt-2 max-w-sm text-sm leading-relaxed text-stone-500">
+    <h3 className="text-lg font-bold tracking-tight text-heading">{title}</h3>
+    <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted">
       {description}
     </p>
     {action ? <div className="mt-6">{action}</div> : null}

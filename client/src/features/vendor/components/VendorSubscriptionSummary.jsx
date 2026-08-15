@@ -10,7 +10,7 @@ const TONES = {
   WARNING: "bg-amber-500",
   CRITICAL: "bg-orange-500",
   EXHAUSTED: "bg-rose-500",
-  NONE: "bg-stone-300",
+  NONE: "bg-faint",
 };
 
 /**
@@ -33,11 +33,11 @@ const VendorSubscriptionSummary = ({ vendorPlan, onOpenPlans }) => {
     <Panel tone={showRenewalWarning ? "warning" : "neutral"} className="p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted">
             Subscription &amp; earnings
           </p>
-          <h3 className="mt-1 break-words text-xl font-black text-stone-950">{plan.name}</h3>
-          <p className="text-sm font-bold text-stone-500">
+          <h3 className="mt-1 break-words text-xl font-black text-heading">{plan.name}</h3>
+          <p className="text-sm font-bold text-muted">
             {plan.price > 0 ? `${money(plan.price)} / month` : "No monthly fee"} ·{" "}
             {plan.commissionRate}% after quota
           </p>
@@ -49,7 +49,7 @@ const VendorSubscriptionSummary = ({ vendorPlan, onOpenPlans }) => {
       </div>
 
       {showRenewalWarning ? (
-        <p className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700">
+        <p className="mt-3 rounded-xl border border-rose-200 dark:border-rose-500/25 bg-rose-50 dark:bg-rose-500/10 px-3 py-2 text-xs font-bold text-rose-700 dark:text-rose-300">
           {subscription.status === "PENDING_PAYMENT"
             ? `Payment of ${money(plan.price)} pending — your plan is not active yet.`
             : expiry.expired
@@ -62,13 +62,13 @@ const VendorSubscriptionSummary = ({ vendorPlan, onOpenPlans }) => {
 
       <div className="mt-4">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <p className="text-sm font-black text-stone-800">
+          <p className="text-sm font-black text-heading">
             {quota.remaining} of {quota.total} free orders left
           </p>
-          <p className="text-xs font-black text-stone-400">{quota.percent}% used</p>
+          <p className="text-xs font-black text-muted">{quota.percent}% used</p>
         </div>
 
-        <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-stone-100">
+        <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-sunken">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${Math.min(100, quota.percent)}%` }}
@@ -78,26 +78,26 @@ const VendorSubscriptionSummary = ({ vendorPlan, onOpenPlans }) => {
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-3 border-t border-[#eee7dc] pt-4 sm:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-4 sm:grid-cols-4">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Orders</p>
-          <p className="mt-1 text-base font-black text-stone-900">{usage.orders}</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted">Orders</p>
+          <p className="mt-1 text-base font-black text-heading">{usage.orders}</p>
         </div>
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted">
             Commission
           </p>
-          <p className="mt-1 text-base font-black text-stone-900">
+          <p className="mt-1 text-base font-black text-heading">
             {money(usage.commissionCharged)}
           </p>
         </div>
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Revenue</p>
-          <p className="mt-1 text-base font-black text-stone-900">{money(usage.grossRevenue)}</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted">Revenue</p>
+          <p className="mt-1 text-base font-black text-heading">{money(usage.grossRevenue)}</p>
         </div>
         <div>
-          <p className="text-[10px] font-black uppercase tracking-widest text-stone-400">Saved</p>
-          <p className="mt-1 text-base font-black text-emerald-600">
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted">Saved</p>
+          <p className="mt-1 text-base font-black text-emerald-600 dark:text-emerald-300">
             {money(usage.savedThisCycle)}
           </p>
         </div>

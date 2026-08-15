@@ -14,6 +14,7 @@ import { useAuth } from "../hooks/useAuth.js";
 import Navbar from "../features/navbar/Navbar.jsx";
 import ProtectedRoute from "../features/auth/ProtectedRoute.jsx";
 import { NotificationProvider } from "../context/NotificationContext.jsx";
+import { ThemeProvider } from "../context/ThemeContext.jsx";
 import PwaInstallButton from "../components/PwaInstallButton.jsx";
 import SiteFooter from "../components/SiteFooter.jsx";
 
@@ -88,7 +89,8 @@ function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <NotificationProvider>
+      <ThemeProvider>
+        <NotificationProvider>
         <Suspense fallback={<Loader label="Loading NearBitez..." />}>
           <Routes>
             {/* ── Auth ── */}
@@ -173,8 +175,9 @@ function App() {
             <Route path="*" element={<Navigate to={appRoutes.publicHome} replace />} />
           </Routes>
         </Suspense>
-        <PwaInstallButton />
-      </NotificationProvider>
+          <PwaInstallButton />
+        </NotificationProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

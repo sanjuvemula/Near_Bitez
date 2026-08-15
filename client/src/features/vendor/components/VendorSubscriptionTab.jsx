@@ -8,7 +8,7 @@ const SubStatusBadge = ({ status }) => {
     ACTIVE: "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]",
     PAUSED: "bg-amber-500/10 text-amber-500 border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]",
     EXPIRING_SOON: "bg-rose-500/10 text-rose-400 border-rose-500/30 shadow-[0_0_10px_rgba(244,63,94,0.2)]",
-    EXPIRED: "bg-slate-500/10 text-slate-400 border-slate-500/30",
+    EXPIRED: "bg-slate-500/10 text-muted border-slate-500/30",
   };
   
   const labels = {
@@ -61,8 +61,8 @@ const VendorSubscriptionTab = ({ restaurant, subscriptions = [], updateSubscript
         {/* Top Stats Strip */}
         <div className="grid grid-cols-3 gap-4">
           <Panel tone="dark" className="p-5 flex flex-col justify-center relative overflow-hidden">
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 relative z-10">Active Subs</p>
-            <p className="text-3xl font-black text-white relative z-10">{activeCount}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1 relative z-10">Active Subs</p>
+            <p className="text-3xl font-black text-heading relative z-10">{activeCount}</p>
           </Panel>
           <Panel tone="dark" className="p-5 flex flex-col justify-center border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.05)] relative overflow-hidden">
             <div className="absolute inset-0 bg-emerald-500/5 pointer-events-none" />
@@ -77,7 +77,7 @@ const VendorSubscriptionTab = ({ restaurant, subscriptions = [], updateSubscript
         </div>
 
         {/* Filters & Refresh */}
-        <Panel tone="dark" className="p-5 grid gap-4 md:grid-cols-[1fr,200px,auto]">
+        <Panel tone="dark" className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-[1fr,190px,auto]">
           <FieldInput placeholder="Search by Customer or ID..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
           <FieldSelect value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
             <option value="ALL">All Statuses</option>
@@ -85,7 +85,7 @@ const VendorSubscriptionTab = ({ restaurant, subscriptions = [], updateSubscript
             <option value="EXPIRING_SOON">Expiring Soon</option>
             <option value="PAUSED">Paused</option>
           </FieldSelect>
-          <VendorButton tone="secondary" onClick={onRefresh} loading={refreshing} className="h-full">
+          <VendorButton tone="secondary" onClick={onRefresh} loading={refreshing} className="w-full lg:w-auto">
             Sync
           </VendorButton>
         </Panel>
@@ -100,25 +100,25 @@ const VendorSubscriptionTab = ({ restaurant, subscriptions = [], updateSubscript
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                 key={sub._id}
                 onClick={() => setSelectedSub(sub)}
-                className={`cursor-pointer rounded-2xl border p-5 transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.4)] ${selectedSub?._id === sub._id ? 'border-indigo-500/50 bg-indigo-500/10' : 'border-white/10 bg-[#0a0a0a]/60 hover:bg-white/[0.03] hover:border-white/20'}`}
+                className={`cursor-pointer rounded-2xl border p-5 transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.4)] ${selectedSub?._id === sub._id ? 'border-indigo-500/50 bg-indigo-500/10' : 'border-white/10 bg-card/60 hover:bg-card/[0.03] hover:border-white/20'}`}
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="flex gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[#111] border border-white/10 text-2xl shadow-inner">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-raised border border-white/10 text-2xl shadow-inner">
                       👤
                     </div>
                     <div>
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-black text-white">{sub.customer?.name || "Customer"}</h3>
+                        <h3 className="text-lg font-black text-heading">{sub.customer?.name || "Customer"}</h3>
                         <SubStatusBadge status={sub.status} />
                       </div>
                       <p className="text-sm font-bold text-indigo-400">{sub.planName || "Custom Plan"}</p>
-                      <p className="text-xs text-slate-400 mt-1">Next: <span className="text-white font-bold">{sub.nextDelivery ? formatDate(sub.nextDelivery) : "Pending"}</span></p>
+                      <p className="text-xs text-muted mt-1">Next: <span className="text-heading font-bold">{sub.nextDelivery ? formatDate(sub.nextDelivery) : "Pending"}</span></p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-black text-white">{formatCurrency(sub.price || 0)}</p>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mt-1">Ends {formatDate(sub.endDate)}</p>
+                    <p className="text-xl font-black text-heading">{formatCurrency(sub.price || 0)}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted mt-1">Ends {formatDate(sub.endDate)}</p>
                   </div>
                 </div>
               </motion.div>
@@ -134,8 +134,8 @@ const VendorSubscriptionTab = ({ restaurant, subscriptions = [], updateSubscript
             {!selectedSub ? (
               <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex h-full flex-col items-center justify-center text-center opacity-50 pt-20">
                 <span className="text-7xl mb-6 drop-shadow-lg">🗓️</span>
-                <h3 className="text-xl font-black text-white">Select a Subscription</h3>
-                <p className="text-sm text-slate-400 mt-2">Click on any customer from the real-time list to view details and manage their subscription status.</p>
+                <h3 className="text-xl font-black text-heading">Select a Subscription</h3>
+                <p className="text-sm text-muted mt-2">Click on any customer from the real-time list to view details and manage their subscription status.</p>
               </motion.div>
             ) : (
               <motion.div key="details" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
@@ -143,9 +143,9 @@ const VendorSubscriptionTab = ({ restaurant, subscriptions = [], updateSubscript
                 {/* Header */}
                 <div className="flex items-start justify-between border-b border-white/10 pb-6">
                   <div>
-                    <h2 className="text-2xl font-black text-white">{selectedSub.customer?.name || "Customer"}</h2>
-                    <p className="text-sm font-bold text-slate-400 mt-1">{selectedSub.customer?.phone || "No Phone Provided"}</p>
-                    <p className="text-[10px] font-bold text-slate-600 mt-2 bg-white/5 px-2 py-1 rounded inline-block">ID: {selectedSub._id}</p>
+                    <h2 className="text-2xl font-black text-heading">{selectedSub.customer?.name || "Customer"}</h2>
+                    <p className="text-sm font-bold text-muted mt-1">{selectedSub.customer?.phone || "No Phone Provided"}</p>
+                    <p className="text-[10px] font-bold text-muted dark:text-body mt-2 bg-white/5 px-2 py-1 rounded inline-block">ID: {selectedSub._id}</p>
                   </div>
                   <SubStatusBadge status={selectedSub.status} />
                 </div>
@@ -154,12 +154,12 @@ const VendorSubscriptionTab = ({ restaurant, subscriptions = [], updateSubscript
                 <div className="rounded-2xl bg-white/5 border border-white/10 p-5 space-y-4">
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">Subscribed Plan</p>
-                    <p className="text-lg font-black text-white">{selectedSub.planName || "Custom"}</p>
+                    <p className="text-lg font-black text-heading">{selectedSub.planName || "Custom"}</p>
                     <div className="flex items-center gap-2 mt-2">
                        <span className={`text-[10px] font-black px-2 py-0.5 rounded border ${selectedSub.isVeg ? 'border-emerald-500/30 text-emerald-400' : 'border-rose-500/30 text-rose-400'}`}>
                           {selectedSub.isVeg ? 'PURE VEG' : 'NON-VEG'}
                         </span>
-                        <span className="text-[10px] font-black px-2 py-0.5 rounded border border-white/10 text-slate-300">
+                        <span className="text-[10px] font-black px-2 py-0.5 rounded border border-white/10 text-body">
                           {selectedSub.mealType || "Standard"}
                         </span>
                     </div>
@@ -167,25 +167,25 @@ const VendorSubscriptionTab = ({ restaurant, subscriptions = [], updateSubscript
                   
                   <div className="grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
                     <div>
-                      <p className="text-[10px] font-bold uppercase text-slate-500">Start Date</p>
-                      <p className="text-sm font-bold text-white">{formatDate(selectedSub.startDate)}</p>
+                      <p className="text-[10px] font-bold uppercase text-muted">Start Date</p>
+                      <p className="text-sm font-bold text-heading">{formatDate(selectedSub.startDate)}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase text-slate-500">Expiry Date</p>
-                      <p className={`text-sm font-bold ${selectedSub.status === 'EXPIRING_SOON' ? 'text-rose-400' : 'text-white'}`}>{formatDate(selectedSub.endDate)}</p>
+                      <p className="text-[10px] font-bold uppercase text-muted">Expiry Date</p>
+                      <p className={`text-sm font-bold ${selectedSub.status === 'EXPIRING_SOON' ? 'text-rose-400' : 'text-heading'}`}>{formatDate(selectedSub.endDate)}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Delivery Info */}
-                <div className="rounded-2xl bg-[#111] border border-white/5 p-5">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Next Scheduled Delivery</p>
+                <div className="rounded-2xl bg-raised border border-white/5 p-5">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-2">Next Scheduled Delivery</p>
                   <p className="text-base font-black text-amber-500">{selectedSub.nextDelivery ? formatDate(selectedSub.nextDelivery) : "Pending Schedule"}</p>
                 </div>
 
                 {/* Real API Status Actions */}
                 <div className="pt-4 space-y-3 border-t border-white/10">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Database Actions</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-2">Database Actions</p>
                   <div className="flex gap-3">
                     <VendorButton 
                       tone={selectedSub.status === 'PAUSED' ? 'success' : 'warning'} 

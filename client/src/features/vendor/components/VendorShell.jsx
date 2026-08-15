@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import VendorNotificationBell from "./VendorNotificationBell.jsx";
+import ThemeToggle from "./ThemeToggle.jsx";
 import {
   ChevronDownIcon,
   LogOutIcon,
@@ -15,15 +16,58 @@ import {
   getGroupIdForTab,
 } from "../vendorNavigation.js";
 
+
+
+/**
+ * Per-section ambient wash.
+ *
+ * Each area of the dashboard tints the page with its own hue, cross-fading as
+ * the user navigates so moving between sections feels like changing rooms.
+ * RGB triplets (not class names) because the value is interpolated at runtime.
+ */
+const SECTION_RGB = {
+  sky: "56 189 248",
+  orange: "249 115 22",
+  rose: "244 63 94",
+  amber: "245 158 11",
+  teal: "20 184 166",
+  emerald: "16 185 129",
+  violet: "139 92 246",
+  cyan: "6 182 212",
+  indigo: "99 102 241",
+  fuchsia: "217 70 239",
+  blue: "59 130 246",
+  purple: "168 85 247",
+};
+
+/**
+ * Per-section icon tints. Written out in full because Tailwind's scanner only
+ * sees literal class names — interpolated ones are purged from the build.
+ */
+const TINTS = {
+  sky:     { on: "text-sky-500",     box: "bg-sky-500/10" },
+  orange:  { on: "text-orange-500",  box: "bg-orange-500/10" },
+  rose:    { on: "text-rose-500",    box: "bg-rose-500/10" },
+  amber:   { on: "text-amber-500",   box: "bg-amber-500/10" },
+  teal:    { on: "text-teal-500",    box: "bg-teal-500/10" },
+  emerald: { on: "text-emerald-500", box: "bg-emerald-500/10" },
+  violet:  { on: "text-violet-500",  box: "bg-violet-500/10" },
+  cyan:    { on: "text-cyan-500",    box: "bg-cyan-500/10" },
+  indigo:  { on: "text-indigo-500",  box: "bg-indigo-500/10" },
+  fuchsia: { on: "text-fuchsia-500", box: "bg-fuchsia-500/10" },
+  blue:    { on: "text-blue-500",    box: "bg-blue-500/10" },
+  purple:  { on: "text-purple-500",  box: "bg-purple-500/10" },
+};
+
 /** Numeric counts render as pills; string badges ("Expiring") render as tags. */
 const Badge = ({ value, tone = "default" }) => {
   if (!value) return null;
 
   const isText = typeof value === "string";
   const tones = {
-    default: "bg-orange-100 text-orange-700",
-    alert: "bg-rose-100 text-rose-700",
-    warn: "bg-amber-100 text-amber-700",
+    default: "bg-accent-soft text-accent-text ring-1 ring-inset ring-accent/20",
+    alert: "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300",
+    warn: "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
   };
 
   return (
@@ -47,6 +91,7 @@ const badgeTone = (key, value) => {
 /** A leaf navigation row. Used for both top-level links and submenu children. */
 const NavLink = ({ item, active, depth = 0, badgeValue, badgeKey, onSelect }) => {
   const Icon = item.icon;
+  const tint = TINTS[item.tint];
 
   return (
     <button
@@ -57,8 +102,8 @@ const NavLink = ({ item, active, depth = 0, badgeValue, badgeKey, onSelect }) =>
         depth > 0 ? "pl-9" : "pl-2.5"
       } ${
         active
-          ? "bg-orange-50 text-orange-700"
-          : "text-stone-600 hover:bg-stone-100/70 hover:text-stone-900"
+          ? "bg-accent-soft text-accent-text"
+          : "text-body hover:bg-sunken hover:text-heading"
       }`}
     >
       {/* Left rail marker instead of a full orange block */}
@@ -66,19 +111,24 @@ const NavLink = ({ item, active, depth = 0, badgeValue, badgeKey, onSelect }) =>
         <motion.span
           layoutId="vendor-nav-active"
           transition={{ type: "spring", stiffness: 500, damping: 40 }}
-          className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-orange-600"
+          className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-accent"
         />
       ) : null}
 
       {Icon ? (
-        <Icon
-          size={depth > 0 ? 15 : 18}
-          className={`flex-shrink-0 ${active ? "text-orange-600" : "text-stone-400 group-hover:text-stone-600"}`}
-        />
+        <span
+          className={`flex flex-shrink-0 items-center justify-center rounded-md transition-all duration-200 group-hover:scale-110 ${
+            depth > 0 ? "h-6 w-6" : "h-7 w-7"
+          } ${tint ? tint.box : ""} ${
+            tint ? tint.on : active ? "text-accent" : "text-muted group-hover:text-body"
+          }`}
+        >
+          <Icon size={depth > 0 ? 14 : 17} />
+        </span>
       ) : depth > 0 ? (
         <span
           className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${
-            active ? "bg-orange-500" : "bg-stone-300 group-hover:bg-stone-400"
+            active ? "bg-accent" : "bg-faint group-hover:bg-muted"
           }`}
         />
       ) : null}
@@ -98,6 +148,7 @@ const NavLink = ({ item, active, depth = 0, badgeValue, badgeKey, onSelect }) =>
 
 const NavGroup = ({ group, expanded, onToggle, activeTab, activeChildId, badges, onSelect }) => {
   const Icon = group.icon;
+  const tint = TINTS[group.tint];
 
   // Roll child badges up to the collapsed header so nothing is hidden.
   const childBadgeTotal = (group.children || []).reduce((sum, child) => {
@@ -117,17 +168,18 @@ const NavGroup = ({ group, expanded, onToggle, activeTab, activeChildId, badges,
         aria-expanded={expanded}
         className={`group flex w-full items-center gap-2.5 rounded-lg py-2 pl-2.5 pr-2 text-left transition-colors duration-150 ${
           containsActive && !expanded
-            ? "text-orange-700"
-            : "text-stone-600 hover:bg-stone-100/70 hover:text-stone-900"
+            ? "text-accent-text"
+            : "text-body hover:bg-sunken hover:text-heading"
         }`}
       >
         {Icon ? (
-          <Icon
-            size={18}
-            className={`flex-shrink-0 ${
-              containsActive ? "text-orange-600" : "text-stone-400 group-hover:text-stone-600"
-            }`}
-          />
+          <span
+            className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-md transition-all duration-200 group-hover:scale-110 ${
+              tint ? tint.box : ""
+            } ${tint ? tint.on : containsActive ? "text-accent" : "text-muted group-hover:text-body"}`}
+          >
+            <Icon size={17} />
+          </span>
         ) : null}
 
         <span
@@ -147,7 +199,7 @@ const NavGroup = ({ group, expanded, onToggle, activeTab, activeChildId, badges,
         <motion.span
           animate={{ rotate: expanded ? 180 : 0 }}
           transition={{ duration: 0.18 }}
-          className="flex-shrink-0 text-stone-300 group-hover:text-stone-500"
+          className="flex-shrink-0 text-faint group-hover:text-muted"
         >
           <ChevronDownIcon size={14} />
         </motion.span>
@@ -194,7 +246,7 @@ const RestaurantIdentity = ({ restaurant, onToggleStatus, updatingStatus }) => {
           <img
             src={restaurant.imageUrl}
             alt={name}
-            className="h-10 w-10 flex-shrink-0 rounded-xl border border-[#eee7dc] object-cover"
+            className="h-10 w-10 flex-shrink-0 rounded-xl border border-line object-cover"
           />
         ) : (
           <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 text-sm font-bold text-white">
@@ -203,8 +255,8 @@ const RestaurantIdentity = ({ restaurant, onToggleStatus, updatingStatus }) => {
         )}
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold leading-tight text-stone-900">{name}</p>
-          <p className="mt-0.5 truncate text-[11px] font-medium text-stone-400">
+          <p className="truncate text-sm font-semibold leading-tight text-heading">{name}</p>
+          <p className="mt-0.5 truncate text-[11px] font-medium text-muted">
             {restaurant?.category || "Restaurant"}
           </p>
         </div>
@@ -217,8 +269,8 @@ const RestaurantIdentity = ({ restaurant, onToggleStatus, updatingStatus }) => {
         disabled={!onToggleStatus || updatingStatus || !restaurant}
         className={`mt-3 flex w-full items-center gap-2 rounded-lg border px-2.5 py-1.5 text-left transition-colors ${
           isOpen
-            ? "border-emerald-200 bg-emerald-50 hover:bg-emerald-100"
-            : "border-rose-200 bg-rose-50 hover:bg-rose-100"
+            ? "border-emerald-200 bg-emerald-50 hover:bg-emerald-100 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20"
+            : "border-rose-200 bg-rose-50 hover:bg-rose-100 dark:border-rose-500/25 dark:bg-rose-500/10 dark:hover:bg-rose-500/20"
         } disabled:cursor-not-allowed disabled:opacity-60`}
         title={onToggleStatus ? "Toggle whether you are accepting orders" : undefined}
       >
@@ -234,7 +286,7 @@ const RestaurantIdentity = ({ restaurant, onToggleStatus, updatingStatus }) => {
         </span>
         <span
           className={`min-w-0 flex-1 truncate text-[11px] font-bold uppercase tracking-wider ${
-            isOpen ? "text-emerald-700" : "text-rose-700"
+            isOpen ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"
           }`}
         >
           {updatingStatus ? "Updating..." : isOpen ? "Open for orders" : "Closed"}
@@ -257,7 +309,8 @@ const SidebarContent = ({
   updatingStatus,
   onClose,
 }) => (
-  <div className="flex h-full flex-col">
+  <div className="relative flex h-full flex-col">
+    <span className="nb-glow -left-16 -top-16 h-48 w-48 opacity-60" />
     <div className="flex items-start justify-between">
       <div className="min-w-0 flex-1">
         <RestaurantIdentity
@@ -271,14 +324,14 @@ const SidebarContent = ({
           type="button"
           onClick={onClose}
           aria-label="Close menu"
-          className="mr-2 mt-5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-stone-400 transition-colors hover:bg-stone-100 hover:text-stone-700 xl:hidden"
+          className="mr-2 mt-5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-sunken hover:text-body xl:hidden"
         >
           <XIcon size={16} />
         </button>
       ) : null}
     </div>
 
-    <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 pb-3">
+    <nav className="relative flex-1 space-y-0.5 overflow-y-auto px-3 pb-3">
       {VENDOR_NAV.map((group) =>
         group.children ? (
           <NavGroup
@@ -304,20 +357,20 @@ const SidebarContent = ({
       )}
     </nav>
 
-    <div className="space-y-0.5 border-t border-[#f0ebe3] p-3">
+    <div className="space-y-0.5 border-t border-line p-3">
       <button
         type="button"
         onClick={() => onSelect({ tab: VENDOR_FOOTER_TAB })}
         className={`group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors ${
           activeTab === VENDOR_FOOTER_TAB
-            ? "bg-orange-50 font-semibold text-orange-700"
-            : "font-medium text-stone-600 hover:bg-stone-100/70 hover:text-stone-900"
+            ? "bg-accent-soft font-semibold text-accent-text"
+            : "font-medium text-body hover:bg-sunken hover:text-heading"
         }`}
       >
         <SettingsIcon
           size={17}
           className={`flex-shrink-0 ${
-            activeTab === VENDOR_FOOTER_TAB ? "text-orange-600" : "text-stone-400"
+            activeTab === VENDOR_FOOTER_TAB ? "text-accent" : "text-muted"
           }`}
         />
         <span className="truncate text-[13px] tracking-tight">Settings</span>
@@ -326,9 +379,9 @@ const SidebarContent = ({
       <button
         type="button"
         onClick={onLogout}
-        className="group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left font-medium text-stone-600 transition-colors hover:bg-rose-50 hover:text-rose-700"
+        className="group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left font-medium text-body transition-colors hover:bg-rose-50 hover:text-rose-700 dark:text-rose-300 dark:hover:bg-rose-500/10 dark:hover:text-rose-300"
       >
-        <LogOutIcon size={17} className="flex-shrink-0 text-stone-400 group-hover:text-rose-500" />
+        <LogOutIcon size={17} className="flex-shrink-0 text-muted group-hover:text-rose-500" />
         <span className="truncate text-[13px] tracking-tight">Log out</span>
       </button>
     </div>
@@ -360,6 +413,9 @@ const VendorShell = ({
     () => findNavEntry(activeTab, orderFilter),
     [activeTab, orderFilter]
   );
+
+  const sectionRgb =
+    SECTION_RGB[activeChild?.tint] || SECTION_RGB[activeGroup?.tint] || SECTION_RGB.orange;
 
   // Keep the owning group open when the tab changes from outside the sidebar
   // (quick actions, notification deep links).
@@ -411,35 +467,53 @@ const VendorShell = ({
   );
 
   return (
-    <div className="relative min-h-screen bg-[#fdfbf8] font-sans text-stone-700 selection:bg-orange-100">
+    <div className="relative isolate min-h-screen font-sans text-body">
+      {/* Section colour wash. Gradients can't be CSS-interpolated, so each
+          section's layer fades in over the previous one. */}
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <AnimatePresence initial={false}>
+          <motion.div
+            key={sectionRgb}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.65, ease: "easeOut" }}
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `radial-gradient(75vmax 55vmax at 12% -10%, rgb(${sectionRgb} / var(--nb-section-alpha)), transparent 62%), radial-gradient(60vmax 48vmax at 92% 108%, rgb(${sectionRgb} / calc(var(--nb-section-alpha) * 0.7)), transparent 60%)`,
+            }}
+          />
+        </AnimatePresence>
+      </div>
       {/* ── Mobile top bar ───────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-[#f0ebe3] bg-white/95 px-4 py-2.5 backdrop-blur xl:hidden">
+      <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-card/95 px-4 py-2.5 backdrop-blur xl:hidden">
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
           aria-label="Open menu"
-          className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-[#eee7dc] bg-white text-stone-600 transition-colors hover:bg-stone-50"
+          className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border border-line bg-card text-body transition-colors hover:bg-sunken"
         >
           <MenuIcon size={17} />
           {totalBadge > 0 ? (
-            <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-orange-500" />
+            <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-accent" />
           ) : null}
         </button>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-stone-900">{pageTitle}</p>
+          <p className="truncate text-sm font-semibold text-heading">{pageTitle}</p>
           <div className="flex items-center gap-1.5">
             <span
               className={`h-1.5 w-1.5 flex-shrink-0 rounded-full ${
                 restaurant?.isActive ? "bg-emerald-500" : "bg-rose-500"
               }`}
             />
-            <p className="truncate text-[11px] font-medium text-stone-400">
+            <p className="truncate text-[11px] font-medium text-muted">
               {restaurant?.name || "Vendor"}
             </p>
           </div>
         </div>
 
+        <ThemeToggle />
         <VendorNotificationBell onNavigate={onTabChange} />
       </header>
 
@@ -453,7 +527,7 @@ const VendorShell = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.18 }}
-              className="fixed inset-0 z-40 bg-stone-900/40 backdrop-blur-sm xl:hidden"
+              className="fixed inset-0 z-40 bg-stone-950/50 backdrop-blur-sm xl:hidden"
               onClick={() => setMobileOpen(false)}
             />
             <motion.aside
@@ -462,7 +536,7 @@ const VendorShell = ({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 400, damping: 38 }}
-              className="fixed left-0 top-0 z-50 h-full w-[270px] max-w-[85vw] overflow-hidden border-r border-[#f0ebe3] bg-white xl:hidden"
+              className="fixed left-0 top-0 z-50 h-full w-[270px] max-w-[85vw] overflow-hidden border-r border-line bg-card shadow-2xl xl:hidden"
             >
               {sidebar(() => setMobileOpen(false))}
             </motion.aside>
@@ -470,9 +544,9 @@ const VendorShell = ({
         ) : null}
       </AnimatePresence>
 
-      <div className="relative mx-auto flex max-w-[1600px]">
+      <div className="relative z-10 mx-auto flex max-w-[1600px]">
         {/* ── Desktop sidebar ────────────────────────────────────────────── */}
-        <aside className="sticky top-0 z-20 hidden h-screen w-[248px] flex-shrink-0 flex-col overflow-hidden border-r border-[#f0ebe3] bg-white xl:flex">
+        <aside className="sticky top-0 z-20 hidden h-screen w-[248px] flex-shrink-0 flex-col overflow-hidden border-r border-line bg-card/70 shadow-[1px_0_3px_rgba(0,0,0,0.02)] backdrop-blur-2xl xl:flex">
           {sidebar(null)}
         </aside>
 
@@ -482,11 +556,11 @@ const VendorShell = ({
           <div className="mx-auto mb-6 hidden max-w-6xl items-center justify-between gap-4 xl:flex">
             <div className="min-w-0">
               {activeChild && activeGroup ? (
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-stone-400">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted">
                   {activeGroup.label}
                 </p>
               ) : null}
-              <h1 className="mt-0.5 truncate text-xl font-bold tracking-tight text-stone-900">
+              <h1 className="mt-0.5 truncate text-xl font-bold tracking-tight text-heading">
                 {pageTitle}
               </h1>
             </div>
@@ -495,8 +569,8 @@ const VendorShell = ({
               <span
                 className={`hidden items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-wider sm:flex ${
                   restaurant?.isActive
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : "border-rose-200 bg-rose-50 text-rose-700"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300"
+                    : "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-500/25 dark:bg-rose-500/10 dark:text-rose-300"
                 }`}
               >
                 <span
@@ -507,6 +581,7 @@ const VendorShell = ({
                 {restaurant?.isActive ? "Open" : "Closed"}
               </span>
 
+              <ThemeToggle />
               <VendorNotificationBell onNavigate={onTabChange} />
             </div>
           </div>

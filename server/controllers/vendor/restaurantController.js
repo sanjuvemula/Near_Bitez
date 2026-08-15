@@ -38,10 +38,25 @@ export const upsertVendorProfile = async (req, res) => {
 
     // ── Core restaurant payload ────────────────────────────────────────────
     const payload = {
-      name:        toTrimmedString(req.body.name),
-      description: toTrimmedString(req.body.description),
-      address:     toTrimmedString(req.body.address),
-      category:    toTrimmedString(req.body.category),
+      // Fall back to the stored values like every other field below, so partial
+      // updates (e.g. flipping isActive from the dashboard toggle) don't fail
+      // validation for fields the caller never intended to change.
+      name:
+        req.body.name === undefined
+          ? existingRestaurant?.name || ""
+          : toTrimmedString(req.body.name),
+      description:
+        req.body.description === undefined
+          ? existingRestaurant?.description || ""
+          : toTrimmedString(req.body.description),
+      address:
+        req.body.address === undefined
+          ? existingRestaurant?.address || ""
+          : toTrimmedString(req.body.address),
+      category:
+        req.body.category === undefined
+          ? existingRestaurant?.category || ""
+          : toTrimmedString(req.body.category),
       cuisineType: parseCuisineType(
         req.body.cuisineType ?? existingRestaurant?.cuisineType ?? []
       ),

@@ -77,7 +77,7 @@ const VendorMenuTab = ({
               <select
                 value={menuCategoryFilter}
                 onChange={(e) => setMenuCategoryFilter(e.target.value)}
-                className="w-full rounded-xl border border-[#e7ddd0] bg-white px-4 py-3 text-sm font-semibold text-stone-900 outline-none transition focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+                className="w-full rounded-xl border border-line-strong bg-card px-4 py-3 text-sm font-semibold text-heading outline-none transition focus:border-accent/60 focus:ring-4 focus:ring-accent/15"
               >
                 {menuCategories.map((category) => (
                   <option key={category} value={category}>
@@ -107,11 +107,11 @@ const VendorMenuTab = ({
                   exit={{ opacity: 0, scale: 0.96 }}
                   className={`group relative flex gap-4 rounded-[20px] border p-4 shadow-[0_22px_50px_-40px_rgba(15,23,42,0.32)] ${
                     item.isAvailable
-                      ? "border-[#eee7dc] bg-white"
-                      : "border-rose-200 bg-rose-50/70"
+                      ? "border-line bg-card"
+                      : "border-rose-200 dark:border-rose-500/25 bg-rose-50/70"
                   }`}
                 >
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-[#fffaf5]">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-sunken">
                     {item.imageUrl ? (
                       <img
                         src={item.imageUrl}
@@ -128,10 +128,10 @@ const VendorMenuTab = ({
                   <div className="flex min-w-0 flex-1 flex-col justify-between">
                     <div>
                       <div className="flex items-start justify-between gap-2">
-                        <h3 className="line-clamp-1 text-base font-bold text-stone-950">
+                        <h3 className="line-clamp-1 text-base font-bold text-heading">
                           {item.name}
                         </h3>
-                        <p className="shrink-0 text-lg font-bold text-orange-600">
+                        <p className="shrink-0 text-lg font-bold text-accent">
                           {formatCurrency(item.price)}
                         </p>
                       </div>
@@ -142,11 +142,11 @@ const VendorMenuTab = ({
                             item.isVeg ? "bg-emerald-500" : "bg-rose-500"
                           }`}
                         />
-                        <span className="rounded-md bg-stone-100 px-2 py-0.5 text-[10px] font-bold text-stone-500">
+                        <span className="rounded-md bg-sunken px-2 py-0.5 text-[10px] font-bold text-muted">
                           {item.category}
                         </span>
                         {!item.isAvailable ? (
-                          <span className="rounded-md bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-600">
+                          <span className="rounded-md bg-rose-100 dark:bg-rose-500/15 px-2 py-0.5 text-[10px] font-bold text-rose-600 dark:text-rose-300">
                             Paused
                           </span>
                         ) : null}
@@ -159,7 +159,7 @@ const VendorMenuTab = ({
                           startEditingMenuItem(item);
                           setFormMode("dish");
                         }}
-                        className="flex-1 rounded-lg border border-[#e7ddd0] bg-white px-2 py-1.5 text-[11px] font-bold text-stone-600 transition hover:bg-orange-50 hover:text-orange-700"
+                        className="flex-1 rounded-lg border border-line-strong bg-card px-2 py-1.5 text-[11px] font-bold text-body transition hover:bg-accent-soft hover:text-accent-text"
                       >
                         Edit
                       </button>
@@ -168,15 +168,15 @@ const VendorMenuTab = ({
                         disabled={pendingAvailabilityId === item._id}
                         className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-bold transition ${
                           item.isAvailable
-                            ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
-                            : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+                            ? "bg-orange-100 dark:bg-orange-500/15 text-accent-text hover:bg-orange-200"
+                            : "bg-emerald-100 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200"
                         }`}
                       >
                         {item.isAvailable ? "Pause" : "Live"}
                       </button>
                       <button
                         onClick={() => deleteMenuItem(item)}
-                        className="flex-1 rounded-lg bg-rose-100 px-2 py-1.5 text-[11px] font-bold text-rose-700 transition hover:bg-rose-200"
+                        className="flex-1 rounded-lg bg-rose-100 dark:bg-rose-500/15 px-2 py-1.5 text-[11px] font-bold text-rose-700 dark:text-rose-300 transition hover:bg-rose-200"
                       >
                         Delete
                       </button>
@@ -201,10 +201,10 @@ const VendorMenuTab = ({
               className="space-y-6 p-8"
             >
               <div>
-                <h2 className="text-xl font-bold text-stone-950">
+                <h2 className="text-xl font-bold text-heading">
                   Add to your menu
                 </h2>
-                <p className="mt-1.5 text-sm text-stone-500">
+                <p className="mt-1.5 text-sm text-muted">
                   Choose what you want to publish.
                 </p>
               </div>
@@ -212,24 +212,24 @@ const VendorMenuTab = ({
               <div className="space-y-4">
                 <button
                   onClick={() => setFormMode("dish")}
-                  className="w-full rounded-2xl border border-[#eee7dc] bg-white p-5 text-left transition hover:border-orange-200 hover:bg-orange-50"
+                  className="w-full rounded-2xl border border-line bg-card p-5 text-left transition hover:border-accent/25 hover:bg-accent-soft"
                 >
-                  <h3 className="text-sm font-bold text-stone-950">
+                  <h3 className="text-sm font-bold text-heading">
                     Add regular dish
                   </h3>
-                  <p className="mt-1 text-[11px] text-stone-500">
+                  <p className="mt-1 text-[11px] text-muted">
                     Single items, combos, drinks.
                   </p>
                 </button>
 
                 <button
                   onClick={() => onTabChange("tiffin")}
-                  className="w-full rounded-2xl border border-[#eee7dc] bg-white p-5 text-left transition hover:border-orange-200 hover:bg-orange-50"
+                  className="w-full rounded-2xl border border-line bg-card p-5 text-left transition hover:border-accent/25 hover:bg-accent-soft"
                 >
-                  <h3 className="text-sm font-bold text-stone-950">
+                  <h3 className="text-sm font-bold text-heading">
                     Open tiffin plans
                   </h3>
-                  <p className="mt-1 text-[11px] text-stone-500">
+                  <p className="mt-1 text-[11px] text-muted">
                     Manage recurring meal plans.
                   </p>
                 </button>
@@ -246,13 +246,13 @@ const VendorMenuTab = ({
               transition={{ duration: 0.2 }}
               className="flex max-h-[calc(100vh-100px)] flex-col"
             >
-              <div className="flex items-center justify-between border-b border-[#eee7dc] bg-[#fffaf5] p-6">
-                <h2 className="text-lg font-bold text-stone-950">
+              <div className="flex items-center justify-between border-b border-line bg-sunken p-6">
+                <h2 className="text-lg font-bold text-heading">
                   {editingMenuId ? "Edit dish" : "New dish"}
                 </h2>
                 <button
                   onClick={handleCancel}
-                  className="text-[10px] font-bold uppercase tracking-widest text-stone-500 transition hover:text-orange-700"
+                  className="text-[10px] font-bold uppercase tracking-widest text-muted transition hover:text-accent-text"
                 >
                   Reset
                 </button>
@@ -260,7 +260,7 @@ const VendorMenuTab = ({
 
               <div className="space-y-6 overflow-y-auto p-6">
                 <div className="space-y-2">
-                  <label className="block cursor-pointer overflow-hidden rounded-2xl border border-dashed border-orange-200 bg-[#fffaf5] transition hover:bg-orange-50">
+                  <label className="block cursor-pointer overflow-hidden rounded-2xl border border-dashed border-accent/25 bg-sunken transition hover:bg-accent-soft">
                     <div className="relative h-40">
                       {menuImagePreview ? (
                         <img
@@ -269,7 +269,7 @@ const VendorMenuTab = ({
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center text-sm font-black text-orange-600">
+                        <div className="flex h-full items-center justify-center text-sm font-black text-accent">
                           Upload dish image
                         </div>
                       )}
@@ -297,7 +297,7 @@ const VendorMenuTab = ({
                   />
 
                   <label className="block">
-                    <span className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-stone-500">
+                    <span className="mb-2 block text-[11px] font-bold uppercase tracking-widest text-muted">
                       Category
                     </span>
                     <select
@@ -308,7 +308,7 @@ const VendorMenuTab = ({
                           category: e.target.value,
                         }))
                       }
-                      className="w-full rounded-xl border border-[#e7ddd0] bg-white px-4 py-3 text-sm font-semibold text-stone-900 outline-none transition focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+                      className="w-full rounded-xl border border-line-strong bg-card px-4 py-3 text-sm font-semibold text-heading outline-none transition focus:border-accent/60 focus:ring-4 focus:ring-accent/15"
                     >
                       <option value="" disabled>
                         Select a category
@@ -362,10 +362,10 @@ const VendorMenuTab = ({
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[11px] font-bold uppercase tracking-widest text-stone-500">
+                  <label className="block text-[11px] font-bold uppercase tracking-widest text-muted">
                     Dietary Type
                   </label>
-                  <div className="flex rounded-xl border border-[#e7ddd0] bg-[#fffaf5] p-1">
+                  <div className="flex rounded-xl border border-line-strong bg-sunken p-1">
                     <button
                       type="button"
                       onClick={() =>
@@ -374,7 +374,7 @@ const VendorMenuTab = ({
                       className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${
                         menuForm.isVeg
                           ? "bg-emerald-500 text-white"
-                          : "text-stone-500"
+                          : "text-muted"
                       }`}
                     >
                       Veg
@@ -387,7 +387,7 @@ const VendorMenuTab = ({
                       className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${
                         !menuForm.isVeg
                           ? "bg-rose-500 text-white"
-                          : "text-stone-500"
+                          : "text-muted"
                       }`}
                     >
                       Non-Veg
@@ -398,15 +398,15 @@ const VendorMenuTab = ({
                 <label
                   className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 ${
                     menuForm.isAvailable
-                      ? "border-orange-200 bg-orange-50"
-                      : "border-[#e7ddd0] bg-white"
+                      ? "border-accent/25 bg-accent-soft"
+                      : "border-line-strong bg-card"
                   }`}
                 >
                   <div>
-                    <p className="text-sm font-bold text-stone-950">
+                    <p className="text-sm font-bold text-heading">
                       Live on storefront
                     </p>
-                    <p className="mt-1 text-[10px] text-stone-500">
+                    <p className="mt-1 text-[10px] text-muted">
                       Customers can order this item now.
                     </p>
                   </div>
@@ -424,7 +424,7 @@ const VendorMenuTab = ({
                 </label>
               </div>
 
-              <div className="border-t border-[#eee7dc] bg-[#fffaf5] p-6">
+              <div className="border-t border-line bg-sunken p-6">
                 <VendorButton
                   tone="primary"
                   className="w-full"

@@ -33,7 +33,7 @@ const VendorRestaurantTab = ({
   return (
     <div className="grid gap-8 xl:grid-cols-[1fr,450px]">
       <Panel tone="dark" className="p-8">
-        <h2 className="mb-8 border-b border-[#eee7dc] pb-4 text-2xl font-black text-stone-950">
+        <h2 className="mb-8 border-b border-line pb-4 text-2xl font-black text-heading">
           Store Profile
         </h2>
 
@@ -77,10 +77,10 @@ const VendorRestaurantTab = ({
           />
 
           <div className="space-y-3 md:col-span-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-stone-500">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted">
               Cover Image
             </span>
-            <label className="block cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-orange-200 bg-[#fffaf5] transition-colors hover:bg-orange-50">
+            <label className="block cursor-pointer overflow-hidden rounded-2xl border-2 border-dashed border-accent/25 bg-sunken transition-colors hover:bg-accent-soft">
               <input
                 type="file"
                 className="sr-only"
@@ -119,7 +119,7 @@ const VendorRestaurantTab = ({
             />
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-4 border-t border-[#eee7dc] pt-8 md:col-span-2">
+          <div className="mt-6 flex flex-wrap gap-4 border-t border-line pt-8 md:col-span-2">
             <VendorButton
               tone="primary"
               className="flex-1"
@@ -144,7 +144,7 @@ const VendorRestaurantTab = ({
 
       <div className="space-y-8">
         <Panel tone="urgent" className="sticky top-6 overflow-hidden p-0">
-          <div className="h-60 bg-[linear-gradient(135deg,#fff7ed,#fed7aa_55%,#fdba74)]">
+          <div className="h-60 bg-[linear-gradient(135deg,#fff7ed,#fed7aa_55%,#fdba74)] dark:bg-none dark:bg-raised">
             {restaurantImagePreview ? (
               <img
                 src={restaurantImagePreview}
@@ -166,34 +166,34 @@ const VendorRestaurantTab = ({
             </div>
 
             <div>
-              <h3 className="text-3xl font-black text-stone-950">
+              <h3 className="text-3xl font-black text-heading">
                 {restaurantForm.name || "Store Name"}
               </h3>
-              <p className="mt-2 text-xs font-black uppercase tracking-wide text-orange-700">
+              <p className="mt-2 text-xs font-black uppercase tracking-wide text-accent-text">
                 {restaurantForm.category || "Category"}
                 {restaurantForm.cuisineType
                   ? ` | ${restaurantForm.cuisineType}`
                   : ""}
               </p>
-              <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-stone-600">
+              <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-body">
                 {restaurantForm.description || "Store details will appear here."}
               </p>
             </div>
 
-            <div className="flex items-center justify-between rounded-2xl border border-[#eee7dc] bg-white p-4">
-              <div className="w-full border-r border-[#eee7dc] text-center">
-                <p className="mb-1 text-[10px] font-black text-stone-500">
+            <div className="flex items-center justify-between rounded-2xl border border-line bg-card p-4">
+              <div className="w-full border-r border-line text-center">
+                <p className="mb-1 text-[10px] font-black text-muted">
                   DELIVERY
                 </p>
-                <p className="text-lg font-black text-stone-950">
+                <p className="text-lg font-black text-heading">
                   {restaurantForm.deliveryTime || 30} min
                 </p>
               </div>
               <div className="w-full text-center">
-                <p className="mb-1 text-[10px] font-black text-stone-500">
+                <p className="mb-1 text-[10px] font-black text-muted">
                   STATUS
                 </p>
-                <p className="text-lg font-black text-stone-950">
+                <p className="text-lg font-black text-heading">
                   {restaurantForm.isActive ? "Live" : "Paused"}
                 </p>
               </div>

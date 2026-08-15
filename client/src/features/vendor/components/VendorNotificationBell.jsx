@@ -11,11 +11,11 @@ const FILTERS = [
 ];
 
 const CATEGORY_TONES = {
-  SUBSCRIPTION: "bg-orange-50 text-orange-700 border-orange-200",
-  PAYMENT: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  ORDER: "bg-sky-50 text-sky-700 border-sky-200",
-  PROMO: "bg-violet-50 text-violet-700 border-violet-200",
-  SYSTEM: "bg-stone-100 text-stone-600 border-stone-200",
+  SUBSCRIPTION: "bg-accent-soft text-accent-text border-accent/25",
+  PAYMENT: "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/25",
+  ORDER: "bg-sky-50 dark:bg-sky-500/10 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-500/25",
+  PROMO: "bg-violet-50 dark:bg-violet-500/10 text-violet-700 dark:text-violet-300 border-violet-200 dark:border-violet-500/25",
+  SYSTEM: "bg-sunken text-body border-line",
 };
 
 const timeAgo = (value) => {
@@ -118,8 +118,8 @@ const VendorNotificationBell = ({ onNavigate }) => {
         aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
         className={`relative flex h-11 w-11 items-center justify-center rounded-xl border transition-colors ${
           unreadCount > 0
-            ? "border-orange-200 bg-orange-50 text-orange-600"
-            : "border-[#e7ddd0] bg-white text-stone-500 hover:bg-orange-50"
+            ? "border-accent/25 bg-accent-soft text-accent"
+            : "border-line-strong bg-card text-muted hover:bg-accent-soft"
         }`}
       >
         <svg
@@ -150,25 +150,25 @@ const VendorNotificationBell = ({ onNavigate }) => {
             exit={{ opacity: 0, y: -8, scale: 0.97 }}
             transition={{ duration: 0.15 }}
             // Anchors right on desktop; becomes a full-width sheet on mobile.
-            className="fixed inset-x-3 top-20 z-50 flex max-h-[70vh] flex-col overflow-hidden rounded-2xl border border-[#eee7dc] bg-white shadow-2xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-[calc(100%+8px)] sm:w-[380px]"
+            className="fixed inset-x-3 top-20 z-50 flex max-h-[70vh] flex-col overflow-hidden rounded-2xl border border-line bg-card shadow-2xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-[calc(100%+8px)] sm:w-[380px]"
           >
-            <div className="flex items-center justify-between gap-2 border-b border-[#f0ebe3] px-4 py-3">
+            <div className="flex items-center justify-between gap-2 border-b border-line px-4 py-3">
               <div className="min-w-0">
-                <p className="text-sm font-black text-stone-950">Notifications</p>
-                <p className="text-[11px] font-bold text-stone-400">{unreadCount} unread</p>
+                <p className="text-sm font-black text-heading">Notifications</p>
+                <p className="text-[11px] font-bold text-muted">{unreadCount} unread</p>
               </div>
               {unreadCount > 0 ? (
                 <button
                   type="button"
                   onClick={markAllRead}
-                  className="flex-shrink-0 rounded-lg px-2 py-1 text-[11px] font-black text-orange-600 hover:bg-orange-50"
+                  className="flex-shrink-0 rounded-lg px-2 py-1 text-[11px] font-black text-accent hover:bg-accent-soft"
                 >
                   Mark all read
                 </button>
               ) : null}
             </div>
 
-            <div className="flex gap-1 overflow-x-auto border-b border-[#f0ebe3] px-3 py-2">
+            <div className="flex gap-1 overflow-x-auto border-b border-line px-3 py-2">
               {FILTERS.map((item) => (
                 <button
                   key={item.id}
@@ -177,7 +177,7 @@ const VendorNotificationBell = ({ onNavigate }) => {
                   className={`flex-shrink-0 rounded-lg px-3 py-1.5 text-[11px] font-black transition-colors ${
                     filter === item.id
                       ? "bg-orange-600 text-white"
-                      : "text-stone-500 hover:bg-stone-100"
+                      : "text-muted hover:bg-sunken"
                   }`}
                 >
                   {item.label}
@@ -189,14 +189,14 @@ const VendorNotificationBell = ({ onNavigate }) => {
               {loading ? (
                 <div className="space-y-2 p-3">
                   {[0, 1, 2].map((key) => (
-                    <div key={key} className="h-16 animate-pulse rounded-xl bg-stone-100" />
+                    <div key={key} className="h-16 animate-pulse rounded-xl bg-sunken" />
                   ))}
                 </div>
               ) : notifications.length === 0 ? (
                 <div className="px-5 py-12 text-center">
                   <p className="text-3xl">🔔</p>
-                  <p className="mt-3 text-sm font-black text-stone-800">All caught up</p>
-                  <p className="mt-1 text-xs font-semibold text-stone-400">
+                  <p className="mt-3 text-sm font-black text-heading">All caught up</p>
+                  <p className="mt-1 text-xs font-semibold text-muted">
                     Subscription and quota updates will appear here.
                   </p>
                 </div>
@@ -204,18 +204,18 @@ const VendorNotificationBell = ({ onNavigate }) => {
                 notifications.map((notification) => (
                   <div
                     key={notification._id}
-                    className={`flex gap-3 border-b border-[#f7f4ef] px-4 py-3 last:border-0 ${
-                      notification.read ? "" : "bg-orange-50/40"
+                    className={`flex gap-3 border-b border-line px-4 py-3 last:border-0 ${
+                      notification.read ? "" : "bg-accent-soft/40"
                     }`}
                   >
-                    <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-stone-100 text-base">
+                    <span className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-sunken text-base">
                       {notification.icon || "🔔"}
                     </span>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <p
-                          className={`min-w-0 text-sm leading-snug text-stone-900 ${
+                          className={`min-w-0 text-sm leading-snug text-heading ${
                             notification.read ? "font-semibold" : "font-black"
                           }`}
                         >
@@ -226,7 +226,7 @@ const VendorNotificationBell = ({ onNavigate }) => {
                         ) : null}
                       </div>
 
-                      <p className="mt-0.5 break-words text-xs font-semibold leading-relaxed text-stone-500">
+                      <p className="mt-0.5 break-words text-xs font-semibold leading-relaxed text-muted">
                         {notification.message}
                       </p>
 
@@ -238,7 +238,7 @@ const VendorNotificationBell = ({ onNavigate }) => {
                         >
                           {notification.category}
                         </span>
-                        <span className="text-[10px] font-bold text-stone-400">
+                        <span className="text-[10px] font-bold text-muted">
                           {timeAgo(notification.createdAt)}
                         </span>
 
@@ -254,7 +254,7 @@ const VendorNotificationBell = ({ onNavigate }) => {
                           <button
                             type="button"
                             onClick={() => markRead(notification._id)}
-                            className="ml-auto text-[10px] font-black text-orange-600 hover:underline"
+                            className="ml-auto text-[10px] font-black text-accent hover:underline"
                           >
                             Mark read
                           </button>

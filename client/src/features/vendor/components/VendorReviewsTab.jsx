@@ -41,23 +41,23 @@ const VendorReviewsTab = ({ restaurant, reviews = [], onRefresh, refreshing }) =
       {/* ─── LEFT: RATING SUMMARY & STATS ──────────────────────── */}
       <div className="space-y-6">
         <Panel tone="dark" className="p-8 text-center flex flex-col items-center border-amber-500/20 shadow-[0_0_30px_rgba(245,158,11,0.05)]">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Overall Rating</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-2">Overall Rating</p>
           <div className="flex items-end gap-2 mb-2">
             <h2 className="text-6xl font-black text-amber-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.4)]">{averageRating}</h2>
-            <span className="text-2xl font-bold text-slate-500 mb-1">/5</span>
+            <span className="text-2xl font-bold text-muted mb-1">/5</span>
           </div>
           <StarRating rating={Math.round(averageRating)} />
-          <p className="text-sm font-bold text-slate-400 mt-4">Based on <span className="text-white">{totalReviews}</span> real reviews</p>
+          <p className="text-sm font-bold text-muted mt-4">Based on <span className="text-heading">{totalReviews}</span> real reviews</p>
         </Panel>
 
         <Panel tone="dark" className="p-6 space-y-4">
-          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Rating Distribution</p>
+          <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-4">Rating Distribution</p>
           {[5, 4, 3, 2, 1].map(star => {
             const count = distribution[star];
             const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
             return (
               <div key={star} className="flex items-center gap-3">
-                <span className="text-sm font-bold text-slate-400 w-8 flex items-center gap-1">{star} <span className="text-amber-500 text-xs">★</span></span>
+                <span className="text-sm font-bold text-muted w-8 flex items-center gap-1">{star} <span className="text-amber-500 text-xs">★</span></span>
                 <div className="flex-1 h-2 rounded-full bg-white/5 overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }} 
@@ -66,7 +66,7 @@ const VendorReviewsTab = ({ restaurant, reviews = [], onRefresh, refreshing }) =
                     className={`h-full rounded-full ${star >= 4 ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]' : star === 3 ? 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.5)]' : 'bg-rose-400 shadow-[0_0_10px_rgba(251,113,133,0.5)]'}`}
                   />
                 </div>
-                <span className="text-xs font-bold text-white w-6 text-right">{count}</span>
+                <span className="text-xs font-bold text-heading w-6 text-right">{count}</span>
               </div>
             );
           })}
@@ -79,9 +79,9 @@ const VendorReviewsTab = ({ restaurant, reviews = [], onRefresh, refreshing }) =
 
       {/* ─── RIGHT: REAL REVIEWS FEED ──────────────────────── */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between bg-[#0a0a0a]/60 border border-white/10 p-5 rounded-2xl backdrop-blur-xl">
-          <h2 className="text-xl font-black text-white">Customer Feedback</h2>
-          <span className="text-xs font-bold text-slate-400 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">Showing Latest</span>
+        <div className="flex items-center justify-between bg-card/60 border border-white/10 p-5 rounded-2xl backdrop-blur-xl">
+          <h2 className="text-xl font-black text-heading">Customer Feedback</h2>
+          <span className="text-xs font-bold text-muted bg-white/5 px-3 py-1.5 rounded-lg border border-white/5">Showing Latest</span>
         </div>
 
         {reviews.length === 0 ? (
@@ -99,15 +99,15 @@ const VendorReviewsTab = ({ restaurant, reviews = [], onRefresh, refreshing }) =
                 transition={{ delay: i * 0.1 }}
                 key={review._id || i}
               >
-                <Panel tone="dark" className="p-6 border-l-4 border-l-amber-500 hover:border-amber-500/50 hover:bg-white/[0.02] transition-colors">
+                <Panel tone="dark" className="p-6 border-l-4 border-l-amber-500 hover:border-amber-500/50 hover:bg-card/[0.02] transition-colors">
                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-white/10 pb-4 mb-4">
                     <div className="flex items-center gap-4">
                       <div className="h-12 w-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-lg font-black text-black shadow-lg">
                         {(review.customer?.name || "U")[0].toUpperCase()}
                       </div>
                       <div>
-                        <h3 className="text-lg font-black text-white">{review.customer?.name || "Unknown Customer"}</h3>
-                        <p className="text-xs font-bold text-slate-500 mt-0.5">{formatDate(review.createdAt)}</p>
+                        <h3 className="text-lg font-black text-heading">{review.customer?.name || "Unknown Customer"}</h3>
+                        <p className="text-xs font-bold text-muted mt-0.5">{formatDate(review.createdAt)}</p>
                       </div>
                     </div>
                     <div className="flex flex-col items-end">
@@ -120,7 +120,7 @@ const VendorReviewsTab = ({ restaurant, reviews = [], onRefresh, refreshing }) =
                     </div>
                   </div>
 
-                  <p className="text-sm font-medium text-slate-300 leading-relaxed italic border-l-2 border-white/10 pl-4">
+                  <p className="text-sm font-medium text-body leading-relaxed italic border-l-2 border-white/10 pl-4">
                     "{review.comment || "No written feedback provided."}"
                   </p>
                   

@@ -1,81 +1,107 @@
 import {
-  BikeIcon,
-  ChartIcon,
+  BoxesIcon,
+  ChefHatIcon,
   ClipboardListIcon,
-  CookingPotIcon,
-  CreditCardIcon,
+  CrownIcon,
   LayoutDashboardIcon,
-  MegaphoneIcon,
+  MapPinnedIcon,
   MessageCircleIcon,
-  PackageIcon,
+  RadioIcon,
   StarIcon,
-  UtensilsIcon,
-  WalletIcon,
+  TrendingUpIcon,
+  UtensilsCrossedIcon,
+  WalletCardsIcon,
 } from "./components/VendorIcons.jsx";
 
 /**
  * Vendor navigation model.
  *
- * This is purely a grouping layer over the existing dashboard tabs — every
- * `tab` below is an id the dashboard already renders. No routes, pages or
- * components were added or removed; only the path the user takes to reach them.
+ * A grouping layer over the dashboard's existing tabs — every `tab` below is
+ * an id the dashboard already renders. No routes, pages or components are
+ * added or removed here; this only shapes how they are reached.
  *
- * `orderFilter` lets two nav entries share the `orders` tab while presenting
- * different slices of it (live queue vs full history), reusing the order
- * status filter the tab already supports.
+ * `orderFilter` lets two entries share the `orders` tab while showing
+ * different slices of it, reusing the order status filter the tab supports.
+ *
+ * `accent: true` marks a section as premium, which gives its icon a subtle
+ * tinted container in the sidebar.
  */
 export const VENDOR_NAV = [
   {
-    id: "dashboard",
+    id: "dashboard", tint: "sky",
     label: "Dashboard",
     icon: LayoutDashboardIcon,
     tab: "overview",
   },
   {
-    id: "operations",
+    id: "operations", tint: "orange",
     label: "Orders & Menu",
     icon: ClipboardListIcon,
     children: [
-      { id: "live-orders", label: "Live Orders", tab: "orders", orderFilter: "LIVE", badge: "liveOrders" },
+      {
+        id: "live-orders", tint: "rose",
+        label: "Live Orders",
+        tab: "orders",
+        orderFilter: "LIVE",
+        badge: "liveOrders",
+        icon: RadioIcon,
+        accent: true,
+      },
       { id: "all-orders", label: "All Orders", tab: "orders", orderFilter: "ALL" },
-      { id: "menu", label: "Menu", tab: "menu", icon: UtensilsIcon },
-      { id: "inventory", label: "Inventory & Stock", tab: "inventory", icon: PackageIcon, badge: "lowStock" },
+      { id: "menu", tint: "amber", label: "Menu", tab: "menu", icon: UtensilsCrossedIcon },
+      {
+        id: "inventory", tint: "teal",
+        label: "Inventory & Stock",
+        tab: "inventory",
+        icon: BoxesIcon,
+        badge: "lowStock",
+      },
     ],
   },
   {
-    id: "tiffin-subscription",
-    label: "Tiffin & Subscription",
-    icon: CookingPotIcon,
+    id: "tiffin", tint: "emerald",
+    label: "Tiffin & Services",
+    icon: ChefHatIcon,
     children: [
-      { id: "tiffin", label: "Tiffin Services", tab: "tiffin" },
+      { id: "tiffin-services", label: "Tiffin Services", tab: "tiffin" },
       { id: "tiffin-subscribers", label: "Tiffin Subscribers", tab: "subscription" },
-      { id: "my-subscription", label: "My Subscription", tab: "plan", icon: CreditCardIcon, badge: "subscription" },
     ],
   },
+  // Stands alone: this is the restaurant's own relationship with NearBitez,
+  // not a customer-facing service.
   {
-    id: "delivery",
+    id: "my-subscription", tint: "violet",
+    label: "My Subscription",
+    icon: CrownIcon,
+    tab: "plan",
+    badge: "subscription",
+    accent: true,
+  },
+  {
+    id: "delivery", tint: "cyan",
     label: "Delivery",
-    icon: BikeIcon,
-    children: [{ id: "delivery-zones", label: "Delivery Zones", tab: "logistics" }],
+    icon: MapPinnedIcon,
+    tab: "logistics",
   },
   {
-    id: "finance",
+    id: "finance", tint: "indigo",
     label: "Finance",
-    icon: WalletIcon,
-    children: [{ id: "wallet", label: "Wallet & Payouts", tab: "wallet" }],
+    icon: WalletCardsIcon,
+    tab: "wallet",
   },
   {
-    id: "growth",
+    id: "growth", tint: "fuchsia",
     label: "Growth",
-    icon: MegaphoneIcon,
+    icon: TrendingUpIcon,
+    accent: true,
     children: [
       { id: "marketing", label: "Marketing", tab: "marketing" },
-      { id: "analytics", label: "Analytics", tab: "analytics", icon: ChartIcon },
+      { id: "analytics", tint: "blue", label: "Analytics", tab: "analytics" },
       { id: "reviews", label: "Reviews", tab: "reviews", icon: StarIcon },
     ],
   },
   {
-    id: "messages",
+    id: "messages", tint: "purple",
     label: "Messages",
     icon: MessageCircleIcon,
     tab: "messages",

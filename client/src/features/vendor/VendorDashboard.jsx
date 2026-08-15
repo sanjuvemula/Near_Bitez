@@ -45,19 +45,22 @@ const VendorDashboard = () => {
       {dashboard.tab === "overview" ? (
         <VendorCommandCenter
           isAdminWorkspace={dashboard.isAdminWorkspace}
-          lastSyncedAt={dashboard.lastSyncedAt}
-          onRefresh={() => dashboard.refreshDashboard({ silent: true })}
           overview={dashboard.overview}
-          refreshing={dashboard.refreshing}
           restaurant={dashboard.restaurant}
           restaurantOptions={dashboard.restaurantOptions}
           selectedRestaurantId={dashboard.selectedRestaurantId}
           setSelectedRestaurantId={dashboard.setSelectedRestaurantId}
+          onToggleStatus={
+            dashboard.restaurant
+              ? () => dashboard.updateRestaurantLiveState(!dashboard.restaurant.isActive)
+              : undefined
+          }
+          updatingStatus={dashboard.updatingStoreStatus}
         />
       ) : null}
 
       {dashboard.error ? (
-        <Panel tone="warning" className="mb-6 rounded-2xl p-6 text-sm font-bold text-rose-600">
+        <Panel tone="warning" className="mb-6 rounded-2xl p-6 text-sm font-bold text-rose-600 dark:text-rose-300">
           System Notice: {dashboard.error}
         </Panel>
       ) : null}
