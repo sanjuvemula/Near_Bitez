@@ -5,6 +5,7 @@ import {
   ScrollView,
   StyleSheet,
   View,
+  type RefreshControlProps,
   type ViewStyle,
 } from "react-native";
 import { SafeAreaView, type Edge } from "react-native-safe-area-context";
@@ -17,7 +18,12 @@ interface ScreenProps {
   padded?: boolean;
   edges?: Edge[];
   style?: ViewStyle;
-  refreshControl?: React.ReactElement;
+  /**
+   * Typed against RefreshControlProps rather than a bare ReactElement:
+   * React 19 changed ReactElement's default props type from `any` to
+   * `unknown`, which no longer satisfies ScrollView's prop.
+   */
+  refreshControl?: React.ReactElement<RefreshControlProps>;
 }
 
 /**

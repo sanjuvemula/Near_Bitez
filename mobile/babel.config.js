@@ -11,8 +11,10 @@ module.exports = function (api) {
           extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
         },
       ],
-      // Must stay last — Reanimated's plugin has to run after everything else.
-      "react-native-reanimated/plugin",
+      // Must stay last. Reanimated 4 moved worklet compilation into
+      // react-native-worklets, so the plugin comes from there now —
+      // "react-native-reanimated/plugin" no longer exists.
+      "react-native-worklets/plugin",
     ],
   };
 };
